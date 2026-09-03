@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍽️ Dzanis Catering
 
-## Getting Started
+Website profil catering modern yang dibangun dengan **Next.js 16**, **React 19**, **Tailwind CSS v4**, dan **Framer Motion**.
 
-First, run the development server:
+---
+
+## 📋 Prasyarat
+
+Sebelum memulai, pastikan perangkat kamu sudah terinstal:
+
+| Kebutuhan | Versi Minimum | Cara Cek |
+|-----------|---------------|----------|
+| [Node.js](https://nodejs.org/) | v18.17+ | `node -v` |
+| [npm](https://www.npmjs.com/) | v9+ | `npm -v` |
+| [Git](https://git-scm.com/) | Terbaru | `git --version` |
+
+> **Rekomendasi:** Gunakan [nvm](https://github.com/nvm-sh/nvm) untuk mengelola versi Node.js.
+
+---
+
+## 🚀 Cara Instalasi
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/your-username/dzanis-catering.git
+cd dzanis-catering
+```
+
+### 2. Install Dependensi
+
+```bash
+npm install
+```
+
+> Alternatif menggunakan package manager lain:
+> ```bash
+> yarn install   # menggunakan Yarn
+> pnpm install   # menggunakan pnpm
+> bun install    # menggunakan Bun
+> ```
+
+### 3. Jalankan Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000) di browser untuk melihat hasilnya.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Perintah yang Tersedia
 
-## Learn More
+| Perintah | Deskripsi |
+|----------|-----------|
+| `npm run dev` | Menjalankan server pengembangan |
+| `npm run build` | Build aplikasi untuk produksi |
+| `npm start` | Menjalankan hasil build produksi |
+| `npm run lint` | Menjalankan linter ESLint |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📦 Teknologi yang Digunakan
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **[Next.js 16](https://nextjs.org/)** – Framework React dengan App Router
+- **[React 19](https://react.dev/)** – Library UI
+- **[Tailwind CSS v4](https://tailwindcss.com/)** – Framework CSS utility-first
+- **[Framer Motion](https://www.framer.com/motion/)** – Animasi
+- **[Lucide React](https://lucide.dev/)** – Ikon
+- **[TypeScript](https://www.typescriptlang.org/)** – Type safety
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📁 Struktur Proyek
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+dzanis-catering/
+├── src/
+│   ├── app/          # Halaman & layout (Next.js App Router)
+│   ├── components/   # Komponen UI yang dapat digunakan ulang
+│   └── data/         # Data statis (menu, kontak, dll.)
+├── public/           # Aset statis (gambar, ikon)
+├── docs/             # Dokumentasi tambahan
+└── scripts/          # Script utilitas
+```
+
+---
+
+## 🌐 Deploy
+
+Cara termudah untuk men-deploy aplikasi Next.js adalah menggunakan **[Vercel](https://vercel.com/new)**:
+
+1. Push kode ke repository GitHub
+2. Import project di [vercel.com](https://vercel.com/new)
+3. Deploy otomatis setiap push ke branch `main`
+
+Lihat [dokumentasi deployment Next.js](https://nextjs.org/docs/app/building-your-application/deploying) untuk opsi lainnya.
+
+---
+
+## 📚 Referensi
+
+- [Dokumentasi Next.js](https://nextjs.org/docs)
+- [Tutorial Next.js](https://nextjs.org/learn)
+- [GitHub Next.js](https://github.com/vercel/next.js)
