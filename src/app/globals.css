@@ -1,0 +1,462 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SISTEM "ORGANIC" — Dzanis Catering
+   Diturunkan dari artboard Claude Design (organic-1ae1b1c5).
+
+   Artboard memakai token semantik (--color-accent, --color-accent-2-800,
+   --space-4, dst.) tanpa menyertakan styles.css milik design system-nya.
+   Nilai di bawah direkonstruksi dari cara tiap token dipakai:
+
+     · accent-2 = olive/sage  — dinyatakan eksplisit oleh prop artboard
+       "bandTone": ["Olive tua" -> -2-800, "Sage sedang" -> -2-700].
+     · accent   = terakota hangat — dipakai untuk tombol utama, badge
+       "MULAI 20K", tombol +, dan tab aktif; teksnya selalu --color-bg,
+       jadi rasio kontrasnya harus >= 4.5:1 terhadap putih.
+     · netral   = krem ke arang, bukan abu-abu murni, supaya foto makanan
+       tetap hangat.
+
+   Semua pasangan teks/latar di bawah sudah dicek >= 4.5:1 (WCAG AA).
+   Bila styles.css asli tersedia (jalankan /design-login), cukup tukar
+   blok token ini — tidak ada nilai warna yang di-hardcode di komponen.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@theme inline {
+  /* Permukaan */
+  --color-bg: #fffcf6;
+  --color-surface: #f6f0e4;
+  --color-text: #221e16;
+  --color-divider: #e0d7c5;
+
+  /* Netral hangat */
+  --color-neutral-200: #f0e9db;
+  --color-neutral-300: #e4dbc9;
+  --color-neutral-400: #c3baa8;
+  --color-neutral-700: #7a7263;
+  --color-neutral-800: #4f4a40;
+  --color-neutral-900: #2a271f;
+
+  /* Aksen 1 — terakota */
+  --color-accent-200: #f6dccb;
+  --color-accent-300: #efc3a6;
+  --color-accent-400: #e39a6c;
+  --color-accent: #b04a22;
+  --color-accent-700: #8a3a1a;
+  --color-accent-900: #4a1d0c;
+
+  /* Aksen 2 — olive / sage */
+  --color-accent-2-200: #dce3ce;
+  --color-accent-2-300: #c6d2b0;
+  --color-accent-2-700: #5b6b42;
+  --color-accent-2-800: #414d2e;
+  --color-accent-2-900: #2a331d;
+
+  /* WhatsApp — dipertahankan dari identitas lama */
+  --color-wa: #25d366;
+  --color-wa-gelap: #1da851;
+
+  --font-heading: var(--font-bricolage), "Trebuchet MS", sans-serif;
+  --font-body: var(--font-instrument), system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  /* Skala jarak — basis 4px, melebar di ujung atas supaya seksi bernapas.
+     Nama mengikuti artboard (--space-1 .. --space-8). */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  --shadow-md: 0 2px 4px -2px rgb(42 39 31 / 0.08), 0 8px 20px -6px rgb(42 39 31 / 0.12);
+  --shadow-lg: 0 4px 8px -4px rgb(42 39 31 / 0.08), 0 20px 44px -12px rgb(42 39 31 / 0.18);
+
+  /* ── Gerak ──────────────────────────────────────────────────────────
+     Satu easing untuk seluruh situs; konsistensi lebih penting daripada
+     variasi pada sistem sekalem ini. */
+  --durasi-cepat: 180ms; /* hover, pergantian tanda +/− */
+  --durasi-sedang: 260ms; /* buka-tutup akordeon */
+  --durasi-lambat: 420ms; /* animasi masuk seksi */
+  --jeda-stagger: 60ms; /* jarak antar anak dalam satu seksi */
+  --jarak-naik: 16px;
+  --easing-keluar: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Navbar sticky menutupi judul seksi saat anchor #paket/#snack/#layanan/#cara
+   diklik. scroll-smooth di layout.tsx membuatnya makin terlihat, jadi sisakan
+   ruang setinggi header. */
+html {
+  scroll-padding-top: 76px;
+}
+
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: 96px;
+  }
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Judul artboard selalu memakai font heading; uppercase & tracking diatur
+   per-seksi karena artboard tidak konsisten (web uppercase, mobile tidak). */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+/* ── Kelas komponen yang dirujuk artboard ─────────────────────────────── */
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding-inline: var(--space-4);
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--durasi-cepat) var(--easing-keluar),
+      color var(--durasi-cepat) var(--easing-keluar),
+      border-color var(--durasi-cepat) var(--easing-keluar);
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--color-accent-700);
+    outline-offset: 2px;
+  }
+
+  .btn-primary {
+    background: var(--color-accent);
+    color: var(--color-bg);
+    border: 1px solid transparent;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-accent-700);
+    color: var(--color-bg);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--color-accent-700);
+    border: 1px solid currentColor;
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-accent);
+    color: var(--color-bg);
+    border-color: var(--color-accent);
+  }
+
+  .btn-block {
+    display: flex;
+    width: 100%;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .card-body {
+    margin: 0;
+    color: var(--color-neutral-800);
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .tag-accent {
+    background: var(--color-accent-200);
+    color: var(--color-accent-900);
+  }
+
+  .tag-accent-2 {
+    background: var(--color-accent-2-200);
+    color: var(--color-accent-2-900);
+  }
+
+  .tag-neutral {
+    background: var(--color-neutral-200);
+    color: var(--color-neutral-800);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-brand {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-right: auto;
+  }
+}
+
+/* Foto poster asli dipotret dengan white balance berbeda-beda. "washed"
+   menyamakannya: sedikit dihangatkan dan diturunkan kontrasnya supaya
+   seluruh galeri terbaca sebagai satu set. */
+.washed {
+  filter: saturate(0.88) contrast(0.96) sepia(0.08);
+}
+
+/* ── Animasi masuk ────────────────────────────────────────────────────
+   Anak langsung dari [data-reveal] naik dan memudar masuk, bergiliran.
+   Keadaan diam (di luar media query) sengaja "terlihat": penyembunyian
+   hanya berlaku bila JS sudah menandai dokumen DAN pengguna tidak minta
+   animasi dikurangi. Tanpa salah satunya, konten tampil apa adanya. */
+[data-reveal] > * {
+  transition:
+    opacity var(--durasi-lambat) var(--easing-keluar),
+    translate var(--durasi-lambat) var(--easing-keluar),
+    box-shadow var(--durasi-cepat) var(--easing-keluar);
+  /* Urutannya mengikuti daftar di atas. box-shadow sengaja 0s: giliran hanya
+     untuk animasi masuk, bayangan hover harus menyahut seketika. */
+  transition-delay:
+    calc(var(--i, 0) * var(--jeda-stagger)),
+    calc(var(--i, 0) * var(--jeda-stagger)),
+    0s;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  [data-js] [data-reveal]:not([data-terlihat]) > * {
+    opacity: 0;
+    translate: 0 var(--jarak-naik);
+  }
+}
+
+/* Giliran bawaan untuk seksi yang tidak menyetel --i sendiri. */
+[data-reveal] > *:nth-child(2) { --i: 1; }
+[data-reveal] > *:nth-child(3) { --i: 2; }
+[data-reveal] > *:nth-child(4) { --i: 3; }
+[data-reveal] > *:nth-child(5) { --i: 4; }
+[data-reveal] > *:nth-child(6) { --i: 5; }
+[data-reveal] > *:nth-child(n + 7) { --i: 6; }
+
+/* Enam item beruntun terasa lamban pada 60ms; grid foto snack box memakai
+   giliran yang lebih rapat. */
+.stagger-rapat {
+  --jeda-stagger: 40ms;
+}
+
+/* Beberapa seksi memberi giliran pada cucu, bukan anak langsung — misalnya
+   <li> di dalam <ol> (karena <div> tidak sah sebagai anak <ol>), atau strip
+   angka yang menyelipkan garis pemisah di antara blok isinya. */
+[data-reveal] [style*="--i"] {
+  transition:
+    opacity var(--durasi-lambat) var(--easing-keluar),
+    translate var(--durasi-lambat) var(--easing-keluar);
+  transition-delay: calc(var(--i, 0) * var(--jeda-stagger));
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  [data-js] [data-reveal]:not([data-terlihat]) [style*="--i"] {
+    opacity: 0;
+    translate: 0 var(--jarak-naik);
+  }
+}
+
+/* Seksi yang mengatur gilirannya sendiri lewat --i mematikan aturan
+   anak-langsung, supaya isinya tidak memudar dua kali (sekali oleh
+   pembungkus, sekali oleh dirinya sendiri). Kelasnya menambah kekhususan
+   sehingga menang atas aturan penyembunyian di atas. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  [data-js] [data-reveal].giliran-manual:not([data-terlihat]) > * {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* Lingkaran nomor pada "Cara pesan" ikut membesar dari 0.85 (spec §8).
+   --i diwarisi dari <li> induknya, jadi gilirannya otomatis sama. */
+.lingkaran-langkah {
+  transition: scale var(--durasi-lambat) var(--easing-keluar);
+  transition-delay: calc(var(--i, 0) * var(--jeda-stagger));
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  [data-js] [data-reveal]:not([data-terlihat]) .lingkaran-langkah {
+    scale: 0.85;
+  }
+}
+
+/* Scroller paket & tab kategori — sembunyikan scrollbar, sisakan gesture. */
+.dz-scroll,
+.dz-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.dz-scroll::-webkit-scrollbar,
+.dz-hide::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────
+   Hero di paruh atas layar, jadi tidak memakai IntersectionObserver:
+   menunggu hidrasi akan membuatnya diam tersembunyi lalu melompat masuk.
+   `both` memastikan elemen berhenti pada keadaan akhir yang terlihat, dan
+   seluruh blok hanya hidup saat pengguna tidak meminta animasi dikurangi. */
+@keyframes hero-naik {
+  from {
+    opacity: 0;
+    translate: 0 var(--jarak-naik);
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  .hero-masuk > * {
+    animation: hero-naik var(--durasi-lambat) var(--easing-keluar) both;
+    animation-delay: calc(var(--i, 0) * var(--jeda-stagger));
+  }
+  .hero-masuk > *:nth-child(2) { --i: 1; }
+  .hero-masuk > *:nth-child(3) { --i: 2; }
+  .hero-masuk > *:nth-child(4) { --i: 3; }
+
+  /* Anak ke-2 adalah blok dua tombol khusus mobile (lg:hidden). Di desktop ia
+     tidak tampil tapi tetap dihitung nth-child, jadi urutannya menyisakan
+     lubang 60ms. Dinomori ulang supaya rapat kembali: 0, 1, 2. */
+  @media (min-width: 1024px) {
+    .hero-masuk > *:nth-child(3) { --i: 1; }
+    .hero-masuk > *:nth-child(4) { --i: 2; }
+  }
+
+  /* Lingkaran sage di balik foto membesar dari 0.9 (spec §8). Hanya `scale`,
+     tanpa opacity — induknya sudah memudar masuk, dan menumpuk dua fade
+     membuat lingkaran terlihat berkedip. */
+  .lingkaran-sage {
+    animation: lingkaran-membesar var(--durasi-lambat) var(--easing-keluar) both;
+    animation-delay: calc(2 * var(--jeda-stagger));
+  }
+}
+
+@keyframes lingkaran-membesar {
+  from {
+    scale: 0.9;
+  }
+}
+
+/* ── Akordeon ─────────────────────────────────────────────────────────
+   Menganimasikan tinggi tanpa mengukur lewat JavaScript dan tanpa
+   menyentuh properti layout: grid dengan satu baris yang bergerak dari
+   0fr ke 1fr. Anaknya wajib overflow:hidden supaya isinya terpotong rapi
+   saat menutup. */
+.akordeon-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--durasi-sedang) var(--easing-keluar);
+}
+
+.akordeon-panel[data-buka="true"] {
+  grid-template-rows: 1fr;
+}
+
+.akordeon-panel > * {
+  overflow: hidden;
+}
+
+/* Tanda +/− tetap memakai karakter yang sama seperti artboard; hanya
+   pergantiannya yang dihaluskan supaya tidak mengedip. */
+.tanda-akordeon {
+  transition: rotate var(--durasi-cepat) var(--easing-keluar);
+}
+
+.tanda-akordeon[data-buka="true"] {
+  rotate: 180deg;
+}
+
+/* ── Hover ────────────────────────────────────────────────────────────
+   Dikurung dalam (hover: hover) supaya keadaan hover tidak menempel
+   setelah disentuh di perangkat layar sentuh. */
+@media (hover: hover) {
+  .btn {
+    transition:
+      background-color var(--durasi-cepat) var(--easing-keluar),
+      color var(--durasi-cepat) var(--easing-keluar),
+      border-color var(--durasi-cepat) var(--easing-keluar),
+      scale var(--durasi-cepat) var(--easing-keluar);
+  }
+
+  .btn:hover {
+    scale: 1.02;
+  }
+
+  /* Transisi box-shadow untuk kartu yang BUKAN anak langsung [data-reveal].
+     Kartu di dalam reveal sudah mendapat box-shadow lewat daftar properti di
+     aturan [data-reveal] > *; kalau ditulis ulang di sini, shorthand
+     `transition` menimpa daftar itu seluruhnya (spesifisitas sama, aturan ini
+     lebih akhir) sehingga kartu kehilangan fade dan gilirannya. Jangan
+     mengganti :not() di bawah dengan `.card` polos. */
+  .card:not([data-reveal] > *) {
+    transition: box-shadow var(--durasi-cepat) var(--easing-keluar);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Foto di dalam kartu ikut membesar tipis saat kartu disorot (spec §6.5). */
+  .card img {
+    transition: scale var(--durasi-sedang) var(--easing-keluar);
+  }
+
+  .card:hover img {
+    scale: 1.03;
+  }
+}
