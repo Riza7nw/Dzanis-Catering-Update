@@ -52,7 +52,7 @@ export function SnackBox() {
                 <span className="font-body font-normal normal-case italic text-accent-700">
                   sendiri
                 </span>
-                <span className="inline-flex items-center rounded-full bg-neutral-200 px-3 py-1 font-body text-[16px] font-semibold tracking-normal text-neutral-800 normal-case not-italic lg:text-[15px]">
+                <span className="inline-flex items-center rounded-full bg-neutral-200 px-3 py-1 font-body text-[18px] font-semibold tracking-normal text-neutral-800 normal-case not-italic lg:text-[15px]">
                   Minimal 20 box
                 </span>
               </span>
