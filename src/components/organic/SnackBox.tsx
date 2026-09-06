@@ -42,24 +42,23 @@ export function SnackBox() {
       <div className="mx-auto flex max-w-[1280px] flex-col gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-8)] lg:grid lg:grid-cols-[1fr_1.2fr] lg:items-center lg:gap-14 lg:px-14 lg:py-[72px]">
         <div className="contents lg:flex lg:flex-col lg:gap-[22px]">
           <div className="flex flex-col gap-[var(--space-2)] lg:contents">
-            <h2 className="m-0 max-w-[300px] text-[29px] leading-[1.12] lg:max-w-none lg:text-[56px] lg:leading-[0.96] lg:tracking-[-0.01em] lg:uppercase">
-              <span className="lg:hidden">
-                {snackRingkasan.totalPilihan} pilihan jajanan, mulai{" "}
-                {formatRupiah(snackRingkasan.hargaTermurah)}
+            <h2 className="m-0 max-w-[340px] font-heading text-[32px] leading-[1.12] uppercase sm:max-w-none lg:text-[56px] lg:leading-[0.96] lg:tracking-[-0.01em]">
+              <span>SNACK BOX </span>
+              <span className="font-body font-normal normal-case italic text-accent-700">
+                isi
               </span>
-              <span className="hidden lg:inline">
-                Snack box{" "}
+              <br />
+              <span className="inline-flex flex-wrap items-center gap-2.5 sm:gap-3 lg:gap-3.5 align-middle">
                 <span className="font-body font-normal normal-case italic text-accent-700">
-                  isi sendiri
+                  sendiri
+                </span>
+                <span className="inline-flex items-center rounded-full bg-neutral-200 px-3 py-1 font-body text-[16px] font-semibold tracking-normal text-neutral-800 normal-case not-italic lg:text-[15px]">
+                  Minimal 20 box
                 </span>
               </span>
             </h2>
 
-            <p className="m-0 text-[16px] leading-[1.6] text-neutral-800 lg:hidden">
-              Puff & pastry, aneka cake, kue basah, puding, menu asin, dan
-              pelengkap. Pilih sendiri isinya, harga mengikuti isi box.
-            </p>
-            <p className="m-0 hidden max-w-[380px] text-[17px] leading-[1.65] text-neutral-800 lg:block">
+            <p className="m-0 max-w-[380px] text-[16px] leading-[1.6] text-neutral-800 lg:text-[17px] lg:leading-[1.65]">
               {snackRingkasan.totalPilihan} pilihan jajanan mulai{" "}
               {formatRupiah(snackRingkasan.hargaTermurah)} — puff & pastry,
               aneka cake, kue basah, puding, menu asin, dan pelengkap. Harga box

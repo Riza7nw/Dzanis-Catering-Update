@@ -8,19 +8,19 @@ const PESAN_HERO = "Halo Dzanis Catering, saya mau tanya paket nasi kotak.";
 export function Hero() {
   return (
     <section className="hero-masuk mx-auto flex max-w-[1280px] flex-col gap-[var(--space-4)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-8)] lg:gap-[44px] lg:px-14 lg:pt-16 lg:pb-[72px]">
-      {/* Judul & paragraf: bertumpuk di mobile, sebaris rata-bawah di web. */}
-      <div className="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-end lg:justify-between lg:gap-[var(--space-8)]">
+      {/* Judul & paragraf: bertumpuk di mobile, sebaris rata-atas di web. */}
+      <div className="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-start lg:justify-between lg:gap-[var(--space-6)]">
         {/* 82px persis di lebar artboard (1280px); clamp hanya mengecilkan
             judul di rentang 1024–1279px supaya tidak menabrak paragraf. */}
-        <h1 className="m-0 max-w-[330px] font-heading text-[38px] leading-[1.06] tracking-[-0.01em] text-pretty uppercase lg:max-w-[820px] lg:text-[clamp(56px,5.8vw,82px)] lg:leading-[0.94] lg:tracking-[-0.02em] xl:text-[82px]">
-          Setiap sajian punya{" "}
+        <h1 className="m-0 max-w-[330px] font-heading text-[38px] leading-[1.06] tracking-[-0.01em] text-pretty uppercase lg:max-w-[700px] xl:max-w-[760px] lg:text-[clamp(56px,5.8vw,82px)] lg:leading-[0.94] lg:tracking-[-0.02em] xl:text-[82px]">
+          <span className="font-heading">Setiap sajian punya</span>{" "}
           <span className="font-body font-normal tracking-[-0.01em] normal-case italic text-accent-700 lg:whitespace-nowrap">
             cerita
           </span>
         </h1>
-        <p className="m-0 max-w-[320px] text-[16px] leading-[1.6] text-neutral-800 lg:mb-[var(--space-2)] lg:w-[300px] lg:max-w-none lg:flex-none">
-          Hidangan yang dibuat dengan bahan pilihan dan cita rasa terbaik untuk
-          menemani cerita di balik setiap momen berharga.
+        <p className="m-0 max-w-[360px] text-[18px] leading-[1.55] text-neutral-800 lg:mt-1.5 lg:-ml-6 xl:-ml-10 lg:w-[380px] xl:w-[420px] lg:max-w-none lg:text-[18px] lg:leading-[1.6] lg:flex-none">
+          Hadirkan kehangatan masakan rumahan yang pas di lidah dan ramah di
+          kantong untuk setiap momen kumpul Anda.
         </p>
       </div>
 
@@ -75,20 +75,24 @@ export function Hero() {
         <div className="absolute top-[-34px] right-[-16px] hidden size-[118px] flex-col items-center justify-center gap-px rounded-full bg-accent text-bg shadow-[var(--shadow-md)] lg:flex">
           <span className="font-heading text-[14px] tracking-[0.04em]">MULAI</span>
           <span className="font-heading text-[27px] leading-none">20K</span>
-          <span className="text-[12px] tracking-[0.04em] text-accent-900">per box</span>
+          <span className="text-base font-bold tracking-[0.04em]">per box</span>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-[var(--space-2)] lg:gap-[14px]">
-        <span className="tag tag-accent lg:hidden">Mulai Rp20.000/box</span>
-        <span className="tag tag-accent-2 hidden lg:inline-flex lg:px-4 lg:py-[var(--space-2)]">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 lg:gap-[14px]">
+        <span className="tag tag-accent text-base px-4 py-2 lg:hidden">
+          Mulai Rp20.000/box
+        </span>
+        <span className="tag tag-accent-2 text-base px-5 py-2.5 hidden lg:inline-flex">
           Halal, masakan rumahan
         </span>
         {/* Sage di mobile, netral di web — mengikuti masing-masing artboard. */}
-        <span className="tag tag-accent-2 lg:bg-neutral-200 lg:px-4 lg:py-[var(--space-2)] lg:text-neutral-800">
+        <span className="tag tag-accent-2 text-base px-4 py-2 lg:px-5 lg:py-2.5 lg:bg-neutral-200 lg:text-neutral-800">
           Minimal 20 box
         </span>
-        <span className="tag tag-neutral lg:px-4 lg:py-[var(--space-2)]">Antar Ciayumajakuning</span>
+        <span className="tag tag-neutral text-base px-4 py-2 lg:px-5 lg:py-2.5">
+          Antar Ciayumajakuning
+        </span>
         <a
           className="btn btn-secondary hidden px-[22px] lg:ml-auto lg:inline-flex"
           href={waLink(PESAN_HERO)}

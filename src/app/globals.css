@@ -57,6 +57,8 @@
 
   --font-heading: var(--font-bricolage), "Trebuchet MS", sans-serif;
   --font-body: var(--font-instrument), system-ui, -apple-system, sans-serif;
+  --font-bricolage: var(--font-bricolage), "Trebuchet MS", sans-serif;
+  --font-instrument: var(--font-instrument), system-ui, -apple-system, sans-serif;
 }
 
 :root {
