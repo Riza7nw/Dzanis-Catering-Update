@@ -1,16 +1,9 @@
 /**
  * Katalog snack box — 51 pilihan dalam 6 kategori.
- *
- * Disalin apa adanya dari `CATS` di artboard "Rakit Snack Box.dc.html", lalu
- * dicocokkan ulang dengan dua lembar poster harga milik Dzanis
- * (dzanis-snackbox-1.png = 24 pilihan, dzanis-snackbox-2.png = 27 pilihan).
- * Keduanya cocok persis: 24 + 27 = 51, dan seluruh harga sama.
- *
  * Harga dalam rupiah, per biji — bukan per box.
  */
 
 export type SnackItem = {
-  /** Nama juga dipakai sebagai kunci kuantitas, jadi harus unik lintas kategori. */
   nama: string;
   harga: number;
 };
@@ -104,7 +97,6 @@ export const snackKategori: SnackKategori[] = [
   },
 ];
 
-/** Angka yang dipajang di seksi snack box homepage. */
 export const snackRingkasan = {
   totalPilihan: snackKategori.reduce((n, k) => n + k.items.length, 0),
   totalKategori: snackKategori.length,
@@ -113,9 +105,7 @@ export const snackRingkasan = {
   ),
 };
 
-/** Minimal order berlaku sama untuk nasi kotak maupun snack box. */
 export const MIN_BOX = 20;
-/** Tombol +/- jumlah box bergerak per kelipatan ini. */
 export const STEP_BOX = 5;
 
 export function formatRupiah(n: number) {

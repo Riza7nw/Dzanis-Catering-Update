@@ -1,0 +1,92 @@
+---
+import { formatRupiah, snackRingkasan } from '../../data/snack';
+import { snackTeaserPhotos, type SnackTeaserPhoto } from '../../data/menu';
+
+interface Props {
+  photos?: SnackTeaserPhoto[];
+}
+
+const { photos = snackTeaserPhotos } = Astro.props;
+
+/** Tiga angka besar kolom kiri artboard web. */
+const angka = [
+  { nilai: snackRingkasan.totalPilihan, label: "pilihan jajanan" },
+  { nilai: snackRingkasan.totalKategori, label: "kategori" },
+  { nilai: snackRingkasan.hargaTermurah, label: "rupiah termurah" },
+];
+---
+
+<section id="snack">
+  <div class="mx-auto flex max-w-[1280px] flex-col gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-8)] lg:grid lg:grid-cols-[1fr_1.2fr] lg:items-center lg:gap-14 lg:px-14 lg:py-[72px]">
+    <div class="contents lg:flex lg:flex-col lg:gap-[22px]">
+      <div class="flex flex-col gap-[var(--space-2)] lg:contents">
+        <h2 class="m-0 max-w-[340px] font-heading text-[32px] leading-[1.12] uppercase sm:max-w-none lg:text-[56px] lg:leading-[0.96] lg:tracking-[-0.01em]">
+          <span>SNACK BOX </span>
+          <span class="font-body font-normal normal-case italic text-accent-700">
+            isi
+          </span>
+          <br />
+          <span class="inline-flex flex-wrap items-center gap-2.5 sm:gap-3 lg:gap-3.5 align-middle">
+            <span class="font-body font-normal normal-case italic text-accent-700">
+              sendiri
+            </span>
+            <span class="inline-flex items-center rounded-full bg-neutral-200 px-3 py-1 font-body text-[16px] font-semibold tracking-normal text-neutral-800 normal-case not-italic lg:text-[18px]">
+              Minimal 20 box
+            </span>
+          </span>
+        </h2>
+
+        <p class="m-0 max-w-[380px] text-[16px] leading-[1.6] text-neutral-800 lg:text-[17px] lg:leading-[1.65]">
+          {snackRingkasan.totalPilihan} pilihan jajanan mulai{" "}
+          {formatRupiah(snackRingkasan.hargaTermurah)} — puff &amp; pastry,
+          aneka cake, kue basah, puding, menu asin, dan pelengkap. Harga box
+          mengikuti isi yang dipilih.
+        </p>
+      </div>
+
+      <div class="hidden lg:flex lg:gap-8" data-reveal>
+        {angka.map((a) => (
+          <div>
+            <div class="font-heading text-[38px] leading-none text-accent-700">
+              {a.nilai}
+            </div>
+            <div class="text-[14px] text-neutral-700">{a.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div class="order-1 flex flex-col gap-2.5 sm:flex-row lg:order-none lg:self-start">
+        <button
+          type="button"
+          data-order-trigger
+          data-package-name="Snack Box Dzanis"
+          class="btn btn-primary min-h-[52px] text-[16px] lg:min-h-12 lg:w-auto lg:px-[26px] lg:text-[14px] lg:tracking-[0.06em] lg:uppercase"
+        >
+          Pesan Snack Box
+        </button>
+        <a
+          href="/rakit-snack-box"
+          class="btn btn-secondary min-h-[52px] text-[16px] lg:min-h-12 lg:w-auto lg:px-[22px] lg:text-[14px] lg:tracking-[0.06em] lg:uppercase"
+        >
+          <span class="lg:hidden">Rakit pilihan sendiri</span>
+          <span class="hidden lg:inline">Rakit sendiri</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Grid foto 3x2: bulat di mobile, rounded-sm di desktop -->
+    <div class="grid grid-cols-3 gap-[var(--space-3)] lg:gap-[14px] stagger-rapat" data-reveal>
+      {photos.map((f) => (
+        <div class="relative aspect-square overflow-hidden rounded-full bg-surface lg:rounded-[var(--radius-sm)]">
+          <img
+            src={f.src}
+            alt={f.alt}
+            loading="lazy"
+            decoding="async"
+            class="washed h-full w-full object-cover"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
