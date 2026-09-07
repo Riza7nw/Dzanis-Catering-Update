@@ -42,3 +42,12 @@ yarn-error.log*
 # scratch alur kerja subagent (ledger, brief, laporan) — bukan bagian proyek
 /.superpowers/
 next-env.d.ts
+
+# Internal developer notes & local project summaries
+PROJECT_SUMMARY.md
+PROJECT_SUMMARY*.md
+*.local.md
+.notes/
+private/
+scratch/
+
