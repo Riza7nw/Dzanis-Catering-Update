@@ -53,3 +53,4 @@ PROJECT_SUMMARY*.md
 private/
 scratch/
 
+.vscode/
