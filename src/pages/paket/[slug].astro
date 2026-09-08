@@ -166,10 +166,17 @@ const pageDescription = paket.deskripsiSingkat;
       </nav>
 
       <!-- 2-Column Responsive Breakdown -->
+<<<<<<< HEAD
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
         <!-- Left Column: Media & Operational Badges (lg:col-span-5) -->
         <div class="lg:col-span-5 flex flex-col gap-6">
+=======
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        
+        <!-- Left Column: Media & Composition (lg:col-span-1) -->
+        <div class="flex flex-col gap-6">
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
           <!-- Main Photo Card -->
           <div class="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden rounded-3xl border border-neutral-200/80 bg-surface shadow-sm">
             <img
@@ -207,6 +214,7 @@ const pageDescription = paket.deskripsiSingkat;
             </div>
           </div>
 
+<<<<<<< HEAD
           <!-- Operational Notice Box -->
           <div class="rounded-2xl border border-neutral-200/90 bg-surface/60 p-5 text-neutral-800">
             <h4 class="font-heading text-sm font-bold text-neutral-900 mb-3 uppercase tracking-wide">
@@ -275,6 +283,8 @@ const pageDescription = paket.deskripsiSingkat;
             </div>
           </div>
 
+=======
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
           <!-- Structured Menu Breakdown -->
           <div class="border-t border-divider pt-6">
             <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900 mb-4">
@@ -356,6 +366,160 @@ const pageDescription = paket.deskripsiSingkat;
             </div>
           </div>
 
+<<<<<<< HEAD
+=======
+          <!-- Operational Notice Box -->
+          <div class="rounded-2xl border border-neutral-200/90 bg-surface/60 p-5 text-neutral-800">
+            <h4 class="font-heading text-sm font-bold text-neutral-900 mb-3 uppercase tracking-wide">
+              Ketentuan Pemesanan
+            </h4>
+            <ul class="space-y-2 text-xs leading-relaxed text-neutral-700">
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-bold">✓</span>
+                <span><strong>Cutoff H-2 / H-3:</strong> Disarankan memesan minimal H-3 agar persiapan bahan baku optimal.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-bold">✓</span>
+                <span><strong>100% Halal:</strong> Menggunakan bahan pilihan berkualitas dengan dapur higienis rumahan Majalengka.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-bold">✓</span>
+                <span><strong>Area Pengantaran:</strong> Melayani seluruh Ciayumajakuning (Cirebon, Indramayu, Majalengka, Kuningan).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-bold">✓</span>
+                <span><strong>Alat Makan:</strong> Sudah termasuk sendok, tisu, dan tusuk gigi steril dalam setiap box.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right Column: Detail, Menu Selection & Calculator (lg:col-span-1) -->
+        <div class="flex flex-col gap-8">
+          
+          <!-- Header & Price -->
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="rounded-full bg-accent-2-200 text-accent-2-900 px-3 py-0.5 text-xs font-semibold">
+                Nasi Kotak Higienis
+              </span>
+              {paket.badge && (
+                <span class="rounded-full bg-accent/10 text-accent px-3 py-0.5 text-xs font-bold uppercase tracking-wider">
+                  {paket.badge}
+                </span>
+              )}
+            </div>
+
+            <h1 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight">
+              {paket.nama}
+            </h1>
+
+            <div class="mt-3 flex items-baseline gap-2">
+              <span class="font-heading text-xl text-neutral-500 font-semibold">Rp</span>
+              <span class="font-heading text-3xl sm:text-4xl font-bold text-accent-700 leading-none">
+                {paket.harga.toLocaleString("id-ID")}
+              </span>
+              <span class="text-sm font-medium text-neutral-600">/ porsi</span>
+            </div>
+
+            <p class="mt-4 text-sm sm:text-base text-neutral-700 leading-relaxed">
+              {paket.deskripsiLengkap}
+            </p>
+
+            <!-- Tags -->
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              {paket.tags.map((tag) => (
+                <span class="inline-flex items-center rounded-full bg-white border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-800 shadow-2xs">
+                  ✓ {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Menu Selection Section - Only show if canSelectMainMenu is true */}
+          {paket.canSelectMainMenu && paket.selectableMainMenus && paket.selectableSideDishes && (
+            <div class="border-t border-divider pt-6">
+              <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900 mb-5">
+                Pilih Menu Anda
+              </h3>
+
+              <div class="space-y-6">
+                {/* Main Menu Selection */}
+                <div>
+                  <label class="block text-sm font-bold text-neutral-900 mb-3">
+                    🍗 Pilih Menu Utama
+                  </label>
+                  <div class="space-y-2">
+                    {paket.selectableMainMenus!.map((menu, idx) => (
+                      <label class="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200 cursor-pointer hover:bg-accent/5 hover:border-accent/40 transition group">
+                        <input
+                          type="radio"
+                          name="main-menu"
+                          value={menu}
+                          data-menu-id={`main-menu-${idx}`}
+                          class="w-4 h-4 cursor-pointer accent-accent"
+                          checked={idx === 0}
+                        />
+                        <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
+                          {menu}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Side Dishes Selection */}
+                <div>
+                  <div class="flex items-center justify-between mb-3">
+                    <label class="block text-sm font-bold text-neutral-900">
+                      🥗 Pilih {paket.sideDishesSelectMin}-{paket.sideDishesSelectMax} Lauk Pendamping
+                    </label>
+                    <span class="text-xs font-medium text-neutral-500" id="side-count">
+                      0 / {paket.sideDishesSelectMax} pilihan
+                    </span>
+                  </div>
+                  <div class="space-y-2">
+                    {paket.selectableSideDishes!.map((dish, idx) => (
+                      <label class="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200 cursor-pointer hover:bg-accent/5 hover:border-accent/40 transition group has-[:checked]:bg-accent/10 has-[:checked]:border-accent/40">
+                        <input
+                          type="checkbox"
+                          name="side-dishes"
+                          value={dish}
+                          data-dish-id={`side-dish-${idx}`}
+                          class="w-4 h-4 cursor-pointer accent-accent"
+                          data-min={paket.sideDishesSelectMin}
+                          data-max={paket.sideDishesSelectMax}
+                        />
+                        <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
+                          {dish}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <p class="text-xs text-neutral-500 mt-3">
+                    Pilih minimal {paket.sideDishesSelectMin} dan maksimal {paket.sideDishesSelectMax} lauk pendamping.
+                  </p>
+                </div>
+
+                {/* Selection Summary Card */}
+                <div class="rounded-2xl border border-accent/20 bg-accent/5 p-4">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2">
+                    Ringkasan Pilihan Anda:
+                  </h4>
+                  <div class="text-sm text-neutral-800">
+                    <p id="menu-summary-main" class="font-medium text-accent-700">
+                      Menu: {paket.selectableMainMenus![0]}
+                    </p>
+                    <p id="menu-summary-sides" class="text-neutral-700 text-xs mt-1">
+                      Lauk: —
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
           <!-- Interactive Portion Calculator -->
           <div class="rounded-3xl border border-neutral-200 bg-surface/50 p-6 sm:p-7 shadow-sm">
             <div class="mb-5">
@@ -402,6 +566,24 @@ const pageDescription = paket.deskripsiSingkat;
               </div>
             </div>
 
+<<<<<<< HEAD
+=======
+            <!-- Tanggal Acara Input -->
+            <div class="mt-4">
+              <label for="event-date-input" class="block text-xs font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
+                Tanggal Acara
+              </label>
+              <input
+                type="date"
+                id="event-date-input"
+                class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-base font-medium text-neutral-900 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition shadow-2xs"
+              />
+              <p class="text-xs text-neutral-500 mt-2">
+                Pilih tanggal acara Anda untuk memudahkan proses pemesanan.
+              </p>
+            </div>
+
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
             <!-- Dynamic WhatsApp Checkout Button -->
             <div class="mt-5">
               <a
@@ -416,9 +598,22 @@ const pageDescription = paket.deskripsiSingkat;
                 </svg>
                 <span>Pesan Sekarang via WhatsApp</span>
               </a>
+<<<<<<< HEAD
               <p class="mt-2 text-center text-xs text-neutral-500">
                 Format pesan WhatsApp akan otomatis terisi dengan rincian paket dan jumlah porsi.
               </p>
+=======
+              {paket.canSelectMainMenu && (
+                <p class="mt-2 text-center text-xs text-neutral-500" id="validation-message">
+                  Pastikan Anda telah memilih menu dan lauk pendamping sebelum memesan.
+                </p>
+              )}
+              {!paket.canSelectMainMenu && (
+                <p class="mt-2 text-center text-xs text-neutral-500">
+                  Format pesan WhatsApp akan otomatis terisi dengan rincian paket dan jumlah porsi.
+                </p>
+              )}
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
             </div>
           </div>
 
@@ -430,24 +625,157 @@ const pageDescription = paket.deskripsiSingkat;
   <Footer />
 </BaseLayout>
 
+<<<<<<< HEAD
 <!-- Client Script: Inline Vanilla Calculator with Defensive Handling & View Transitions -->
 <script is:inline define:vars={{ basePrice: paket.harga, packageName: paket.nama, minOrder: paket.minOrder, phone: waPhoneNumber }}>
+=======
+<!-- Client Script: Inline Vanilla Calculator with Menu Selection & Defensive Handling -->
+<script is:inline define:vars={{ basePrice: paket.harga, packageName: paket.nama, minOrder: paket.minOrder, phone: waPhoneNumber, hasMenuSelection: paket.canSelectMainMenu, sideDishesMin: paket.sideDishesSelectMin, sideDishesMax: paket.sideDishesSelectMax }}>
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
   function initPortionCalculator() {
     const input = document.getElementById('portion-input');
     const display = document.getElementById('subtotal-display');
     const btn = document.getElementById('wa-checkout-btn');
+<<<<<<< HEAD
 
     if (!input || !display || !btn) return;
 
     function calculateClampedQty() {
       let rawVal = parseInt(input.value, 10);
       // Defensive Handling: Tangani null, empty, NaN, atau angka di bawah minOrder
+=======
+    const eventDateInput = document.getElementById('event-date-input');
+
+    if (!input || !display || !btn) return;
+
+    // Menu Selection State
+    let selectedMainMenu = null;
+    let selectedSideDishes = [];
+    let selectedEventDate = null;
+
+    function calculateClampedQty() {
+      let rawVal = parseInt(input.value, 10);
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
       if (isNaN(rawVal) || rawVal < minOrder) {
         return minOrder;
       }
       return rawVal;
     }
 
+<<<<<<< HEAD
+=======
+    // Initialize Menu Selection Handlers
+    if (hasMenuSelection) {
+      const mainMenuRadios = document.querySelectorAll('input[name="main-menu"]');
+      const sideDishCheckboxes = document.querySelectorAll('input[name="side-dishes"]');
+
+      // Set initial state
+      if (mainMenuRadios.length > 0) {
+        selectedMainMenu = mainMenuRadios[0].value;
+      }
+
+      // Main Menu Radio Handler
+      mainMenuRadios.forEach((radio) => {
+        radio.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            selectedMainMenu = e.target.value;
+            updateSummary();
+            updateCheckout();
+          }
+        });
+      });
+
+      // Side Dishes Checkbox Handler
+      sideDishCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', (e) => {
+          const minSelections = parseInt(e.target.dataset.min, 10);
+          const maxSelections = parseInt(e.target.dataset.max, 10);
+          const allCheckboxes = document.querySelectorAll('input[name="side-dishes"]');
+          const checkedCount = Array.from(allCheckboxes).filter(cb => cb.checked).length;
+
+          // Validate constraints
+          if (e.target.checked && checkedCount > maxSelections) {
+            e.target.checked = false;
+            alert(`Maksimal pilihan adalah ${maxSelections} lauk pendamping`);
+            return;
+          }
+
+          // Update selected side dishes
+          selectedSideDishes = Array.from(allCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+          // Update counter
+          const sideCount = document.getElementById('side-count');
+          if (sideCount) {
+            sideCount.textContent = `${checkedCount} / ${maxSelections} pilihan`;
+          }
+
+          updateSummary();
+          updateCheckout();
+        });
+      });
+
+      // Set first menu as selected by default
+      if (mainMenuRadios.length > 0) {
+        mainMenuRadios[0].checked = true;
+      }
+    }
+
+    function updateSummary() {
+      const summaryMain = document.getElementById('menu-summary-main');
+      const summarySides = document.getElementById('menu-summary-sides');
+
+      if (summaryMain && selectedMainMenu) {
+        summaryMain.textContent = `Menu: ${selectedMainMenu}`;
+      }
+
+      if (summarySides && selectedSideDishes.length > 0) {
+        summarySides.textContent = `Lauk: ${selectedSideDishes.join(', ')}`;
+      } else if (summarySides) {
+        summarySides.textContent = 'Lauk: —';
+      }
+    }
+
+    function validateMenuSelection() {
+      if (!hasMenuSelection) {
+        return { valid: true };
+      }
+
+      const validationMessage = document.getElementById('validation-message');
+      let errors = [];
+
+      if (!selectedMainMenu) {
+        errors.push('Pilih satu menu utama');
+      }
+
+      if (selectedSideDishes.length < sideDishesMin) {
+        errors.push(`Pilih minimal ${sideDishesMin} lauk pendamping`);
+      }
+
+      if (selectedSideDishes.length > sideDishesMax) {
+        errors.push(`Maksimal ${sideDishesMax} lauk pendamping`);
+      }
+
+      if (errors.length > 0) {
+        const errorMsg = errors.join('\n');
+        if (validationMessage) {
+          validationMessage.textContent = '❌ ' + errors.join(' & ');
+          validationMessage.classList.add('text-red-600');
+        }
+        alert('Mohon lengkapi pilihan menu:\n\n' + errorMsg);
+        return { valid: false };
+      }
+
+      if (validationMessage) {
+        validationMessage.textContent = '✓ Pilihan menu Anda sudah lengkap';
+        validationMessage.classList.remove('text-red-600');
+      }
+
+      return { valid: true };
+    }
+
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     function updateCheckout() {
       const qty = calculateClampedQty();
       const total = qty * basePrice;
@@ -459,6 +787,7 @@ const pageDescription = paket.deskripsiSingkat;
         maximumFractionDigits: 0
       }).format(total);
 
+<<<<<<< HEAD
       // Strict URL Encoding untuk Pesan WhatsApp
       const rawMessage = `Halo Dzanis Catering, saya ingin memesan *${packageName}* sebanyak *${qty} porsi*.\nTotal estimasi: Rp ${total.toLocaleString('id-ID')}.\nMohon info ketersediaan slot tanggal [Isi Tanggal Acara].`;
       btn.href = `https://wa.me/${phone}?text=${encodeURIComponent(rawMessage)}`;
@@ -466,6 +795,63 @@ const pageDescription = paket.deskripsiSingkat;
 
     input.addEventListener('input', updateCheckout);
     
+=======
+      // Build message with menu selections
+      let messageLines = [
+        `Halo Dzanis Catering, saya ingin memesan *${packageName}* sebanyak *${qty} porsi*.`,
+      ];
+
+      if (hasMenuSelection) {
+        if (selectedMainMenu) {
+          messageLines.push(`Menu Utama: ${selectedMainMenu}`);
+        }
+        if (selectedSideDishes.length > 0) {
+          messageLines.push(`Lauk Pendamping: ${selectedSideDishes.join(', ')}`);
+        }
+      }
+
+      if (selectedEventDate) {
+        const dateObj = new Date(selectedEventDate);
+        const formattedDate = dateObj.toLocaleDateString('id-ID', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        messageLines.push(`Tanggal Acara: ${formattedDate}`);
+      }
+
+      messageLines.push(
+        `Total estimasi: Rp ${total.toLocaleString('id-ID')}.`,
+        `Mohon konfirmasi ketersediaan. Terima kasih!`
+      );
+
+      const rawMessage = messageLines.join('\n');
+      
+      // Create a data attribute to store the message
+      btn.dataset.waMessage = rawMessage;
+    }
+
+    // WhatsApp Button Click Handler with Validation
+    btn.addEventListener('click', (e) => {
+      if (hasMenuSelection) {
+        const validation = validateMenuSelection();
+        if (!validation.valid) {
+          e.preventDefault();
+          return;
+        }
+      }
+
+      // Get message from data attribute
+      const waMessage = btn.dataset.waMessage;
+      if (waMessage) {
+        btn.href = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`;
+      }
+    });
+
+    input.addEventListener('input', updateCheckout);
+
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     // Reset visual value pada input jika user mengosongkan / memasukkan nilai di bawah batas minimum
     input.addEventListener('blur', () => {
       let val = parseInt(input.value, 10);
@@ -475,8 +861,24 @@ const pageDescription = paket.deskripsiSingkat;
       }
     });
 
+<<<<<<< HEAD
     // Jalankan segera saat inisialisasi
     updateCheckout();
+=======
+    // Event Date Handler
+    if (eventDateInput) {
+      eventDateInput.addEventListener('change', (e) => {
+        selectedEventDate = e.target.value;
+        updateCheckout();
+      });
+    }
+
+    // Jalankan segera saat inisialisasi
+    updateCheckout();
+    if (hasMenuSelection) {
+      updateSummary();
+    }
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
   }
 
   // Initial Load & Astro View Transitions Support

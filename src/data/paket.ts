@@ -20,6 +20,15 @@ export interface Paket {
   pelengkap: string[];
   foto: string;
   fotoAlt?: string;
+<<<<<<< HEAD
+=======
+  // Menu selection configuration
+  canSelectMainMenu?: boolean;
+  selectableMainMenus?: string[];
+  selectableSideDishes?: string[];
+  sideDishesSelectMin?: number;
+  sideDishesSelectMax?: number;
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
   // Properti kompatibilitas tambahan
   ringkas?: string;
   populer?: boolean;
@@ -61,6 +70,23 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     foto: "/images/menu/paket-20k.jpg",
     fotoAlt: "Paket Hemat 20K Dzanis Catering",
+<<<<<<< HEAD
+=======
+    // Menu selection
+    canSelectMainMenu: true,
+    selectableMainMenus: [
+      "Ayam Goreng Serundeng Lengkuas",
+      "Tahu & Tempe Goreng Gurih",
+    ],
+    selectableSideDishes: [
+      "Oseng Kacang Panjang Tempe",
+      "Bihun Goreng Sayur",
+      "Tumis Buncis Jagung",
+      "Capcay Gurih",
+    ],
+    sideDishesSelectMin: 2,
+    sideDishesSelectMax: 3,
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     ringkas:
       "Ayam goreng serundeng · tahu tempe · oseng kacang panjang · sambal terasi · kerupuk",
     populer: false,
@@ -101,6 +127,24 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     foto: "/images/menu/paket-23k.jpg",
     fotoAlt: "Paket Favorit 23K Dzanis Catering",
+<<<<<<< HEAD
+=======
+    // Menu selection
+    canSelectMainMenu: true,
+    selectableMainMenus: [
+      "Ayam Bakar Madu",
+      "Ayam Goreng Lengkuas",
+      "Telur Balado 1/2 Butir",
+    ],
+    selectableSideDishes: [
+      "Bakmi Goreng Gurih",
+      "Capcay Bakso Sayur",
+      "Sambal Goreng Kentang",
+      "Tempe Orek Manis Gurih",
+    ],
+    sideDishesSelectMin: 2,
+    sideDishesSelectMax: 3,
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     ringkas:
       "Ayam bakar madu · telur balado 1/2 · bakmi goreng gurih · sambal · pisang",
     populer: true,
@@ -141,6 +185,24 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     foto: "/images/menu/paket-25k.jpg",
     fotoAlt: "Paket Spesial 25K Dzanis Catering",
+<<<<<<< HEAD
+=======
+    // Menu selection
+    canSelectMainMenu: true,
+    selectableMainMenus: [
+      "Rolade Daging Sapi Olahan",
+      "Ayam Rica Kemangi",
+      "Telur Balado Bumbu Merah",
+    ],
+    selectableSideDishes: [
+      "Sambal Goreng Ati Kentang",
+      "Capcay Bakso Sosis",
+      "Mie Goreng Spesial",
+      "Tumis Buncis Jagung Manis",
+    ],
+    sideDishesSelectMin: 2,
+    sideDishesSelectMax: 3,
+>>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     ringkas:
       "Ayam rica-rica / rolade daging · sambal goreng ati kentang · capcay bakso · kerupuk udang",
     populer: false,
