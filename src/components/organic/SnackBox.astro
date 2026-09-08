@@ -55,23 +55,13 @@ const angka = [
         ))}
       </div>
 
-      <div class="order-1 flex flex-col gap-2.5 sm:flex-row lg:order-none lg:self-start">
-        <button
-          type="button"
-          data-order-trigger
-          data-package-name="Snack Box Dzanis"
-          class="btn btn-primary min-h-[52px] text-[16px] lg:min-h-12 lg:w-auto lg:px-[26px] lg:text-[14px] lg:tracking-[0.06em] lg:uppercase"
-        >
-          Pesan Snack Box
-        </button>
-        <a
-          href="/rakit-snack-box"
-          class="btn btn-secondary min-h-[52px] text-[16px] lg:min-h-12 lg:w-auto lg:px-[22px] lg:text-[14px] lg:tracking-[0.06em] lg:uppercase"
-        >
-          <span class="lg:hidden">Rakit pilihan sendiri</span>
-          <span class="hidden lg:inline">Rakit sendiri</span>
-        </a>
-      </div>
+      <a
+        class="btn btn-primary btn-block order-1 min-h-[52px] text-[16px] lg:order-none lg:min-h-12 lg:w-auto lg:self-start lg:px-[26px] lg:text-[14px] lg:tracking-[0.06em] lg:uppercase"
+        href="/rakit-snack-box"
+      >
+        <span class="lg:hidden">Rakit snack box sendiri</span>
+        <span class="hidden lg:inline">Rakit snack box</span>
+      </a>
     </div>
 
     <!-- Grid foto 3x2: bulat di mobile, rounded-sm di desktop -->

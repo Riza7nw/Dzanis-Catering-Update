@@ -1,12 +1,28 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/organic/Navbar.astro';
 import Hero from '../components/organic/Hero.astro';
+import Angka from '../components/organic/Angka.astro';
+import Layanan from '../components/organic/Layanan.astro';
+import Paket from '../components/organic/Paket.astro';
 import SnackBox from '../components/organic/SnackBox.astro';
+import CaraPesan from '../components/organic/CaraPesan.astro';
+import Faq from '../components/organic/Faq.astro';
+import CtaBesar from '../components/organic/CtaBesar.astro';
+import Footer from '../components/organic/Footer.astro';
 ---
 
 <BaseLayout title="Dzanis Catering | Nasi Kotak & Snack Box Ciayumajakuning">
+  <Navbar />
   <main id="konten">
     <Hero />
+    <Paket />
     <SnackBox />
+    <CtaBesar />
+    <Layanan />
+    <CaraPesan />
+    <Angka />
+    <Faq />
   </main>
+  <Footer />
 </BaseLayout>

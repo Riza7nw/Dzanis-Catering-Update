@@ -92,6 +92,18 @@
   --easing-keluar: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Reset native <details> marker arrows — our accordion components use
+   custom +/× icons instead of browser disclosure triangles. */
+summary::-webkit-details-marker,
+summary::marker {
+  display: none;
+  content: '';
+}
+
+details > summary {
+  list-style: none;
+}
+
 /* Navbar sticky menutupi judul seksi saat anchor #paket/#snack/#layanan/#cara
    diklik. scroll-smooth membuatnya makin terlihat, jadi sisakan
    ruang setinggi header. */

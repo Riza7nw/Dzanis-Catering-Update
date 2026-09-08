@@ -1,0 +1,45 @@
+---
+import { langkah } from '../../data/konten';
+---
+
+<section
+  id="cara"
+  class="px-[var(--space-4)] py-[var(--space-8)] lg:px-14 lg:pt-0 lg:pb-[72px]"
+>
+  <div class="mx-auto flex max-w-[1280px] flex-col gap-[var(--space-6)] lg:gap-8">
+    <h2 class="font-heading text-[29px] leading-[1.12] lg:text-[52px] lg:leading-[0.98] lg:tracking-[-0.01em] lg:uppercase">
+      Cara pesan
+    </h2>
+
+    <div class="giliran-manual" data-reveal>
+      <ol
+        role="list"
+        class="flex list-none flex-col gap-[var(--space-4)] lg:grid lg:grid-cols-4 lg:gap-6 p-0 m-0"
+      >
+        {langkah.map((item, i) => (
+          <li
+            style={`--i: ${i};`}
+            class="flex items-start gap-[var(--space-3)] lg:flex-col lg:gap-3"
+          >
+            <span
+              aria-hidden="true"
+              class="lingkaran-langkah flex size-10 flex-none items-center justify-center rounded-full bg-accent-2-300 font-heading text-[17px] text-accent-2-900 lg:size-[52px] lg:text-[21px] font-bold"
+            >
+              {i + 1}
+            </span>
+
+            <div class="pt-[5px] lg:flex lg:flex-col lg:gap-3 lg:pt-0">
+              <h3 class="mb-[2px] font-heading text-[19px] leading-tight lg:mb-0 lg:text-[21px]">
+                <span class="lg:hidden">{item.judul}</span>
+                <span class="hidden lg:inline">{item.judulRingkas}</span>
+              </h3>
+              <p class="text-[15px] leading-[1.5] text-neutral-800 lg:leading-[1.55] m-0">
+                {item.deskripsi}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>

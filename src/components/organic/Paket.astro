@@ -1,0 +1,172 @@
+---
+import { paket } from '../../data/paket';
+import { formatRupiah } from '../../data/snack';
+import { waLink } from '../../data/company';
+
+const GARIS_BAND = "color-mix(in srgb, var(--color-bg) 26%, transparent)";
+
+const fotoBand = [
+  ...paket.map((p) => ({ src: p.foto, alt: p.fotoAlt })),
+  { src: "/images/menu/hero-nasi-kotak.jpg", alt: "Nasi kotak siap antar" },
+];
+---
+
+<section id="paket">
+  <!-- ── Mobile: carousel kartu paket ─────────────────────────────── -->
+  <div class="flex flex-col gap-[var(--space-4)] bg-surface py-[var(--space-8)] lg:hidden">
+    <div class="flex flex-col gap-[var(--space-1)] px-[var(--space-4)]">
+      <h2 class="font-heading text-[29px] leading-[1.12]">
+        Tiga paket nasi kotak
+      </h2>
+      <p class="max-w-[300px] text-[15px] leading-[1.55] text-neutral-800">
+        Harga per box, sudah termasuk kemasan dan sendok. Geser untuk melihat semua.
+      </p>
+    </div>
+
+    <div class="dz-scroll flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-[var(--space-4)] pt-[var(--space-1)] pb-[var(--space-2)]">
+      {paket.map((p) => (
+        <article
+          class={`flex w-[300px] flex-none snap-start flex-col overflow-hidden rounded-[32px] bg-bg ${
+            p.populer ? "shadow-[var(--shadow-lg)]" : "shadow-[var(--shadow-md)]"
+          }`}
+        >
+          <div class="relative aspect-[4/3] w-full overflow-hidden bg-surface">
+            <img
+              src={p.foto}
+              alt={p.fotoAlt}
+              loading="lazy"
+              decoding="async"
+              class="washed h-full w-full object-cover"
+            />
+            {p.populer && (
+              <span class="absolute top-[12px] left-[12px] rounded-full bg-accent px-[14px] py-[7px] font-heading text-[13px] text-bg font-semibold">
+                Paling sering dipesan
+              </span>
+            )}
+          </div>
+
+          <div class="flex flex-1 flex-col gap-[var(--space-3)] p-[var(--space-4)]">
+            <div>
+              <h3 class="mb-[2px] font-heading text-[24px]">
+                {p.nama}
+              </h3>
+              <p class="flex items-baseline gap-[2px] text-accent-700">
+                <span class="font-heading text-[19px]">Rp</span>
+                <span class="font-heading text-[34px] leading-none">
+                  {p.harga.toLocaleString("id-ID")}
+                </span>
+                <span class="ml-[6px] text-[14px] text-neutral-700">
+                  per box
+                </span>
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-[var(--space-1)]">
+              {p.sudahTermasuk.map((item) => (
+                <span class="tag tag-accent-2 text-[12px]">
+                  ✓ {item}
+                </span>
+              ))}
+            </div>
+
+            <div class="flex flex-col gap-[var(--space-2)]">
+              {p.lauk.map((l) => (
+                <p class="text-[15px] leading-[1.45]">
+                  {l.nama}{" "}
+                  <span class="text-neutral-700">— {l.ket}</span>
+                </p>
+              ))}
+            </div>
+
+            <!-- Native Details Accordion untuk Lauk Pendamping (Zero JS) -->
+            <details class="group border-t border-divider pt-[var(--space-2)]">
+              <summary class="flex min-h-[48px] cursor-pointer list-none items-center justify-between text-accent-700 focus-visible:outline-2 focus-visible:outline-accent-700">
+                <span class="text-[15px] font-semibold">
+                  Lauk pendamping ({p.pendamping.length})
+                </span>
+                <span class="w-[22px] text-center font-heading text-[18px] transition-transform duration-200 group-open:rotate-180">
+                  +
+                </span>
+              </summary>
+              <div class="mt-2 rounded-[var(--radius-lg)] bg-surface p-[var(--space-3)] text-[14px] leading-[1.6] text-neutral-800">
+                {p.pendamping.join(", ")}
+              </div>
+            </details>
+
+            <a
+              class="btn btn-primary btn-block mt-auto min-h-[50px] text-[16px]"
+              href={waLink(`Halo Dzanis Catering, saya mau pesan ${p.nama}.`)}
+            >
+              Pesan paket ini
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  <!-- ── Desktop: band olive + baris harga ────────────────────────── -->
+  <div class="hidden bg-accent-2-800 text-bg lg:block">
+    <div class="mx-auto grid max-w-[1280px] grid-cols-[1.15fr_1fr] items-start gap-[56px] px-[56px] py-[64px]">
+      <div class="grid grid-cols-2 gap-[14px]">
+        {fotoBand.map((f) => (
+          <div
+            class="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-sm)] bg-accent-2-900"
+          >
+            <img
+              src={f.src}
+              alt={f.alt}
+              loading="lazy"
+              decoding="async"
+              class="washed h-full w-full object-cover"
+            />
+          </div>
+        ))}
+      </div>
+
+      <div class="flex flex-col gap-[24px]">
+        <h2 class="font-heading text-[56px] leading-[0.96] tracking-[-0.01em] uppercase">
+          Paket nasi kotak
+        </h2>
+        <p class="max-w-[400px] text-[16px] leading-[1.65] text-accent-2-200">
+          Tiga tingkat harga, semuanya sudah termasuk nasi dan kemasan. Lauk pendamping bisa dipilih dari 14 pilihan.
+        </p>
+
+        <div class="flex flex-col" data-reveal>
+          {paket.map((p, i) => (
+            <div
+              style={`border-top-color: ${GARIS_BAND}; border-bottom-color: ${GARIS_BAND};`}
+              class={`flex items-baseline justify-between gap-[20px] border-t py-[18px] ${
+                i === paket.length - 1 ? "border-b" : ""
+              }`}
+            >
+              <div>
+                <div class="flex items-center gap-[12px]">
+                  <span class="font-heading text-[24px] font-semibold">{p.nama}</span>
+                  {p.populer && (
+                    <span class="rounded-full bg-accent px-[11px] py-[4px] text-[11px] tracking-[0.06em] text-bg uppercase font-bold">
+                      Paling sering dipesan
+                    </span>
+                  )}
+                </div>
+                <p class="mt-[2px] text-[14px] leading-[1.5] text-accent-2-200">
+                  {p.ringkas}
+                </p>
+              </div>
+              <div class="font-heading text-[30px] whitespace-nowrap">
+                  {formatRupiah(p.harga)}
+                </div>
+            </div>
+          ))}
+        </div>
+
+        <a
+          class="btn btn-primary min-h-[48px] self-start px-[26px] text-[14px] tracking-[0.06em] uppercase"
+          href={waLink('Halo Dzanis Catering, saya mau lihat menu lengkap nasi kotak.')}
+        >
+          Lihat menu lengkap
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
