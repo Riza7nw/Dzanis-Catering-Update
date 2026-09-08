@@ -1,0 +1,283 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/organic/Navbar.astro';
+import Footer from '../components/organic/Footer.astro';
+
+const legalCards = [
+  {
+    label: 'NIB / Izin Usaha',
+    detail: 'Legalitas usaha untuk menjalankan aktivitas usaha katering secara resmi.',
+    status: 'Legal',
+  },
+  {
+    label: 'Uji Lab Mikrobiologi & Air Bersih',
+    detail: 'Hasil uji kualitas air dan sanitasi dapur sesuai standar keamanan pangan.',
+    status: 'Uji Lab',
+  },
+  {
+    label: 'Pangan Sanitasi & Kesehatan',
+    detail: 'Sertifikat kesehatan untuk operasional dapur dan keamanan makanan.',
+    status: 'Sanitasi',
+  },
+  {
+    label: 'Legalitas & Izin Lainnya',
+    detail: 'Dokumen pendukung terkait proses bisnis dan pengelolaan usaha.',
+    status: 'Dokumen',
+  },
+];
+
+const sertifikat = [
+  {
+    label: 'Sertifikat Halal Indonesia',
+    meta: 'No. 123456789012345678',
+    date: '8 April 2024',
+    badge: 'HALAL',
+  },
+  {
+    label: 'Sertifikat Laik Higiene Sanitasi (SLHS)',
+    meta: 'No. 440/…/2023',
+    date: '14 Mei 2023',
+    badge: 'SLHS',
+  },
+  {
+    label: 'Sertifikat Penjemahan Makanan',
+    meta: 'No. 057/…/2024',
+    date: '26 Juni 2024',
+    badge: 'K3',
+  },
+  {
+    label: 'Sertifikat Pangan',
+    meta: 'No. 220/…/2024',
+    date: '2 Juli 2024',
+    badge: 'PANGAN',
+  },
+];
+
+const prosesVerifikasi = [
+  {
+    no: '1',
+    title: 'Cek Di Portal SIIA / BPJPH',
+    description: 'Pastikan nomor sertifikat valid di portal resmi dan sesuai nama usaha.',
+  },
+  {
+    no: '2',
+    title: 'Scan Barcode Sertifikat',
+    description: 'Gunakan QR code untuk memeriksa data lengkap dan validitas dokumen.',
+  },
+  {
+    no: '3',
+    title: 'Validasi Profil NIB di OSS RBA',
+    description: 'Pastikan data usaha terdaftar resmi di sistem OSS / NIB yang berlaku.',
+  },
+];
+---
+
+<BaseLayout title="Sertifikat & Legalitas | Dzanis Catering">
+  <Navbar />
+
+  <main id="konten" class="bg-[#f7f2e8] text-[#221e16]">
+    <section class="bg-[#1d3a32] text-[#fefaf5]">
+      <div class="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-14 lg:py-8">
+        <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d8e2d2]">
+          <span class="inline-flex h-2.5 w-2.5 rounded-full bg-[#e6b78c]" aria-hidden="true"></span>
+          <span>Gelar legalitas &amp; sertifikasi resmi</span>
+        </div>
+
+        <div class="mt-5 grid gap-6 lg:grid-cols-[1.3fr_0.9fr] lg:items-center lg:gap-10">
+          <div>
+            <h1 class="max-w-[540px] font-heading text-3xl font-bold leading-[1.08] tracking-[-0.04em] text-[#fefaf5] sm:text-5xl">
+              Pameran Legalitas &amp; Sertifikasi Resmi Buktikan Nyata
+            </h1>
+            <p class="mt-4 max-w-[640px] text-sm leading-6 text-[#dfe7dd] sm:text-base">
+              Dzanis Catering berkomitmen menjaga kualitas dan keamanan pangan dengan dokumen legalitas usaha,
+              sertifikat sanitasi, serta hasil uji laboratorium yang terverifikasi. Semua proses berjalan sesuai
+              prosedur dan dapat dipertanggungjawabkan.
+            </p>
+          </div>
+
+          <div class="rounded-[28px] border border-white/10 bg-[#f5f0e7] p-4 text-[#221e16] shadow-[0_18px_40px_rgba(17,24,39,0.12)] sm:p-5">
+            <div class="flex items-center justify-between gap-3 border-b border-[#d9d0c1] pb-3">
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7d7468]">
+                  Dokumen resmi
+                </p>
+                <h2 class="mt-1 font-heading text-xl font-bold text-[#221e16]">
+                  Dzanis Catering
+                </h2>
+              </div>
+              <span class="rounded-full bg-[#dfe7d0] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#2a331d]">
+                Legal
+              </span>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-2xl border border-[#ded3c0] bg-white/40 p-3">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#726a5e]">NIB</p>
+                <p class="mt-1 font-semibold text-[#221e16]">123456789012345</p>
+              </div>
+              <div class="rounded-2xl border border-[#ded3c0] bg-white/40 p-3">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#726a5e]">Status</p>
+                <p class="mt-1 font-semibold text-[#221e16]">Aktif</p>
+              </div>
+              <div class="rounded-2xl border border-[#ded3c0] bg-white/40 p-3">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#726a5e]">No. Telepon</p>
+                <p class="mt-1 font-semibold text-[#221e16]">0812 3438 3858</p>
+              </div>
+              <div class="rounded-2xl border border-[#ded3c0] bg-white/40 p-3">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#726a5e]">Wilayah</p>
+                <p class="mt-1 font-semibold text-[#221e16]">Majalengka</p>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
+              <span class="rounded-full bg-[#eec7a7] px-2.5 py-1 text-[#4a1d0c]">Sertifikat halal</span>
+              <span class="rounded-full bg-[#dfe7d0] px-2.5 py-1 text-[#2a331d]">Sanitasi</span>
+              <span class="rounded-full bg-[#efeae0] px-2.5 py-1 text-[#4f4a40]">Legal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-14 lg:py-12">
+      <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#6f6a63]">Dokumen lengkap</p>
+          <h2 class="mt-2 font-heading text-2xl font-bold text-[#221e16] sm:text-4xl">
+            Showcase Sertifikat Resmi Berlaku
+          </h2>
+        </div>
+        <button class="btn btn-secondary hidden sm:inline-flex">Unduh daftar sertifikat</button>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {sertifikat.map((item) => (
+          <article class="rounded-[28px] border border-[#d9d0c1] bg-[#fffdf9] p-4 shadow-[0_10px_24px_rgba(42,39,31,0.04)]">
+            <div class="flex items-center justify-between gap-3">
+              <span class="rounded-full bg-[#e8d7c9] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#4a1d0c]">
+                {item.badge}
+              </span>
+              <span class="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#6f6a63]">
+                {item.date}
+              </span>
+            </div>
+
+            <h3 class="mt-4 font-heading text-lg font-bold leading-snug text-[#221e16]">
+              {item.label}
+            </h3>
+
+            <p class="mt-3 text-sm leading-6 text-[#4f4a40]">
+              {item.meta}
+            </p>
+
+            <div class="mt-5 rounded-2xl bg-[#f4efe6] p-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#4f4a40]">
+              Dokumen terverifikasi
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="bg-[#1f2e2d] py-10 text-[#fefaf5] sm:py-12">
+      <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-14">
+        <div class="mb-6">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#c8d8bf]">Kebijakan &amp; kepatuhan</p>
+          <h2 class="mt-2 font-heading text-2xl font-bold sm:text-4xl">
+            Legalitas Usaha, Uji Lab &amp; Piagam Standar
+          </h2>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {legalCards.map((item) => (
+            <article class="rounded-[24px] border border-white/10 bg-[#fffaf2] p-4 text-[#221e16] shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-[18px]" aria-hidden="true">✦</span>
+                <span class="rounded-full bg-[#dce4cc] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#2a331d]">
+                  {item.status}
+                </span>
+              </div>
+              <h3 class="mt-4 font-heading text-lg font-bold leading-tight text-[#221e16]">
+                {item.label}
+              </h3>
+              <p class="mt-3 text-sm leading-6 text-[#4f4a40]">
+                {item.detail}
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-14 lg:py-12">
+      <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#6f6a63]">Pendaftaran</p>
+          <h2 class="mt-2 font-heading text-2xl font-bold text-[#221e16] sm:text-4xl">
+            Lengkapi Dokumen &amp; Administrasi SPK Seleksi Cepat
+          </h2>
+        </div>
+
+        <button class="btn btn-primary self-start">Unduh dokumen</button>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-3">
+        <div class="rounded-[28px] border border-[#d9d0c1] bg-[#fffaf2] p-5 shadow-[0_10px_24px_rgba(42,39,31,0.04)]">
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6f6a63]">Pajak</p>
+          <h3 class="mt-3 font-heading text-xl font-bold text-[#221e16]">Bukti Dokumen Usaha</h3>
+          <ul class="mt-4 space-y-2 text-sm leading-6 text-[#4f4a40]">
+            <li>✓ Sertifikat halal</li>
+            <li>✓ NIB / legalitas usaha</li>
+            <li>✓ Data kepemilikan usaha</li>
+          </ul>
+        </div>
+
+        <div class="rounded-[28px] border border-[#d9d0c1] bg-[#fffaf2] p-5 shadow-[0_10px_24px_rgba(42,39,31,0.04)]">
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6f6a63]">Standar</p>
+          <h3 class="mt-3 font-heading text-xl font-bold text-[#221e16]">Kebersihan &amp; Keamanan</h3>
+          <ul class="mt-4 space-y-2 text-sm leading-6 text-[#4f4a40]">
+            <li>✓ Sanitasi dapur</li>
+            <li>✓ Uji mikrobiologi</li>
+            <li>✓ Prosedur penyimpanan</li>
+          </ul>
+        </div>
+
+        <div class="rounded-[28px] border border-[#d9d0c1] bg-[#fffaf2] p-5 shadow-[0_10px_24px_rgba(42,39,31,0.04)]">
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6f6a63]">Terverifikasi</p>
+          <h3 class="mt-3 font-heading text-xl font-bold text-[#221e16]">Proses Validasi</h3>
+          <ul class="mt-4 space-y-2 text-sm leading-6 text-[#4f4a40]">
+            <li>✓ Data konsisten</li>
+            <li>✓ Nomor sertifikat valid</li>
+            <li>✓ Dokumen siap ditampilkan</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-[1280px] px-4 pb-12 sm:px-6 lg:px-14 lg:pb-16">
+      <div class="mb-5">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#6f6a63]">Panduan traksaksi</p>
+        <h2 class="mt-2 font-heading text-2xl font-bold text-[#221e16] sm:text-4xl">
+          Cara Cek &amp; Verifikasi Keaslian Sertifikat Secara Mandiri
+        </h2>
+      </div>
+
+      <div class="grid gap-4 lg:grid-cols-3">
+        {prosesVerifikasi.map((item) => (
+          <article class="rounded-[28px] border border-[#d9d0c1] bg-[#fffdf9] p-5 shadow-[0_10px_24px_rgba(42,39,31,0.04)]">
+            <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#dfe7d0] font-heading text-xl font-bold text-[#2a331d]">
+              {item.no}
+            </div>
+            <h3 class="mt-5 font-heading text-xl font-bold leading-tight text-[#221e16]">
+              {item.title}
+            </h3>
+            <p class="mt-3 text-sm leading-6 text-[#4f4a40]">
+              {item.description}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
