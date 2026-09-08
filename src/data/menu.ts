@@ -31,30 +31,33 @@ export const snackTeaserPhotos: SnackTeaserPhoto[] = [
 export const paketMenu: MenuItem[] = [
   {
     id: "paket-20k",
-    title: "Paket 20K",
+    title: "Paket Hemat 20K",
     price: 20000,
-    description: "Ayam goreng, olahan ayam, atau lele goreng dengan tahu, tempe, lalap, dan sambal.",
+    description:
+      "Ayam goreng lengkuas/serundeng, oseng tempe kacang, sambal terasi, dan kerupuk.",
     badges: ["Nasi", "Mulai 20 Box"],
     imageUrl: "/images/menu/paket-20k.jpg",
-    imageAlt: "Ayam goreng paket 20K",
+    imageAlt: "Paket Hemat 20K Dzanis Catering",
   },
   {
     id: "paket-23k",
     title: "Paket 23K",
     price: 23000,
-    description: "Nasi, buah, kerupuk dengan 4 pilihan lauk utama (ayam, nila/mas, olahan daging).",
-    badges: ["Nasi", "Buah", "Kerupuk", "Favorit"],
+    description:
+      "Ayam bakar madu, telur balado 1/2, bakmi goreng gurih, sambal, dan pisang.",
+    badges: ["Nasi", "Pisang", "Kerupuk", "Favorit"],
     imageUrl: "/images/menu/paket-23k.jpg",
-    imageAlt: "Nasi kotak paket 23K",
+    imageAlt: "Paket Favorit 23K Dzanis Catering",
     isPopular: true,
   },
   {
     id: "paket-25k",
-    title: "Paket 25K",
+    title: "Paket Spesial 25K",
     price: 25000,
-    description: "Ayam kampung / negeri, bistik, rolade, rendang lengkap dengan 3 lauk pendamping.",
-    badges: ["Nasi", "Buah", "Kerupuk", "Komplit"],
+    description:
+      "Ayam rica-rica / rolade daging, sambal goreng ati kentang, capcay bakso, dan kerupuk udang.",
+    badges: ["Nasi", "Buah", "Kerupuk Udang", "Spesial"],
     imageUrl: "/images/menu/paket-25k.jpg",
-    imageAlt: "Ikan nila paket 25K",
+    imageAlt: "Paket Spesial 25K Dzanis Catering",
   },
 ];

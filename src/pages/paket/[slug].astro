@@ -1,0 +1,387 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/organic/Navbar.astro';
+import Footer from '../../components/organic/Footer.astro';
+import { DAFTAR_PAKET, type Paket } from '../../data/paket';
+import { waPhoneNumber } from '../../data/company';
+
+export async function getStaticPaths() {
+  return DAFTAR_PAKET.map((paket) => ({
+    params: { slug: paket.slug },
+    props: { paket },
+  }));
+}
+
+interface Props {
+  paket: Paket;
+}
+
+const { paket } = Astro.props;
+
+const pageTitle = `${paket.nama} | Dzanis Catering`;
+const pageDescription = paket.deskripsiSingkat;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <Navbar />
+
+  <main id="konten" class="bg-bg">
+    <!-- Breadcrumb Navigation -->
+    <div class="border-b border-divider bg-surface/50">
+      <div class="mx-auto max-w-[1280px] px-4 py-3 sm:px-6 lg:px-14">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs sm:text-sm text-neutral-600">
+          <a
+            href="/"
+            class="font-medium transition-colors hover:text-accent-700"
+          >
+            Beranda
+          </a>
+          <span class="text-neutral-400" aria-hidden="true">/</span>
+          <a
+            href="/#paket"
+            class="font-medium transition-colors hover:text-accent-700"
+          >
+            Paket Nasi Kotak
+          </a>
+          <span class="text-neutral-400" aria-hidden="true">/</span>
+          <span class="font-semibold text-neutral-900 truncate" aria-current="page">
+            {paket.nama}
+          </span>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Detail Section -->
+    <div class="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12 lg:px-14 lg:py-16">
+      <div class="mb-6">
+        <a
+          href="/#paket"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-accent-700 hover:text-accent-900 transition-colors"
+        >
+          <span aria-hidden="true">&larr;</span>
+          <span>Kembali ke Daftar Paket</span>
+        </a>
+      </div>
+
+      <!-- 2-Column Responsive Breakdown -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        
+        <!-- Left Column: Media & Operational Badges (lg:col-span-5) -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+          <!-- Main Photo Card -->
+          <div class="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden rounded-3xl border border-neutral-200/80 bg-surface shadow-sm">
+            <img
+              src={paket.foto}
+              alt={paket.fotoAlt || paket.nama}
+              loading="eager"
+              decoding="async"
+              class="h-full w-full object-cover"
+            />
+            {paket.badge && (
+              <span class="absolute top-3.5 left-3.5 rounded-full bg-accent px-3 py-1 font-heading text-xs tracking-wider text-white font-bold uppercase shadow-md">
+                {paket.badge}
+              </span>
+            )}
+          </div>
+
+          <!-- Specs Pill Tags -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm">
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                Kemasan
+              </span>
+              <span class="mt-0.5 block text-xs sm:text-sm font-bold text-neutral-900">
+                {paket.kemasan}
+              </span>
+            </div>
+
+            <div class="rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm">
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                Minimum Order
+              </span>
+              <span class="mt-0.5 block text-xs sm:text-sm font-bold text-neutral-900">
+                {paket.minOrder} Porsi / Box
+              </span>
+            </div>
+          </div>
+
+          <!-- Operational Notice Box -->
+          <div class="rounded-2xl border border-neutral-200/90 bg-surface/60 p-5 text-neutral-800">
+            <h4 class="font-heading text-sm font-bold text-neutral-900 mb-3 uppercase tracking-wide">
+              Ketentuan Pemesanan
+            </h4>
+            <ul class="space-y-2 text-xs leading-relaxed text-neutral-700">
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-bold">✓</span>
+                <span><strong>Cutoff H-2 / H-3:</strong> Disarankan memesan minimal H-3 agar persiapan bahan baku optimal.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-bold">✓</span>
+                <span><strong>100% Halal:</strong> Menggunakan bahan pilihan berkualitas dengan dapur higienis rumahan Majalengka.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-bold">✓</span>
+                <span><strong>Area Pengantaran:</strong> Melayani seluruh Ciayumajakuning (Cirebon, Indramayu, Majalengka, Kuningan).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-bold">✓</span>
+                <span><strong>Alat Makan:</strong> Sudah termasuk sendok, tisu, dan tusuk gigi steril dalam setiap box.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right Column: Detail, Composition & Calculator (lg:col-span-7) -->
+        <div class="lg:col-span-7 flex flex-col gap-8">
+          
+          <!-- Header & Price -->
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="rounded-full bg-accent-2-200 text-accent-2-900 px-3 py-0.5 text-xs font-semibold">
+                Nasi Kotak Higienis
+              </span>
+              {paket.badge && (
+                <span class="rounded-full bg-accent/10 text-accent px-3 py-0.5 text-xs font-bold uppercase tracking-wider">
+                  {paket.badge}
+                </span>
+              )}
+            </div>
+
+            <h1 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight">
+              {paket.nama}
+            </h1>
+
+            <div class="mt-3 flex items-baseline gap-2">
+              <span class="font-heading text-xl text-neutral-500 font-semibold">Rp</span>
+              <span class="font-heading text-3xl sm:text-4xl font-bold text-accent-700 leading-none">
+                {paket.harga.toLocaleString("id-ID")}
+              </span>
+              <span class="text-sm font-medium text-neutral-600">/ porsi</span>
+            </div>
+
+            <p class="mt-4 text-sm sm:text-base text-neutral-700 leading-relaxed">
+              {paket.deskripsiLengkap}
+            </p>
+
+            <!-- Tags -->
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              {paket.tags.map((tag) => (
+                <span class="inline-flex items-center rounded-full bg-white border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-800 shadow-2xs">
+                  ✓ {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <!-- Structured Menu Breakdown -->
+          <div class="border-t border-divider pt-6">
+            <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900 mb-4">
+              Komposisi & Menu Sajian
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Menu Utama -->
+              <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
+                <div class="flex items-center gap-2 mb-2.5">
+                  <span class="text-base" aria-hidden="true">🍗</span>
+                  <h4 class="font-heading text-xs font-bold uppercase tracking-wider text-neutral-900">
+                    Menu Utama
+                  </h4>
+                </div>
+                <ul class="space-y-1.5 text-xs sm:text-sm text-neutral-700">
+                  {paket.menuUtama.map((item) => (
+                    <li class="flex items-start gap-2">
+                      <span class="text-accent font-bold flex-none">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <!-- Lauk Pendamping -->
+              <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
+                <div class="flex items-center gap-2 mb-2.5">
+                  <span class="text-base" aria-hidden="true">🥗</span>
+                  <h4 class="font-heading text-xs font-bold uppercase tracking-wider text-neutral-900">
+                    Lauk Pendamping
+                  </h4>
+                </div>
+                <ul class="space-y-1.5 text-xs sm:text-sm text-neutral-700">
+                  {paket.laukPendamping.map((item) => (
+                    <li class="flex items-start gap-2">
+                      <span class="text-accent font-bold flex-none">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <!-- Sambal & Lalapan -->
+              <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
+                <div class="flex items-center gap-2 mb-2.5">
+                  <span class="text-base" aria-hidden="true">🌶️</span>
+                  <h4 class="font-heading text-xs font-bold uppercase tracking-wider text-neutral-900">
+                    Sambal & Lalapan
+                  </h4>
+                </div>
+                <ul class="space-y-1.5 text-xs sm:text-sm text-neutral-700">
+                  {paket.sambalLalapan.map((item) => (
+                    <li class="flex items-start gap-2">
+                      <span class="text-accent font-bold flex-none">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <!-- Pelengkap -->
+              <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
+                <div class="flex items-center gap-2 mb-2.5">
+                  <span class="text-base" aria-hidden="true">🍱</span>
+                  <h4 class="font-heading text-xs font-bold uppercase tracking-wider text-neutral-900">
+                    Pelengkap & Kemasan
+                  </h4>
+                </div>
+                <ul class="space-y-1.5 text-xs sm:text-sm text-neutral-700">
+                  {paket.pelengkap.map((item) => (
+                    <li class="flex items-start gap-2">
+                      <span class="text-accent font-bold flex-none">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Portion Calculator -->
+          <div class="rounded-3xl border border-neutral-200 bg-surface/50 p-6 sm:p-7 shadow-sm">
+            <div class="mb-5">
+              <h3 class="font-heading text-xl font-bold text-neutral-900">
+                Kalkulator Porsi & Pemesanan
+              </h3>
+              <p class="text-xs sm:text-sm text-neutral-600 mt-1">
+                Tentukan jumlah porsi yang dibutuhkan untuk menghitung estimasi biaya dan membuat format pesan WhatsApp otomatis.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+              <!-- Input Porsi -->
+              <div class="sm:col-span-5">
+                <label for="portion-input" class="block text-xs font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
+                  Jumlah Porsi (Min. {paket.minOrder})
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="portion-input"
+                    min={paket.minOrder}
+                    step="5"
+                    value={paket.minOrder}
+                    class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-base sm:text-lg font-bold text-neutral-900 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition shadow-2xs"
+                  />
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-neutral-500 pointer-events-none">
+                    porsi
+                  </span>
+                </div>
+              </div>
+
+              <!-- Live Subtotal Display -->
+              <div class="sm:col-span-7 rounded-2xl border border-neutral-200 bg-white p-3.5 sm:p-4 shadow-2xs flex flex-col justify-center">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                  Estimasi Total Biaya:
+                </span>
+                <span
+                  id="subtotal-display"
+                  class="font-heading text-2xl sm:text-3xl font-bold text-accent-700 leading-none mt-1"
+                >
+                  Rp {(paket.harga * paket.minOrder).toLocaleString("id-ID")}
+                </span>
+              </div>
+            </div>
+
+            <!-- Dynamic WhatsApp Checkout Button -->
+            <div class="mt-5">
+              <a
+                id="wa-checkout-btn"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex w-full items-center justify-center gap-2.5 rounded-full bg-accent py-3.5 px-6 text-sm font-bold uppercase tracking-wider text-white shadow-md hover:bg-accent-700 transition duration-200"
+              >
+                <svg class="size-5 flex-none" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 016.988 2.896 9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                <span>Pesan Sekarang via WhatsApp</span>
+              </a>
+              <p class="mt-2 text-center text-xs text-neutral-500">
+                Format pesan WhatsApp akan otomatis terisi dengan rincian paket dan jumlah porsi.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<!-- Client Script: Inline Vanilla Calculator with Defensive Handling & View Transitions -->
+<script is:inline define:vars={{ basePrice: paket.harga, packageName: paket.nama, minOrder: paket.minOrder, phone: waPhoneNumber }}>
+  function initPortionCalculator() {
+    const input = document.getElementById('portion-input');
+    const display = document.getElementById('subtotal-display');
+    const btn = document.getElementById('wa-checkout-btn');
+
+    if (!input || !display || !btn) return;
+
+    function calculateClampedQty() {
+      let rawVal = parseInt(input.value, 10);
+      // Defensive Handling: Tangani null, empty, NaN, atau angka di bawah minOrder
+      if (isNaN(rawVal) || rawVal < minOrder) {
+        return minOrder;
+      }
+      return rawVal;
+    }
+
+    function updateCheckout() {
+      const qty = calculateClampedQty();
+      const total = qty * basePrice;
+
+      // Update Tampilan Subtotal
+      display.textContent = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+      }).format(total);
+
+      // Strict URL Encoding untuk Pesan WhatsApp
+      const rawMessage = `Halo Dzanis Catering, saya ingin memesan *${packageName}* sebanyak *${qty} porsi*.\nTotal estimasi: Rp ${total.toLocaleString('id-ID')}.\nMohon info ketersediaan slot tanggal [Isi Tanggal Acara].`;
+      btn.href = `https://wa.me/${phone}?text=${encodeURIComponent(rawMessage)}`;
+    }
+
+    input.addEventListener('input', updateCheckout);
+    
+    // Reset visual value pada input jika user mengosongkan / memasukkan nilai di bawah batas minimum
+    input.addEventListener('blur', () => {
+      let val = parseInt(input.value, 10);
+      if (isNaN(val) || val < minOrder) {
+        input.value = minOrder.toString();
+        updateCheckout();
+      }
+    });
+
+    // Jalankan segera saat inisialisasi
+    updateCheckout();
+  }
+
+  // Initial Load & Astro View Transitions Support
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPortionCalculator);
+  } else {
+    initPortionCalculator();
+  }
+  document.addEventListener('astro:page-load', initPortionCalculator);
+</script>

@@ -1,0 +1,117 @@
+---
+import { DAFTAR_LAYANAN_LAIN } from '../../data/layananLain';
+import { waPhoneNumber } from '../../data/company';
+
+const phone = waPhoneNumber || "6281324383858";
+---
+
+<section id="layanan" class="py-14 md:py-20 bg-surface/30">
+  <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-14">
+    <!-- Header Seksi -->
+    <div class="flex flex-col gap-2 max-w-2xl">
+      <h2 class="font-serif font-bold tracking-wide text-3xl md:text-5xl text-neutral-900 uppercase">
+        Layanan Lain
+      </h2>
+      <p class="text-sm md:text-base text-neutral-700 leading-relaxed">
+        Di luar nasi kotak dan snack box, kami juga menangani acara berskala besar dengan fasilitas lengkap.
+      </p>
+    </div>
+
+    <!-- 3-Card Responsive Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-10">
+      {DAFTAR_LAYANAN_LAIN.map((item) => {
+        const rawMessage = `Halo Dzanis Catering, saya ingin konsultasi penawaran untuk layanan *${item.nama}*.\n\nDetail Rencana Acara:\n- Perkiraan Jumlah: [Isi pax / porsi]\n- Tanggal Acara: [Isi tanggal]\n- Lokasi Acara: [Isi kota/daerah]\n\nMohon informasi ketersediaan slot dan katalog lengkapnya.`;
+        const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(rawMessage)}`;
+
+        return (
+          <article class="bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col justify-between transition-shadow duration-200 hover:shadow-md">
+            <!-- Top Image with Floating Badge -->
+            <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
+              <img
+                src={item.foto}
+                alt={item.fotoAlt}
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+              />
+              {item.badge && (
+                <span class="absolute top-3.5 left-3.5 rounded-full bg-[#C04A27] px-3 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
+                  {item.badge}
+                </span>
+              )}
+            </div>
+
+            <!-- Card Content Body -->
+            <div class="p-5 md:p-6 flex flex-1 flex-col justify-between">
+              <div>
+                <!-- Title & Description -->
+                <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1.5">
+                  {item.nama}
+                </h3>
+                <p class="text-xs sm:text-sm text-neutral-600 leading-relaxed mb-4">
+                  {item.deskripsi}
+                </p>
+
+                <!-- Pricing & MoQ Header -->
+                <div class="mb-4">
+                  <p class="flex items-baseline gap-1.5 text-neutral-900">
+                    <span class="text-xs font-semibold text-neutral-500">Mulai</span>
+                    <span class="text-2xl font-bold font-heading text-neutral-900">
+                      {item.headlineHarga}
+                    </span>
+                    <span class="text-xs text-neutral-500 font-normal">
+                      {item.satuanHarga}
+                    </span>
+                  </p>
+                  <span class="inline-block bg-neutral-100 text-neutral-700 text-xs font-semibold px-2.5 py-1 rounded-full w-fit mt-2">
+                    {item.minOrder}
+                  </span>
+                </div>
+
+                <!-- Facility Inclusion List -->
+                <div class="border-t border-neutral-100 pt-3.5 mb-2">
+                  <span class="block text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-2">
+                    Fasilitas Termasuk:
+                  </span>
+                  <ul class="text-xs text-neutral-600 space-y-1.5">
+                    {item.fasilitas.map((f) => (
+                      <li class="flex items-start gap-2">
+                        <span class="text-[#C04A27] font-bold flex-none">✓</span>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <!-- Native Accordion for Menu Highlights (Zero JS) -->
+                <details class="group border-t border-neutral-100 pt-3 mt-4">
+                  <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                    <span>Contoh Menu Pilihan ({item.menuHighlight.length})</span>
+                    <span class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
+                  </summary>
+                  <ul class="mt-2 space-y-1 text-xs text-neutral-600 pl-2">
+                    {item.menuHighlight.map((m) => (
+                      <li>• {m}</li>
+                    ))}
+                  </ul>
+                </details>
+              </div>
+
+              <!-- Primary CTA Button with URL-Encoded WhatsApp Payload -->
+              <div class="mt-6 pt-2">
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex w-full items-center justify-center gap-2 text-center py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition duration-200 shadow-xs"
+                >
+                  KONSULTASI / MINTA PENAWARAN
+                </a>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>

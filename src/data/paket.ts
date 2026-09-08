@@ -1,97 +1,150 @@
 /**
- * Tiga paket nasi kotak Dzanis Catering.
+ * Data Layer: Paket Nasi Kotak Dzanis Catering
+ * Berisi definisi tipe eksplisit Paket dan dataset DAFTAR_PAKET.
  */
 
-export type Paket = {
+export interface Paket {
   id: string;
+  slug: string;
   nama: string;
   harga: number;
-  /** Ringkasan satu baris, dipakai di baris harga versi web. */
-  ringkas: string;
-  /** Yang sudah termasuk dalam harga — tampil sebagai tag centang. */
-  sudahTermasuk: string[];
-  /** Pilihan lauk utama; keterangan tampil lebih redup di sebelah nama. */
-  lauk: { nama: string; ket: string }[];
-  /** Daftar lauk pendamping yang bisa dibuka-tutup. */
-  pendamping: string[];
+  minOrder: number;
+  badge?: string | null;
+  kemasan: string;
+  tags: string[];
+  deskripsiSingkat: string;
+  deskripsiLengkap: string;
+  menuUtama: string[];
+  laukPendamping: string[];
+  sambalLalapan: string[];
+  pelengkap: string[];
   foto: string;
-  fotoAlt: string;
+  fotoAlt?: string;
+  // Properti kompatibilitas tambahan
+  ringkas?: string;
   populer?: boolean;
-};
+}
 
-const PENDAMPING_8 = [
-  "Tumis labu",
-  "Mie goreng",
-  "Bihun goreng",
-  "Soun",
-  "Capcay",
-  "Tempe kering",
-  "Tempe basah",
-  "Acar kuning",
-];
-
-const PENDAMPING_14 = [
-  ...PENDAMPING_8,
-  "Tumis buncis baso",
-  "Sambal goreng cabe",
-  "Sambal goreng kentang",
-  "Bakwan jagung",
-  "Tahu isi",
-  "Sayur asem",
-];
-
-export const paket: Paket[] = [
+export const DAFTAR_PAKET: Paket[] = [
   {
-    id: "20k",
-    nama: "Paket 20K",
+    id: "paket-hemat-20k",
+    slug: "paket-hemat-20k",
+    nama: "Paket Hemat 20K",
     harga: 20000,
-    ringkas: "Ayam goreng · olahan ayam · lele goreng",
-    sudahTermasuk: ["Nasi"],
-    lauk: [
-      { nama: "Ayam Goreng", ket: "tahu & tempe, sambal, lalapan" },
-      { nama: "Olahan Ayam", ket: "2 lauk pendamping" },
-      { nama: "Ikan Lele Goreng", ket: "tahu & tempe, sambal, lalapan" },
+    minOrder: 20,
+    badge: null,
+    kemasan: "Box Kraft 18x18 cm",
+    tags: ["Nasi Pulen", "Sambal Terasi", "Kerupuk"],
+    deskripsiSingkat:
+      "Pilihan hemat praktis untuk konsumsi pengajian, syukuran, atau rapat internal.",
+    deskripsiLengkap:
+      "Pilihan hemat dan praktis untuk berbagai kebutuhan acara seperti pengajian, syukuran, dan rapat internal. Setiap porsi dikemas higienis menggunakan box kraft ramah lingkungan, lengkap dengan alat makan steril dan lauk pauk berkualitas yang diolah secara higienis.",
+    menuUtama: [
+      "Ayam Goreng Serundeng Lengkuas",
+      "Tahu & Tempe Goreng Gurih",
     ],
-    pendamping: PENDAMPING_8,
+    laukPendamping: [
+      "Oseng Kacang Panjang Tempe",
+      "Bihun Goreng Sayur",
+      "Tumis Buncis Jagung",
+      "Capcay Gurih",
+    ],
+    sambalLalapan: [
+      "Sambal Terasi Matang",
+      "Lalapan Timun Segar",
+    ],
+    pelengkap: [
+      "Nasi Putih Pulen",
+      "Kerupuk Bawang",
+      "Air Mineral Cup",
+      "Sendok & Tisu Steril",
+    ],
     foto: "/images/menu/paket-20k.jpg",
-    fotoAlt: "Ayam goreng paket 20K",
+    fotoAlt: "Paket Hemat 20K Dzanis Catering",
+    ringkas:
+      "Ayam goreng serundeng · tahu tempe · oseng kacang panjang · sambal terasi · kerupuk",
+    populer: false,
   },
   {
-    id: "23k",
-    nama: "Paket 23K",
+    id: "paket-favorit-23k",
+    slug: "paket-favorit-23k",
+    nama: "Paket Favorit 23K",
     harga: 23000,
-    ringkas: "Nasi, buah & kerupuk · 4 pilihan lauk utama",
-    sudahTermasuk: ["Nasi", "Buah", "Kerupuk"],
-    lauk: [
-      { nama: "Ayam Goreng", ket: "tahu & tempe, sambal, lalapan" },
-      { nama: "Ikan Nila / Mas", ket: "tahu & tempe, sambal, lalapan" },
-      { nama: "Olahan Ayam", ket: "2 lauk pendamping" },
-      { nama: "Olahan Daging / Rolade", ket: "2 lauk pendamping" },
+    minOrder: 20,
+    badge: "PALING SERING DIPESAN",
+    kemasan: "Box Bento Sekat 4",
+    tags: ["Nasi Pulen", "Telur Balado 1/2", "Pisang", "Kerupuk"],
+    deskripsiSingkat:
+      "Kombinasi dua protein dengan buah pencuci mulut, menu terfavorit untuk seminar dan instansi.",
+    deskripsiLengkap:
+      "Pilihan terfavorit yang paling sering dipesan untuk kebutuhan seminar, workshop instansi, dan acara korporat. Mengombinasikan dua varian protein lezat dengan pelengkap buah pisang segar serta disajikan rapi dalam kemasan bento bersekat higienis.",
+    menuUtama: [
+      "Ayam Bakar Madu / Ayam Goreng Lengkuas",
+      "Telur Balado 1/2 Butir",
     ],
-    pendamping: PENDAMPING_14,
+    laukPendamping: [
+      "Bakmi Goreng Gurih",
+      "Capcay Bakso Sayur",
+      "Sambal Goreng Kentang",
+      "Tempe Orek Manis Gurih",
+    ],
+    sambalLalapan: [
+      "Sambal Bajak / Sambal Terasi",
+      "Lalapan Segar",
+    ],
+    pelengkap: [
+      "Nasi Putih Pulen",
+      "Buah Pisang Segar",
+      "Kerupuk Renyah",
+      "Air Mineral Cup",
+      "Sendok & Tisu Steril",
+    ],
     foto: "/images/menu/paket-23k.jpg",
-    fotoAlt: "Nasi kotak paket 23K",
+    fotoAlt: "Paket Favorit 23K Dzanis Catering",
+    ringkas:
+      "Ayam bakar madu · telur balado 1/2 · bakmi goreng gurih · sambal · pisang",
     populer: true,
   },
   {
-    id: "25k",
-    nama: "Paket 25K",
+    id: "paket-spesial-25k",
+    slug: "paket-spesial-25k",
+    nama: "Paket Spesial 25K",
     harga: 25000,
-    ringkas: "Ayam kampung · rolade, bistik, rendang · 3 lauk",
-    sudahTermasuk: ["Nasi", "Buah", "Kerupuk"],
-    lauk: [
-      {
-        nama: "Ayam Goreng",
-        ket: "pilihan kampung / negeri, tahu & tempe, sambal, lalapan",
-      },
-      { nama: "Ikan Mas / Nila", ket: "tahu & tempe, sambal, lalapan" },
-      {
-        nama: "Olahan Ayam / Daging",
-        ket: "rolade, bistik, rendang, 3 lauk pendamping",
-      },
+    minOrder: 20,
+    badge: null,
+    kemasan: "Box Exclusive Laminasi 20x20 cm",
+    tags: ["Nasi Pulen", "Sambal Goreng Ati", "Buah Segar", "Kerupuk Udang"],
+    deskripsiSingkat:
+      "Paket hidangan premium lengkap dengan variasi olahan hewani dan hidangan penutup acara resmi.",
+    deskripsiLengkap:
+      "Sajian istimewa kelas premium untuk acara resmi, jamuan tamu kehormatan, arisan besar, dan hajatan keluarga. Dikemas dalam box eksklusif laminasi berukuran 20x20 cm dengan lauk pauk olahan daging dan ayam rica, sambal goreng ati kentang, serta kerupuk udang renyah.",
+    menuUtama: [
+      "Rolade Daging Sapi Olahan / Ayam Rica Kemangi",
+      "Telur Balado Bumbu Merah",
     ],
-    pendamping: PENDAMPING_14,
+    laukPendamping: [
+      "Sambal Goreng Ati Kentang",
+      "Capcay Bakso Sosis",
+      "Mie Goreng Spesial",
+      "Tumis Buncis Jagung Manis",
+    ],
+    sambalLalapan: [
+      "Sambal Goreng Cabe Merah",
+      "Lalapan Timun & Kemangi",
+    ],
+    pelengkap: [
+      "Nasi Putih Pulen",
+      "Kerupuk Udang",
+      "Buah Segar / Puding Cup",
+      "Air Mineral Cup",
+      "Sendok, Tusuk Gigi & Tisu Steril",
+    ],
     foto: "/images/menu/paket-25k.jpg",
-    fotoAlt: "Ikan nila paket 25K",
+    fotoAlt: "Paket Spesial 25K Dzanis Catering",
+    ringkas:
+      "Ayam rica-rica / rolade daging · sambal goreng ati kentang · capcay bakso · kerupuk udang",
+    populer: false,
   },
 ];
+
+export const paket = DAFTAR_PAKET;
