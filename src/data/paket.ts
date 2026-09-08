@@ -20,15 +20,12 @@ export interface Paket {
   pelengkap: string[];
   foto: string;
   fotoAlt?: string;
-<<<<<<< HEAD
-=======
   // Menu selection configuration
   canSelectMainMenu?: boolean;
   selectableMainMenus?: string[];
   selectableSideDishes?: string[];
   sideDishesSelectMin?: number;
   sideDishesSelectMax?: number;
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
   // Properti kompatibilitas tambahan
   ringkas?: string;
   populer?: boolean;
@@ -70,8 +67,6 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     foto: "/images/menu/paket-20k.jpg",
     fotoAlt: "Paket Hemat 20K Dzanis Catering",
-<<<<<<< HEAD
-=======
     // Menu selection
     canSelectMainMenu: true,
     selectableMainMenus: [
@@ -86,7 +81,6 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     sideDishesSelectMin: 2,
     sideDishesSelectMax: 3,
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     ringkas:
       "Ayam goreng serundeng · tahu tempe · oseng kacang panjang · sambal terasi · kerupuk",
     populer: false,
@@ -127,8 +121,6 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     foto: "/images/menu/paket-23k.jpg",
     fotoAlt: "Paket Favorit 23K Dzanis Catering",
-<<<<<<< HEAD
-=======
     // Menu selection
     canSelectMainMenu: true,
     selectableMainMenus: [
@@ -144,7 +136,6 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     sideDishesSelectMin: 2,
     sideDishesSelectMax: 3,
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     ringkas:
       "Ayam bakar madu · telur balado 1/2 · bakmi goreng gurih · sambal · pisang",
     populer: true,
@@ -185,8 +176,6 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     foto: "/images/menu/paket-25k.jpg",
     fotoAlt: "Paket Spesial 25K Dzanis Catering",
-<<<<<<< HEAD
-=======
     // Menu selection
     canSelectMainMenu: true,
     selectableMainMenus: [
@@ -202,7 +191,6 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     sideDishesSelectMin: 2,
     sideDishesSelectMax: 3,
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     ringkas:
       "Ayam rica-rica / rolade daging · sambal goreng ati kentang · capcay bakso · kerupuk udang",
     populer: false,

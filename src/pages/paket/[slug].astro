@@ -21,6 +21,14 @@ const { slug } = Astro.params;
 
 const pageTitle = `${paket.nama} | Dzanis Catering`;
 const pageDescription = paket.deskripsiSingkat;
+
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const minEventDateString = [
+  tomorrow.getFullYear(),
+  String(tomorrow.getMonth() + 1).padStart(2, '0'),
+  String(tomorrow.getDate()).padStart(2, '0'),
+].join('-');
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
@@ -166,17 +174,9 @@ const pageDescription = paket.deskripsiSingkat;
       </nav>
 
       <!-- 2-Column Responsive Breakdown -->
-<<<<<<< HEAD
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        
         <!-- Left Column: Media & Operational Badges (lg:col-span-5) -->
         <div class="lg:col-span-5 flex flex-col gap-6">
-=======
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-        
-        <!-- Left Column: Media & Composition (lg:col-span-1) -->
-        <div class="flex flex-col gap-6">
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
           <!-- Main Photo Card -->
           <div class="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden rounded-3xl border border-neutral-200/80 bg-surface shadow-sm">
             <img
@@ -214,7 +214,6 @@ const pageDescription = paket.deskripsiSingkat;
             </div>
           </div>
 
-<<<<<<< HEAD
           <!-- Operational Notice Box -->
           <div class="rounded-2xl border border-neutral-200/90 bg-surface/60 p-5 text-neutral-800">
             <h4 class="font-heading text-sm font-bold text-neutral-900 mb-3 uppercase tracking-wide">
@@ -241,9 +240,8 @@ const pageDescription = paket.deskripsiSingkat;
           </div>
         </div>
 
-        <!-- Right Column: Detail, Composition & Calculator (lg:col-span-7) -->
+        <!-- Right Column: Detail, Composition, Menu Selection & Calculator (lg:col-span-7) -->
         <div class="lg:col-span-7 flex flex-col gap-8">
-          
           <!-- Header & Price -->
           <div>
             <div class="flex flex-wrap items-center gap-2 mb-2">
@@ -273,7 +271,6 @@ const pageDescription = paket.deskripsiSingkat;
               {paket.deskripsiLengkap}
             </p>
 
-            <!-- Tags -->
             <div class="mt-4 flex flex-wrap gap-1.5">
               {paket.tags.map((tag) => (
                 <span class="inline-flex items-center rounded-full bg-white border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-800 shadow-2xs">
@@ -283,8 +280,6 @@ const pageDescription = paket.deskripsiSingkat;
             </div>
           </div>
 
-=======
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
           <!-- Structured Menu Breakdown -->
           <div class="border-t border-divider pt-6">
             <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900 mb-4">
@@ -292,7 +287,6 @@ const pageDescription = paket.deskripsiSingkat;
             </h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Menu Utama -->
               <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
                 <div class="flex items-center gap-2 mb-2.5">
                   <span class="text-base" aria-hidden="true">🍗</span>
@@ -310,7 +304,6 @@ const pageDescription = paket.deskripsiSingkat;
                 </ul>
               </div>
 
-              <!-- Lauk Pendamping -->
               <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
                 <div class="flex items-center gap-2 mb-2.5">
                   <span class="text-base" aria-hidden="true">🥗</span>
@@ -328,7 +321,6 @@ const pageDescription = paket.deskripsiSingkat;
                 </ul>
               </div>
 
-              <!-- Sambal & Lalapan -->
               <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
                 <div class="flex items-center gap-2 mb-2.5">
                   <span class="text-base" aria-hidden="true">🌶️</span>
@@ -346,7 +338,6 @@ const pageDescription = paket.deskripsiSingkat;
                 </ul>
               </div>
 
-              <!-- Pelengkap -->
               <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
                 <div class="flex items-center gap-2 mb-2.5">
                   <span class="text-base" aria-hidden="true">🍱</span>
@@ -366,77 +357,6 @@ const pageDescription = paket.deskripsiSingkat;
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-          <!-- Operational Notice Box -->
-          <div class="rounded-2xl border border-neutral-200/90 bg-surface/60 p-5 text-neutral-800">
-            <h4 class="font-heading text-sm font-bold text-neutral-900 mb-3 uppercase tracking-wide">
-              Ketentuan Pemesanan
-            </h4>
-            <ul class="space-y-2 text-xs leading-relaxed text-neutral-700">
-              <li class="flex items-start gap-2">
-                <span class="text-accent font-bold">✓</span>
-                <span><strong>Cutoff H-2 / H-3:</strong> Disarankan memesan minimal H-3 agar persiapan bahan baku optimal.</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-accent font-bold">✓</span>
-                <span><strong>100% Halal:</strong> Menggunakan bahan pilihan berkualitas dengan dapur higienis rumahan Majalengka.</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-accent font-bold">✓</span>
-                <span><strong>Area Pengantaran:</strong> Melayani seluruh Ciayumajakuning (Cirebon, Indramayu, Majalengka, Kuningan).</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-accent font-bold">✓</span>
-                <span><strong>Alat Makan:</strong> Sudah termasuk sendok, tisu, dan tusuk gigi steril dalam setiap box.</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Right Column: Detail, Menu Selection & Calculator (lg:col-span-1) -->
-        <div class="flex flex-col gap-8">
-          
-          <!-- Header & Price -->
-          <div>
-            <div class="flex flex-wrap items-center gap-2 mb-2">
-              <span class="rounded-full bg-accent-2-200 text-accent-2-900 px-3 py-0.5 text-xs font-semibold">
-                Nasi Kotak Higienis
-              </span>
-              {paket.badge && (
-                <span class="rounded-full bg-accent/10 text-accent px-3 py-0.5 text-xs font-bold uppercase tracking-wider">
-                  {paket.badge}
-                </span>
-              )}
-            </div>
-
-            <h1 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight">
-              {paket.nama}
-            </h1>
-
-            <div class="mt-3 flex items-baseline gap-2">
-              <span class="font-heading text-xl text-neutral-500 font-semibold">Rp</span>
-              <span class="font-heading text-3xl sm:text-4xl font-bold text-accent-700 leading-none">
-                {paket.harga.toLocaleString("id-ID")}
-              </span>
-              <span class="text-sm font-medium text-neutral-600">/ porsi</span>
-            </div>
-
-            <p class="mt-4 text-sm sm:text-base text-neutral-700 leading-relaxed">
-              {paket.deskripsiLengkap}
-            </p>
-
-            <!-- Tags -->
-            <div class="mt-4 flex flex-wrap gap-1.5">
-              {paket.tags.map((tag) => (
-                <span class="inline-flex items-center rounded-full bg-white border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-800 shadow-2xs">
-                  ✓ {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Menu Selection Section - Only show if canSelectMainMenu is true */}
           {paket.canSelectMainMenu && paket.selectableMainMenus && paket.selectableSideDishes && (
             <div class="border-t border-divider pt-6">
               <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900 mb-5">
@@ -444,7 +364,6 @@ const pageDescription = paket.deskripsiSingkat;
               </h3>
 
               <div class="space-y-6">
-                {/* Main Menu Selection */}
                 <div>
                   <label class="block text-sm font-bold text-neutral-900 mb-3">
                     🍗 Pilih Menu Utama
@@ -468,7 +387,6 @@ const pageDescription = paket.deskripsiSingkat;
                   </div>
                 </div>
 
-                {/* Side Dishes Selection */}
                 <div>
                   <div class="flex items-center justify-between mb-3">
                     <label class="block text-sm font-bold text-neutral-900">
@@ -501,7 +419,6 @@ const pageDescription = paket.deskripsiSingkat;
                   </p>
                 </div>
 
-                {/* Selection Summary Card */}
                 <div class="rounded-2xl border border-accent/20 bg-accent/5 p-4">
                   <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2">
                     Ringkasan Pilihan Anda:
@@ -519,7 +436,6 @@ const pageDescription = paket.deskripsiSingkat;
             </div>
           )}
 
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
           <!-- Interactive Portion Calculator -->
           <div class="rounded-3xl border border-neutral-200 bg-surface/50 p-6 sm:p-7 shadow-sm">
             <div class="mb-5">
@@ -532,7 +448,6 @@ const pageDescription = paket.deskripsiSingkat;
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
-              <!-- Input Porsi -->
               <div class="sm:col-span-5">
                 <label for="portion-input" class="block text-xs font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
                   Jumlah Porsi (Min. {paket.minOrder})
@@ -552,7 +467,6 @@ const pageDescription = paket.deskripsiSingkat;
                 </div>
               </div>
 
-              <!-- Live Subtotal Display -->
               <div class="sm:col-span-7 rounded-2xl border border-neutral-200 bg-white p-3.5 sm:p-4 shadow-2xs flex flex-col justify-center">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
                   Estimasi Total Biaya:
@@ -566,9 +480,6 @@ const pageDescription = paket.deskripsiSingkat;
               </div>
             </div>
 
-<<<<<<< HEAD
-=======
-            <!-- Tanggal Acara Input -->
             <div class="mt-4">
               <label for="event-date-input" class="block text-xs font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
                 Tanggal Acara
@@ -576,6 +487,8 @@ const pageDescription = paket.deskripsiSingkat;
               <input
                 type="date"
                 id="event-date-input"
+                min={minEventDateString}
+                required
                 class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-base font-medium text-neutral-900 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition shadow-2xs"
               />
               <p class="text-xs text-neutral-500 mt-2">
@@ -583,8 +496,6 @@ const pageDescription = paket.deskripsiSingkat;
               </p>
             </div>
 
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
-            <!-- Dynamic WhatsApp Checkout Button -->
             <div class="mt-5">
               <a
                 id="wa-checkout-btn"
@@ -598,11 +509,6 @@ const pageDescription = paket.deskripsiSingkat;
                 </svg>
                 <span>Pesan Sekarang via WhatsApp</span>
               </a>
-<<<<<<< HEAD
-              <p class="mt-2 text-center text-xs text-neutral-500">
-                Format pesan WhatsApp akan otomatis terisi dengan rincian paket dan jumlah porsi.
-              </p>
-=======
               {paket.canSelectMainMenu && (
                 <p class="mt-2 text-center text-xs text-neutral-500" id="validation-message">
                   Pastikan Anda telah memilih menu dan lauk pendamping sebelum memesan.
@@ -613,10 +519,8 @@ const pageDescription = paket.deskripsiSingkat;
                   Format pesan WhatsApp akan otomatis terisi dengan rincian paket dan jumlah porsi.
                 </p>
               )}
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -625,56 +529,35 @@ const pageDescription = paket.deskripsiSingkat;
   <Footer />
 </BaseLayout>
 
-<<<<<<< HEAD
-<!-- Client Script: Inline Vanilla Calculator with Defensive Handling & View Transitions -->
-<script is:inline define:vars={{ basePrice: paket.harga, packageName: paket.nama, minOrder: paket.minOrder, phone: waPhoneNumber }}>
-=======
-<!-- Client Script: Inline Vanilla Calculator with Menu Selection & Defensive Handling -->
-<script is:inline define:vars={{ basePrice: paket.harga, packageName: paket.nama, minOrder: paket.minOrder, phone: waPhoneNumber, hasMenuSelection: paket.canSelectMainMenu, sideDishesMin: paket.sideDishesSelectMin, sideDishesMax: paket.sideDishesSelectMax }}>
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
+<script is:inline define:vars={{ basePrice: paket.harga, packageName: paket.nama, minOrder: paket.minOrder, phone: waPhoneNumber, hasMenuSelection: Boolean(paket.canSelectMainMenu), sideDishesMin: paket.sideDishesSelectMin ?? 0, sideDishesMax: paket.sideDishesSelectMax ?? 0 }}>
   function initPortionCalculator() {
     const input = document.getElementById('portion-input');
     const display = document.getElementById('subtotal-display');
     const btn = document.getElementById('wa-checkout-btn');
-<<<<<<< HEAD
-
-    if (!input || !display || !btn) return;
-
-    function calculateClampedQty() {
-      let rawVal = parseInt(input.value, 10);
-      // Defensive Handling: Tangani null, empty, NaN, atau angka di bawah minOrder
-=======
     const eventDateInput = document.getElementById('event-date-input');
 
     if (!input || !display || !btn) return;
 
-    // Menu Selection State
     let selectedMainMenu = null;
     let selectedSideDishes = [];
     let selectedEventDate = null;
 
     function calculateClampedQty() {
       let rawVal = parseInt(input.value, 10);
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
       if (isNaN(rawVal) || rawVal < minOrder) {
         return minOrder;
       }
       return rawVal;
     }
 
-<<<<<<< HEAD
-=======
-    // Initialize Menu Selection Handlers
     if (hasMenuSelection) {
       const mainMenuRadios = document.querySelectorAll('input[name="main-menu"]');
       const sideDishCheckboxes = document.querySelectorAll('input[name="side-dishes"]');
 
-      // Set initial state
       if (mainMenuRadios.length > 0) {
         selectedMainMenu = mainMenuRadios[0].value;
       }
 
-      // Main Menu Radio Handler
       mainMenuRadios.forEach((radio) => {
         radio.addEventListener('change', (e) => {
           if (e.target.checked) {
@@ -685,27 +568,22 @@ const pageDescription = paket.deskripsiSingkat;
         });
       });
 
-      // Side Dishes Checkbox Handler
       sideDishCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', (e) => {
-          const minSelections = parseInt(e.target.dataset.min, 10);
           const maxSelections = parseInt(e.target.dataset.max, 10);
           const allCheckboxes = document.querySelectorAll('input[name="side-dishes"]');
           const checkedCount = Array.from(allCheckboxes).filter(cb => cb.checked).length;
 
-          // Validate constraints
           if (e.target.checked && checkedCount > maxSelections) {
             e.target.checked = false;
             alert(`Maksimal pilihan adalah ${maxSelections} lauk pendamping`);
             return;
           }
 
-          // Update selected side dishes
           selectedSideDishes = Array.from(allCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.value);
 
-          // Update counter
           const sideCount = document.getElementById('side-count');
           if (sideCount) {
             sideCount.textContent = `${checkedCount} / ${maxSelections} pilihan`;
@@ -716,7 +594,6 @@ const pageDescription = paket.deskripsiSingkat;
         });
       });
 
-      // Set first menu as selected by default
       if (mainMenuRadios.length > 0) {
         mainMenuRadios[0].checked = true;
       }
@@ -775,28 +652,16 @@ const pageDescription = paket.deskripsiSingkat;
       return { valid: true };
     }
 
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
     function updateCheckout() {
       const qty = calculateClampedQty();
       const total = qty * basePrice;
 
-      // Update Tampilan Subtotal
       display.textContent = new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
-        maximumFractionDigits: 0
+        maximumFractionDigits: 0,
       }).format(total);
 
-<<<<<<< HEAD
-      // Strict URL Encoding untuk Pesan WhatsApp
-      const rawMessage = `Halo Dzanis Catering, saya ingin memesan *${packageName}* sebanyak *${qty} porsi*.\nTotal estimasi: Rp ${total.toLocaleString('id-ID')}.\nMohon info ketersediaan slot tanggal [Isi Tanggal Acara].`;
-      btn.href = `https://wa.me/${phone}?text=${encodeURIComponent(rawMessage)}`;
-    }
-
-    input.addEventListener('input', updateCheckout);
-    
-=======
-      // Build message with menu selections
       let messageLines = [
         `Halo Dzanis Catering, saya ingin memesan *${packageName}* sebanyak *${qty} porsi*.`,
       ];
@@ -812,11 +677,11 @@ const pageDescription = paket.deskripsiSingkat;
 
       if (selectedEventDate) {
         const dateObj = new Date(selectedEventDate);
-        const formattedDate = dateObj.toLocaleDateString('id-ID', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        const formattedDate = dateObj.toLocaleDateString('id-ID', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
         });
         messageLines.push(`Tanggal Acara: ${formattedDate}`);
       }
@@ -827,12 +692,9 @@ const pageDescription = paket.deskripsiSingkat;
       );
 
       const rawMessage = messageLines.join('\n');
-      
-      // Create a data attribute to store the message
       btn.dataset.waMessage = rawMessage;
     }
 
-    // WhatsApp Button Click Handler with Validation
     btn.addEventListener('click', (e) => {
       if (hasMenuSelection) {
         const validation = validateMenuSelection();
@@ -842,7 +704,23 @@ const pageDescription = paket.deskripsiSingkat;
         }
       }
 
-      // Get message from data attribute
+      if (eventDateInput && !eventDateInput.value) {
+        e.preventDefault();
+        alert('Mohon pilih tanggal acara minimal hari berikutnya.');
+        return;
+      }
+
+      if (eventDateInput && eventDateInput.value) {
+        const selectedDate = new Date(`${eventDateInput.value}T00:00:00`);
+        const minSelectableDate = new Date(`${minEventDateString}T00:00:00`);
+
+        if (selectedDate < minSelectableDate) {
+          e.preventDefault();
+          alert('Tanggal acara tidak bisa dipilih hari ini atau hari sebelumnya. Minimal pilih tanggal besok.');
+          return;
+        }
+      }
+
       const waMessage = btn.dataset.waMessage;
       if (waMessage) {
         btn.href = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`;
@@ -851,8 +729,6 @@ const pageDescription = paket.deskripsiSingkat;
 
     input.addEventListener('input', updateCheckout);
 
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
-    // Reset visual value pada input jika user mengosongkan / memasukkan nilai di bawah batas minimum
     input.addEventListener('blur', () => {
       let val = parseInt(input.value, 10);
       if (isNaN(val) || val < minOrder) {
@@ -861,11 +737,6 @@ const pageDescription = paket.deskripsiSingkat;
       }
     });
 
-<<<<<<< HEAD
-    // Jalankan segera saat inisialisasi
-    updateCheckout();
-=======
-    // Event Date Handler
     if (eventDateInput) {
       eventDateInput.addEventListener('change', (e) => {
         selectedEventDate = e.target.value;
@@ -873,15 +744,12 @@ const pageDescription = paket.deskripsiSingkat;
       });
     }
 
-    // Jalankan segera saat inisialisasi
     updateCheckout();
     if (hasMenuSelection) {
       updateSummary();
     }
->>>>>>> aafabf1 (feat: migrate project to Astro storefront)
   }
 
-  // Initial Load & Astro View Transitions Support
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPortionCalculator);
   } else {
