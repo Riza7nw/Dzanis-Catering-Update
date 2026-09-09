@@ -1,0 +1,40 @@
+---
+import { company } from '../../data/company';
+
+const angka = [
+  { nilai: company.stats.tahun, label: company.stats.tahunLabel },
+  { nilai: company.stats.acara, label: company.stats.acaraLabel },
+  { nilai: company.stats.pilihan, label: company.stats.pilihanLabel },
+];
+---
+
+<section class="px-[var(--space-4)] pb-[var(--space-8)] lg:px-14 lg:pb-[72px]">
+  <div class="giliran-manual" data-reveal>
+    <div class="mx-auto max-w-[1280px] rounded-[32px] bg-accent-2-200 px-[var(--space-4)] py-[var(--space-6)] lg:px-[var(--space-8)] lg:py-[var(--space-7)]">
+      <!-- Mobile: tiga baris bertumpuk. Web: tiga kolom sejajar, garis ikut memutar. -->
+      <div class="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-stretch lg:gap-[var(--space-7)]">
+        {angka.map((item, i) => (
+          <>
+            {i > 0 && (
+              <div
+                aria-hidden="true"
+                class="h-px w-full bg-accent-2-900/20 lg:h-auto lg:w-px lg:shrink-0"
+              />
+            )}
+            <div
+              style={`--i: ${i};`}
+              class="flex items-baseline gap-[var(--space-3)] lg:flex-1 lg:flex-col lg:items-start lg:gap-[var(--space-2)]"
+            >
+              <div class="font-heading text-[42px] leading-none text-accent-2-900 lg:text-[56px]">
+                {item.nilai}
+              </div>
+              <div class="text-[15px] leading-[1.4] text-accent-2-900 lg:max-w-[220px] lg:text-[16px]">
+                {item.label}
+              </div>
+            </div>
+          </>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

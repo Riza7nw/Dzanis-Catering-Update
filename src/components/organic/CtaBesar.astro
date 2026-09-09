@@ -1,0 +1,35 @@
+---
+import { waLink } from '../../data/company';
+
+const waPeracara = waLink('Halo Dzanis Catering, saya mau pesan untuk acara. Berikut jumlah box, tanggal, dan alamatnya:');
+---
+
+<section>
+  <div class="mx-auto grid max-w-[1280px] grid-cols-1 items-stretch lg:grid-cols-2">
+    <div class="relative aspect-[4/3] w-full bg-surface lg:aspect-auto lg:min-h-[420px] overflow-hidden">
+      <img
+        src="/images/menu/paket-25k.jpg"
+        alt="Pesanan nasi kotak Dzanis Catering siap diantar"
+        loading="lazy"
+        decoding="async"
+        class="washed h-full w-full object-cover"
+      />
+    </div>
+
+    <div class="flex flex-col justify-center gap-[var(--space-5)] bg-accent-300 px-[var(--space-4)] py-[var(--space-8)] lg:gap-[26px] lg:px-14 lg:py-16">
+      <h2 class="m-0 font-heading text-[29px] leading-[1.12] text-accent-900 lg:text-[54px] lg:leading-[0.98] lg:tracking-[-0.01em] lg:uppercase">
+        Pesan sekarang untuk acara Anda
+      </h2>
+      <p class="m-0 max-w-[380px] text-[16px] leading-[1.65] text-accent-900">
+        Kirim jumlah box, tanggal, dan alamat lewat WhatsApp. Kami balas
+        dengan rincian harga di hari yang sama.
+      </p>
+      <a
+        class="btn btn-primary btn-block min-h-[52px] text-[16px] lg:w-auto lg:self-start lg:px-[30px] lg:text-[15px] lg:tracking-[0.06em] lg:uppercase"
+        href={waPeracara}
+      >
+        Pesan via WhatsApp
+      </a>
+    </div>
+  </div>
+</section>

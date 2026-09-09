@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/organic/Navbar.astro';
+import RakitSnackBox from '../components/organic/RakitSnackBox.astro';
+import Footer from '../components/organic/Footer.astro';
+import { snackRingkasan } from '../data/snack';
+
+const title = "Rakit Snack Box Sendiri — Dzanis Catering";
+const description = `Susun sendiri isi snack box dari ${snackRingkasan.totalPilihan} pilihan jajanan mulai Rp${snackRingkasan.hargaTermurah}. Harga box langsung terhitung transparan, pesanan dikirim lewat WhatsApp.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <Navbar />
+  <main id="konten">
+    <!-- Breadcrumb Navigation -->
+    <div class="mx-auto max-w-[1280px] px-[var(--space-4)] pt-6 pb-2 lg:px-14">
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-neutral-600">
+        <a
+          href="/"
+          class="inline-flex items-center gap-1.5 font-medium text-neutral-600 transition-colors hover:text-accent-700"
+        >
+          <span aria-hidden="true">&larr;</span>
+          <span>Kembali ke Beranda</span>
+        </a>
+        <span class="text-neutral-400" aria-hidden="true">/</span>
+        <span class="font-semibold text-neutral-900" aria-current="page">Rakit Snack Box</span>
+      </nav>
+    </div>
+
+    <RakitSnackBox />
+  </main>
+  <Footer />
+</BaseLayout>

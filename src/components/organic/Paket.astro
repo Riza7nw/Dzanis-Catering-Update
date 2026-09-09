@@ -1,0 +1,127 @@
+---
+import { DAFTAR_PAKET } from '../../data/paket';
+---
+
+<section id="paket" class="py-14 md:py-20 bg-surface/40">
+  <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-14">
+    <!-- Header Seksi -->
+    <div class="flex flex-col gap-2 mb-10 max-w-2xl">
+      <h2 class="font-heading text-3xl md:text-5xl font-bold tracking-tight text-neutral-900 uppercase">
+        Paket Nasi Kotak
+      </h2>
+      <p class="text-sm md:text-base text-neutral-700 leading-relaxed">
+        Tiga pilihan paket nasi kotak higienis, lengkap dengan alat makan steril. Lauk pendamping dapat disesuaikan.
+      </p>
+    </div>
+
+    <!-- Responsive 3-Column Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {DAFTAR_PAKET.map((paket) => (
+        <article class="bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-shadow duration-200 hover:shadow-md">
+          <!-- Top Image with Badge -->
+          <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
+            <img
+              src={paket.foto}
+              alt={paket.fotoAlt || paket.nama}
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+            />
+            {paket.badge && (
+              <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
+                {paket.badge}
+              </span>
+            )}
+          </div>
+
+          <!-- Card Content -->
+          <div class="p-5 md:p-6 flex flex-1 flex-col">
+            <!-- Title & Description -->
+            <div class="mb-3">
+              <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
+                {paket.nama}
+              </h3>
+              <p class="text-xs md:text-sm text-neutral-600 line-clamp-2 leading-relaxed">
+                {paket.deskripsiSingkat}
+              </p>
+            </div>
+
+            <!-- Price Display -->
+            <div class="mb-3">
+              <p class="flex items-baseline gap-1">
+                <span class="text-xs font-semibold text-neutral-500">Rp</span>
+                <span class="text-2xl font-bold font-heading text-neutral-900">
+                  {paket.harga.toLocaleString("id-ID")}
+                </span>
+                <span class="text-xs text-neutral-500 font-medium">/ box</span>
+              </p>
+            </div>
+
+            <!-- Tags Pill List -->
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              {paket.tags.map((tag) => (
+                <span class="inline-flex items-center rounded-full bg-surface px-2.5 py-0.5 text-xs text-neutral-700 font-medium">
+                  ✓ {tag}
+                </span>
+              ))}
+            </div>
+
+            <!-- Menu Utama -->
+            <div class="space-y-1 mb-3">
+              {paket.menuUtama.map((menu) => (
+                <p class="text-xs text-neutral-700 flex items-start gap-1.5 leading-snug">
+                  <span class="text-[#C04A27] font-bold flex-none">•</span>
+                  <span>{menu}</span>
+                </p>
+              ))}
+            </div>
+
+            <!-- Native Accordion for Lauk Pendamping (Zero JS) -->
+            <details class="group border-t border-neutral-100 pt-3 mt-auto">
+              <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                <span>Lauk pendamping ({paket.laukPendamping.length})</span>
+                <span class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
+              </summary>
+              <ul class="mt-2 space-y-1 text-xs text-neutral-600 pl-2">
+                {paket.laukPendamping.map((lauk) => (
+                  <li>• {lauk}</li>
+                ))}
+              </ul>
+            </details>
+
+            <!-- Actions -->
+            <div class="mt-4 pt-3 border-t border-neutral-100">
+              <a
+                href={`/paket/${paket.slug}`}
+                class="block w-full text-center py-2.5 px-4 rounded-full border border-[#C04A27] text-[#C04A27] text-xs font-semibold hover:bg-orange-50 transition"
+              >
+                Detail Lengkap
+              </a>
+              <button
+                type="button"
+                data-order-trigger
+                data-package-name={paket.nama}
+                data-price={paket.harga}
+                class="w-full mt-2 py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition cursor-pointer"
+              >
+                Pesan Paket Ini
+              </button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <!-- Bottom WhatsApp Consultation Link -->
+    <div class="mt-10 flex items-center justify-center">
+      <a
+        href="https://wa.me/6281220863004?text=Halo%20Dzanis%20Catering,%20saya%20ingin%20melihat%20katalog%20menu%20nasi%20kotak%20lengkap"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-[#C04A27] hover:underline"
+      >
+        Konsultasi Menu & Porsi Khusus via WhatsApp →
+      </a>
+    </div>
+  </div>
+</section>

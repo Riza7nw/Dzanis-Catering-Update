@@ -1,0 +1,54 @@
+---
+import { company } from '../../data/company';
+
+const waGeneral = company.contact.whatsappLink;
+const tautan = [
+  { label: "Paket", href: "/#paket" },
+  { label: "Snack Box", href: "/#snack" },
+  { label: "Layanan", href: "/#layanan" },
+  { label: "Cara pesan", href: "/#cara" },
+];
+---
+
+<header class="sticky top-0 z-50 bg-bg lg:border-b lg:border-divider">
+  <div class="mx-auto flex max-w-[1280px] items-center gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-3)] lg:gap-[var(--space-7)] lg:px-14 lg:py-[22px]">
+    <!-- Brand — mr-auto pushes nav + CTA to the right -->
+    <a href="/" class="mr-auto flex items-center gap-[var(--space-2)] lg:gap-[var(--space-3)] text-text no-underline hover:opacity-90 transition-opacity">
+      <img
+        src={company.mark}
+        alt={company.name}
+        width="40"
+        height="40"
+        class="size-9 shrink-0 rounded-full object-contain lg:size-10"
+      />
+      <span class="font-heading font-semibold tracking-[0.02em]">
+        <span class="text-[17px] lg:hidden">Dzanis</span>
+        <span class="hidden text-[22px] lg:inline">DZANIS CATERING</span>
+      </span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <nav
+      aria-label="Navigasi utama"
+      class="hidden items-center gap-[34px] text-[15px] lg:flex"
+    >
+      {tautan.map((t) => (
+        <a
+          href={t.href}
+          class="flex min-h-11 items-center text-text no-underline transition-colors hover:text-accent-700"
+        >
+          {t.label}
+        </a>
+      ))}
+    </nav>
+
+    <!-- CTA Button — direct WhatsApp link matching production -->
+    <a
+      class="btn btn-primary px-[18px] lg:px-[var(--space-5)]"
+      href={waGeneral}
+    >
+      <span class="lg:hidden">Pesan</span>
+      <span class="hidden lg:inline">Pesan sekarang</span>
+    </a>
+  </div>
+</header>

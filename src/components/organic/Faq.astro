@@ -1,0 +1,36 @@
+---
+import { faqs } from '../../data/faq';
+---
+
+<section
+  id="faq"
+  class="px-[var(--space-4)] pb-[var(--space-8)] lg:px-14 lg:pb-20"
+>
+  <div class="mx-auto flex max-w-[1280px] flex-col gap-[var(--space-3)] lg:grid lg:grid-cols-[1fr_1.4fr] lg:items-start lg:gap-14">
+    <h2 class="font-heading text-[29px] leading-[1.12] lg:text-[44px] lg:leading-none lg:tracking-[-0.01em] lg:uppercase">
+      <span class="lg:hidden">Pertanyaan yang sering masuk</span>
+      <span class="hidden lg:inline">Sering ditanya</span>
+    </h2>
+
+    <div class="flex flex-col">
+      {faqs.map((item) => (
+        <details class="group border-t border-divider last:border-b">
+          <summary class="flex w-full cursor-pointer list-none items-center justify-between gap-[var(--space-3)] py-[var(--space-3)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700 lg:min-h-12 lg:gap-6 lg:py-[18px]">
+            <span class="font-heading text-[18px] leading-[1.25] lg:text-[20px] font-semibold text-neutral-900">
+              {item.question}
+            </span>
+            <span
+              aria-hidden="true"
+              class="w-5 flex-none text-center font-heading text-[22px] text-accent-700 lg:w-[22px] lg:text-[24px] font-bold transition-transform duration-200 group-open:rotate-45"
+            >
+              +
+            </span>
+          </summary>
+          <div class="max-w-[320px] pb-[var(--space-3)] text-[15px] leading-[1.6] text-neutral-800 lg:max-w-[560px] lg:pb-[18px] lg:text-[16px] lg:leading-[1.65]">
+            {item.answer}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,5 +1,14 @@
 /**
  * Isi seksi "Layanan lain" dan "Cara pesan".
+ * Judul & deskripsi persis seperti artboard.
+ *
+ * FOTO — perlu diganti. Artboard memasang <image-slot> kosong untuk ketiga
+ * layanan ini, jadi tidak ada aset yang ditentukan perancang. Stok lama di
+ * public/images/services/ TIDAK dipakai: foto-foto itu memperlihatkan kemasan
+ * bermerek "Niezar Catering", milik usaha lain. Sementara ini dipakai foto
+ * Dzanis asli hasil potongan poster harga, meskipun subjeknya nasi kotak dan
+ * jajanan — bukan prasmanan atau booth. Ganti begitu pemilik mengirim foto
+ * acara, booth, dan prasmanan kantor yang sesungguhnya.
  */
 
 export type Layanan = {
@@ -32,6 +41,7 @@ export const layanan: Layanan[] = [
 ];
 
 export type Langkah = {
+  /** Judul versi mobile lebih panjang dari versi web; keduanya dipakai. */
   judul: string;
   judulRingkas: string;
   deskripsi: string;

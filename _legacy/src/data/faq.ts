@@ -1,8 +1,5 @@
 /** Empat pertanyaan yang muncul di kedua artboard, teks jawaban identik. */
-export type Faq = {
-  question: string;
-  answer: string;
-};
+export type Faq = { question: string; answer: string };
 
 export const faqs: Faq[] = [
   {
