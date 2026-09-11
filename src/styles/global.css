@@ -108,6 +108,7 @@ details > summary {
    diklik. scroll-smooth membuatnya makin terlihat, jadi sisakan
    ruang setinggi header. */
 html {
+  scroll-behavior: smooth;
   scroll-padding-top: 76px;
 }
 
