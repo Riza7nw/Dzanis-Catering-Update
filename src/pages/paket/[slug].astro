@@ -17,7 +17,6 @@ interface Props {
 }
 
 const { paket } = Astro.props;
-const { slug } = Astro.params;
 
 const pageTitle = `${paket.nama} | Dzanis Catering`;
 const pageDescription = paket.deskripsiSingkat;
@@ -140,12 +139,12 @@ const minEventDateString = [
 
                   <div class="flex items-baseline justify-between gap-2 pt-2 border-t border-current/10 mt-2">
                     <span class:list={[
-                      "font-heading text-xs sm:text-sm font-bold",
+                      "font-heading text-lg sm:text-xl font-bold",
                       isCurrent ? "text-white" : "text-neutral-700 group-hover:text-accent-700"
                     ]}>
                       Rp {item.harga.toLocaleString("id-ID")}
                       <span class:list={[
-                        "text-[10px] font-normal",
+                        "text-[18px] font-bold",
                         isCurrent ? "text-white/80" : "text-neutral-500"
                       ]}> / porsi</span>
                     </span>
@@ -392,7 +391,7 @@ const minEventDateString = [
                     <label class="block text-sm font-bold text-neutral-900">
                       🥗 Pilih {paket.sideDishesSelectMin}-{paket.sideDishesSelectMax} Lauk Pendamping
                     </label>
-                    <span class="text-xs font-medium text-neutral-500" id="side-count">
+                    <span class="text-xs font-medium text-neutral-500" id="side-count" aria-live="polite">
                       0 / {paket.sideDishesSelectMax} pilihan
                     </span>
                   </div>
@@ -473,6 +472,8 @@ const minEventDateString = [
                 </span>
                 <span
                   id="subtotal-display"
+                  aria-live="polite"
+                  role="status"
                   class="font-heading text-2xl sm:text-3xl font-bold text-accent-700 leading-none mt-1"
                 >
                   Rp {(paket.harga * paket.minOrder).toLocaleString("id-ID")}
@@ -510,7 +511,7 @@ const minEventDateString = [
                 <span>Pesan Sekarang via WhatsApp</span>
               </a>
               {paket.canSelectMainMenu && (
-                <p class="mt-2 text-center text-xs text-neutral-500" id="validation-message">
+                <p class="mt-2 text-center text-xs text-neutral-500" id="validation-message" role="alert" aria-live="assertive">
                   Pastikan Anda telah memilih menu dan lauk pendamping sebelum memesan.
                 </p>
               )}

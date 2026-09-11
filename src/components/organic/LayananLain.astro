@@ -85,9 +85,9 @@ const phone = waPhoneNumber || "6281324383858";
 
                 <!-- Native Accordion for Menu Highlights (Zero JS) -->
                 <details class="group border-t border-neutral-100 pt-3 mt-4">
-                  <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                  <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
                     <span>Contoh Menu Pilihan ({item.menuHighlight.length})</span>
-                    <span class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
+                    <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
                   </summary>
                   <ul class="mt-2 space-y-1 text-xs text-neutral-600 pl-2">
                     {item.menuHighlight.map((m) => (

@@ -36,7 +36,14 @@ import { snackKategori, MIN_BOX, formatRupiah } from '../../data/snack';
             >
               −
             </button>
-            <span id="builder-box-count" class="font-heading text-lg font-bold min-w-[28px] text-center text-neutral-900">
+            <span
+              id="builder-box-count"
+              role="spinbutton"
+              aria-valuemin="20"
+              aria-valuenow={MIN_BOX}
+              aria-label="Jumlah box"
+              class="font-heading text-lg font-bold min-w-[28px] text-center text-neutral-900"
+            >
               {MIN_BOX}
             </span>
             <button
@@ -95,17 +102,17 @@ import { snackKategori, MIN_BOX, formatRupiah } from '../../data/snack';
         <div class="flex flex-wrap items-center gap-6 text-center md:text-left">
           <div>
             <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Item Terpilih</span>
-            <span id="summary-item-count" class="font-heading text-2xl font-bold text-neutral-900">0 macam</span>
+            <span id="summary-item-count" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-neutral-900">0 macam</span>
           </div>
           <div class="h-8 w-px bg-divider hidden sm:block"></div>
           <div>
             <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Harga per Box</span>
-            <span id="summary-subtotal" class="font-heading text-2xl font-bold text-accent-700">Rp0</span>
+            <span id="summary-subtotal" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-accent-700">Rp0</span>
           </div>
           <div class="h-8 w-px bg-divider hidden sm:block"></div>
           <div>
             <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Estimasi Total</span>
-            <span id="summary-total" class="font-heading text-2xl font-bold text-neutral-900">Rp0</span>
+            <span id="summary-total" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-neutral-900">Rp0</span>
           </div>
         </div>
 
@@ -179,14 +186,20 @@ import { snackKategori, MIN_BOX, formatRupiah } from '../../data/snack';
     boxMinusBtn?.addEventListener('click', () => {
       if (boxCount > minBoxes) {
         boxCount -= stepBoxes;
-        if (boxCountDisplay) boxCountDisplay.textContent = String(boxCount);
+        if (boxCountDisplay) {
+          boxCountDisplay.textContent = String(boxCount);
+          boxCountDisplay.setAttribute('aria-valuenow', String(boxCount));
+        }
         recalculate();
       }
     });
 
     boxPlusBtn?.addEventListener('click', () => {
       boxCount += stepBoxes;
-      if (boxCountDisplay) boxCountDisplay.textContent = String(boxCount);
+      if (boxCountDisplay) {
+        boxCountDisplay.textContent = String(boxCount);
+        boxCountDisplay.setAttribute('aria-valuenow', String(boxCount));
+      }
       recalculate();
     });
 
