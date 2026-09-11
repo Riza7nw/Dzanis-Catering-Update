@@ -4,6 +4,7 @@ import Navbar from '../../components/organic/Navbar.astro';
 import Footer from '../../components/organic/Footer.astro';
 import { DAFTAR_PAKET, type Paket } from '../../data/paket';
 import { waPhoneNumber } from '../../data/company';
+import { generateProductSchema } from '../../utils/schema';
 
 export async function getStaticPaths() {
   return DAFTAR_PAKET.map((paket) => ({
@@ -20,6 +21,7 @@ const { paket } = Astro.props;
 
 const pageTitle = `${paket.nama} | Dzanis Catering`;
 const pageDescription = paket.deskripsiSingkat;
+const productSchema = generateProductSchema(paket);
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -30,7 +32,11 @@ const minEventDateString = [
 ].join('-');
 ---
 
-<BaseLayout title={pageTitle} description={pageDescription}>
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  schema={productSchema}
+>
   <Navbar />
 
   <main id="konten" class="bg-bg">

@@ -10,9 +10,15 @@ import CaraPesan from '../components/organic/CaraPesan.astro';
 import Faq from '../components/organic/Faq.astro';
 import CtaBesar from '../components/organic/CtaBesar.astro';
 import Footer from '../components/organic/Footer.astro';
+import { generateFoodEstablishmentSchema } from '../utils/schema';
+
+const schema = generateFoodEstablishmentSchema();
 ---
 
-<BaseLayout title="Dzanis Catering | Nasi Kotak & Snack Box Ciayumajakuning">
+<BaseLayout
+  title="Dzanis Catering | Nasi Kotak & Snack Box Ciayumajakuning"
+  schema={schema}
+>
   <Navbar />
   <main id="konten">
     <Hero />

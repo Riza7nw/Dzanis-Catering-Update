@@ -5,11 +5,13 @@ import OrderModal from '../components/interactive/OrderModal.astro';
 interface Props {
   title: string;
   description?: string;
+  schema?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const {
   title,
   description = "Katering rumahan dari Majalengka. Nasi kotak mulai Rp20.000 per box, snack box 51 pilihan, dan prasmanan untuk resepsi, syukuran, serta acara kantor. Mengantar ke Cirebon, Indramayu, Majalengka, dan Kuningan.",
+  schema,
 } = Astro.props;
 ---
 
@@ -28,6 +30,13 @@ const {
       href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
       rel="stylesheet"
     />
+    {schema && (
+      <script
+        type="application/ld+json"
+        is:inline
+        set:html={JSON.stringify(schema, null, 2)}
+      />
+    )}
   </head>
   <body class="min-h-screen bg-bg text-text antialiased">
     <a
