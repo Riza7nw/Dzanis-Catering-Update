@@ -2,19 +2,21 @@
 import { company } from '../../data/company';
 
 const waGeneral = company.contact.whatsappLink;
+const isHome = Astro.url.pathname === '/';
+const prefix = isHome ? '' : '/';
 
 const kolomMenu = [
-  { label: "Paket nasi kotak", href: "#paket" },
-  { label: "Snack box", href: "#snack" },
-  { label: "Prasmanan", href: "#layanan" },
-  { label: "Booth / food cart", href: "#layanan" },
+  { label: "Paket nasi kotak", href: `${prefix}#paket` },
+  { label: "Snack box", href: `${prefix}#snack` },
+  { label: "Prasmanan", href: `${prefix}#layanan` },
+  { label: "Booth / food cart", href: `${prefix}#layanan` },
 ];
 
 const kolomInformasi = [
-  { label: "Cara pesan", href: "#cara" },
+  { label: "Cara pesan", href: `${prefix}#cara` },
   { label: "Sertifikat", href: "/sertifikat" },
-  { label: "Area pengantaran", href: "#faq" },
-  { label: "Sering ditanya", href: "#faq" },
+  { label: "Area pengantaran", href: `${prefix}#faq` },
+  { label: "Sering ditanya", href: `${prefix}#faq` },
 ];
 
 const judulKolom =
