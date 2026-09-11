@@ -1,5 +1,10 @@
 ---
 import { DAFTAR_PAKET } from '../../data/paket';
+import { company } from '../../data/company';
+
+const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${encodeURIComponent(
+  'Halo Dzanis Catering, saya ingin melihat katalog menu nasi kotak lengkap'
+)}`;
 ---
 
 <section id="paket" class="py-14 md:py-20 bg-surface/40">
@@ -115,7 +120,7 @@ import { DAFTAR_PAKET } from '../../data/paket';
     <!-- Bottom WhatsApp Consultation Link -->
     <div class="mt-10 flex items-center justify-center">
       <a
-        href="https://wa.me/6281220863004?text=Halo%20Dzanis%20Catering,%20saya%20ingin%20melihat%20katalog%20menu%20nasi%20kotak%20lengkap"
+        href={waKonsultasiUrl}
         target="_blank"
         rel="noopener noreferrer"
         class="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-[#C04A27] hover:underline"
