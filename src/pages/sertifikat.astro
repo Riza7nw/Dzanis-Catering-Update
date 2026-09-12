@@ -3,6 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/organic/Navbar.astro';
 import Footer from '../components/organic/Footer.astro';
 
+const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
+
 const legalCards = [
   {
     label: 'NIB / Izin Usaha',
@@ -150,7 +152,7 @@ const prosesVerifikasi = [
         <button class="btn btn-secondary hidden sm:inline-flex">Unduh daftar sertifikat</button>
       </div>
 
-      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div id="sertifikat-grid" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {sertifikat.map((item) => (
           <article class="rounded-[28px] border border-divider bg-surface p-4 shadow-[var(--shadow-md)]">
             <div class="flex items-center justify-between gap-3">
@@ -192,7 +194,7 @@ const prosesVerifikasi = [
           </h2>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div id="legal-grid" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {legalCards.map((item) => (
             <article class="rounded-[24px] border border-white/15 bg-surface p-4 text-text shadow-[var(--shadow-md)]">
               <div class="flex items-center justify-between gap-3">
@@ -290,4 +292,84 @@ const prosesVerifikasi = [
   </main>
 
   <Footer />
+
+  <script is:inline define:vars={{ publicApiUrl }}>
+    // Sinkronisasi otomatis jika admin mengubah/menambah sertifikat di backend
+    (async function() {
+      try {
+        const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+          ? 'http://127.0.0.1:8000'
+          : (publicApiUrl || '');
+        const res = await fetch(`${apiUrl}/api/certifications?active=true`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const certs = data.certifications || [];
+        if (!certs || certs.length === 0) return;
+
+        const sertifikatItems = certs.filter(c => c.category === 'sertifikat');
+        const legalItems = certs.filter(c => c.category === 'legalitas');
+
+        const certGrid = document.getElementById('sertifikat-grid');
+        if (certGrid && sertifikatItems.length > 0) {
+          certGrid.innerHTML = sertifikatItems.map(item => {
+            const isHalal = item.badge === 'HALAL';
+            const badgeClass = isHalal
+              ? 'bg-accent-200 text-accent-900'
+              : 'bg-accent-2-200 text-accent-2-900';
+            return `
+              <article class="rounded-[28px] border border-divider bg-surface p-4 shadow-[var(--shadow-md)] transition-all">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] ${badgeClass}">
+                    ${item.badge || 'RESMI'}
+                  </span>
+                  <span class="text-[10px] font-semibold uppercase tracking-[0.15em] text-neutral-700">
+                    ${item.date || ''}
+                  </span>
+                </div>
+                <h3 class="mt-4 font-heading text-lg font-bold leading-snug text-text">
+                  ${item.label}
+                </h3>
+                <p class="mt-3 text-sm leading-6 text-neutral-800">
+                  ${item.meta || ''}
+                </p>
+                ${item.detail ? `<p class="mt-1 text-xs text-neutral-600">${item.detail}</p>` : ''}
+                <div class="mt-5 rounded-2xl bg-bg p-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-800 flex items-center justify-between">
+                  <span>Dokumen terverifikasi</span>
+                  ${item.document_url ? `<a href="${item.document_url}" target="_blank" class="text-accent-700 hover:underline text-[10px]">Lihat &rarr;</a>` : ''}
+                </div>
+              </article>
+            `;
+          }).join('');
+        }
+
+        const legalGrid = document.getElementById('legal-grid');
+        if (legalGrid && legalItems.length > 0) {
+          legalGrid.innerHTML = legalItems.map(item => {
+            const isLegal = item.badge === 'LEGAL' || item.status === 'Legal';
+            const badgeClass = isLegal
+              ? 'bg-accent-200 text-accent-900'
+              : 'bg-accent-2-200 text-accent-2-900';
+            return `
+              <article class="rounded-[24px] border border-white/15 bg-surface p-4 text-text shadow-[var(--shadow-md)]">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-[18px]" aria-hidden="true">✦</span>
+                  <span class="rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] ${badgeClass}">
+                    ${item.badge || item.status || 'Legal'}
+                  </span>
+                </div>
+                <h3 class="mt-4 font-heading text-lg font-bold leading-tight text-text">
+                  ${item.label}
+                </h3>
+                <p class="mt-3 text-sm leading-6 text-neutral-800">
+                  ${item.detail || item.meta || ''}
+                </p>
+              </article>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        // Fallback hening ke tampilan SSG
+      }
+    })();
+  </script>
 </BaseLayout>
