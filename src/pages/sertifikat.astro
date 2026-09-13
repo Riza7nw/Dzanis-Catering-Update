@@ -290,22 +290,29 @@ const prosesVerifikasi = [
     // Sinkronisasi otomatis jika admin mengubah/menambah sertifikat di backend
     (async function() {
       try {
-        const apiUrl = publicApiUrl || (
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryApi = urlParams.get('apiUrl');
+        const apiUrl = queryApi || publicApiUrl || (
           (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
             ? 'http://127.0.0.1:8000'
-            : ''
+            : 'https://alkalize-rewire-scruffy.ngrok-free.dev'
         );
         if (!apiUrl) return;
 
+        console.log('[Dzanis Certs] Menghubungi API:', apiUrl);
         const res = await fetch(`${apiUrl}/api/certifications?active=true`, {
           headers: {
-            'ngrok-skip-browser-warning': 'true',
+            'ngrok-skip-browser-warning': '69420',
             'Accept': 'application/json'
           }
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          console.warn('[Dzanis Certs] Respons API tidak OK:', res.status, res.statusText);
+          return;
+        }
         const data = await res.json();
         const certs = data.certifications || [];
+        console.log('[Dzanis Certs] Data sertifikat diterima:', certs.length, 'item');
         if (!certs || certs.length === 0) return;
 
         const sertifikatItems = certs.filter(c => c.category === 'sertifikat');
@@ -370,7 +377,7 @@ const prosesVerifikasi = [
           }).join('');
         }
       } catch (err) {
-        // Fallback hening ke tampilan SSG
+        console.warn('[Dzanis Certs] Gagal sinkronisasi sertifikat:', err);
       }
     })();
   </script>
