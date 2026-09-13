@@ -290,10 +290,19 @@ const prosesVerifikasi = [
     // Sinkronisasi otomatis jika admin mengubah/menambah sertifikat di backend
     (async function() {
       try {
-        const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-          ? 'http://127.0.0.1:8000'
-          : (publicApiUrl || '');
-        const res = await fetch(`${apiUrl}/api/certifications?active=true`);
+        const apiUrl = publicApiUrl || (
+          (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://127.0.0.1:8000'
+            : ''
+        );
+        if (!apiUrl) return;
+
+        const res = await fetch(`${apiUrl}/api/certifications?active=true`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'Accept': 'application/json'
+          }
+        });
         if (!res.ok) return;
         const data = await res.json();
         const certs = data.certifications || [];
