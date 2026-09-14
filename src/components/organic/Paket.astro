@@ -142,9 +142,12 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const queryApi = urlParams.get('apiUrl');
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
+      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
       const apiUrl = queryApi || publicApiUrl || (
-        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-          ? 'http://127.0.0.1:8000'
+        isLocal
+          ? defaultLocalApi
           : 'https://alkalize-rewire-scruffy.ngrok-free.dev'
       );
       if (!apiUrl) return;
@@ -173,10 +176,30 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       // Helper untuk resolusi URL foto & memastikan format .webp
       const resolvePhotoUrl = (img) => {
         if (!img) return '/images/menu/paket-20k.webp';
-        let target = img;
-        if (target.startsWith('/uploads/')) {
-          target = `${apiUrl}${target}`;
+        let target = String(img).trim();
+
+        // 1. Data URI langsung kembalikan
+        if (target.startsWith('data:')) return target;
+
+        // 2. Full HTTP/HTTPS URL
+        if (target.startsWith('http://') || target.startsWith('https://')) {
+          if (target.includes('ngrok')) {
+            target += (target.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=69420';
+          }
+          return target;
         }
+
+        // 3. Path upload /uploads/...
+        if (target.startsWith('/uploads/')) {
+          if (apiUrl && apiUrl.includes('ngrok')) {
+            return `${apiUrl}${target}${target.includes('?') ? '&' : '?'}ngrok-skip-browser-warning=69420`;
+          }
+          if (apiUrl) {
+            return `${apiUrl}${target}`;
+          }
+          return target;
+        }
+
         return target;
       };
 
@@ -184,7 +207,8 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
         const nama = p.name || p.nama || 'Paket Menu';
         const harga = Number(p.price_per_pax || p.harga || 0);
         const slug = p.slug || (p.id ? String(p.id) : 'paket');
-        const foto = resolvePhotoUrl(p.image || p.foto);
+        const rawImg = p.image || p.foto || '';
+        const foto = resolvePhotoUrl(rawImg);
         const deskripsi = p.description || p.deskripsiSingkat || 'Pilihan menu lezat higienis Dzanis Catering.';
         const badge = p.badge || (p.category ? p.category : null);
         const items = Array.isArray(p.items) ? p.items : (p.menuUtama || []);
@@ -199,7 +223,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 loading="lazy"
                 decoding="async"
                 class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                onerror="this.onerror=null;this.src='/images/menu/paket-20k.webp';"
+                onerror="if(!this.dataset.retryLocal && this.src.includes('/uploads/')){this.dataset.retryLocal='true';this.src='${rawImg}';}else{this.onerror=null;this.src='/images/menu/paket-20k.webp';}"
               />
               ${badge ? `
                 <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
@@ -207,6 +231,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 </span>
               ` : ''}
             </div>
+
 
             <!-- Card Content -->
             <div class="p-5 md:p-6 flex flex-1 flex-col">
