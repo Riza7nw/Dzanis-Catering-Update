@@ -21,10 +21,13 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       </p>
     </div>
 
-    <!-- Responsive 3-Column Grid (Dinamis tersinkron ke Backend) -->
-    <div id="paket-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Responsive Horizontal Scroll Container (Dinamis tersinkron ke Backend) -->
+    <div
+      id="paket-grid"
+      class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-5 pb-6 pt-1 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-14 lg:px-14 overscroll-x-contain no-scrollbar cursor-grab"
+    >
       {DAFTAR_PAKET.map((paket) => (
-        <article class="bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-shadow duration-200 hover:shadow-md">
+        <article class="w-[84vw] sm:w-[320px] md:w-[360px] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-shadow duration-200 hover:shadow-md">
           <!-- Top Image with Badge -->
           <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
             <img
@@ -187,7 +190,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
         const items = Array.isArray(p.items) ? p.items : (p.menuUtama || []);
 
         return `
-          <article class="bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md">
+          <article class="w-[84vw] sm:w-[320px] md:w-[360px] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md">
             <!-- Top Image with Badge (Format .WEBP) -->
             <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
               <img
@@ -266,5 +269,36 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
     } catch (err) {
       console.warn('[Dzanis Menu] Gagal sinkronisasi menu:', err);
     }
+  })();
+
+  // Mendukung swipe/drag geser menggunakan mouse di desktop
+  (function setupDragScroll() {
+    const grid = document.getElementById('paket-grid');
+    if (!grid) return;
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    grid.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button') || e.target.closest('a') || e.target.closest('summary')) return;
+      isDown = true;
+      startX = e.pageX - grid.offsetLeft;
+      scrollLeft = grid.scrollLeft;
+      grid.classList.add('cursor-grabbing');
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isDown) return;
+      isDown = false;
+      grid.classList.remove('cursor-grabbing');
+    });
+
+    grid.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - grid.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      grid.scrollLeft = scrollLeft - walk;
+    });
   })();
 </script>
