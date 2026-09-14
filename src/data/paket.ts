@@ -65,7 +65,7 @@ export const DAFTAR_PAKET: Paket[] = [
       "Air Mineral Cup",
       "Sendok & Tisu Steril",
     ],
-    foto: "/images/menu/paket-20k.jpg",
+    foto: "/images/menu/paket-20k.webp",
     fotoAlt: "Paket Hemat 20K Dzanis Catering",
     // Menu selection
     canSelectMainMenu: true,
@@ -119,7 +119,7 @@ export const DAFTAR_PAKET: Paket[] = [
       "Air Mineral Cup",
       "Sendok & Tisu Steril",
     ],
-    foto: "/images/menu/paket-23k.jpg",
+    foto: "/images/menu/paket-23k.webp",
     fotoAlt: "Paket Favorit 23K Dzanis Catering",
     // Menu selection
     canSelectMainMenu: true,
@@ -174,7 +174,7 @@ export const DAFTAR_PAKET: Paket[] = [
       "Air Mineral Cup",
       "Sendok, Tusuk Gigi & Tisu Steril",
     ],
-    foto: "/images/menu/paket-25k.jpg",
+    foto: "/images/menu/paket-25k.webp",
     fotoAlt: "Paket Spesial 25K Dzanis Catering",
     // Menu selection
     canSelectMainMenu: true,
