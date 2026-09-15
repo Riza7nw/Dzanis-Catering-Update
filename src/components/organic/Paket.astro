@@ -190,7 +190,19 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
     const prevBtn = document.getElementById('paket-prev');
     const nextBtn = document.getElementById('paket-next');
     const dotsContainer = document.getElementById('paket-dots');
-    if (!grid || !prevBtn || !nextBtn) return null;
+    if (!grid || !prevBtn || !nextBtn) {
+      if (window.__paketCarouselAbortController) {
+        window.__paketCarouselAbortController.abort();
+        window.__paketCarouselAbortController = null;
+      }
+      return null;
+    }
+
+    if (window.__paketCarouselAbortController) {
+      window.__paketCarouselAbortController.abort();
+    }
+    window.__paketCarouselAbortController = new AbortController();
+    const { signal } = window.__paketCarouselAbortController;
 
     function getMetrics() {
       const cards = Array.from(grid.querySelectorAll('article'));
@@ -354,7 +366,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
     window.addEventListener('resize', () => {
       renderDots();
       updateControls();
-    });
+    }, { signal });
 
     // Mouse drag scroll dengan pencegahan seleksi teks
     let isDown = false;
@@ -374,7 +386,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       scrollLeftStart = grid.scrollLeft;
 
       e.preventDefault();
-    });
+    }, { signal });
 
     window.addEventListener('mousemove', (e) => {
       if (!isDown) return;
@@ -393,7 +405,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
         grid.scrollLeft = scrollLeftStart - deltaX;
         window.getSelection()?.removeAllRanges();
       }
-    });
+    }, { signal });
 
     const endDrag = () => {
       if (!isDown) return;
@@ -422,8 +434,8 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       }
     };
 
-    window.addEventListener('mouseup', endDrag);
-    window.addEventListener('mouseleave', endDrag);
+    window.addEventListener('mouseup', endDrag, { signal });
+    window.addEventListener('mouseleave', endDrag, { signal });
 
     // Cegah trigger link / button saat user baru saja melakukan drag
     grid.addEventListener('click', (e) => {
@@ -431,7 +443,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
         e.preventDefault();
         e.stopPropagation();
       }
-    }, true);
+    }, { signal, capture: true });
 
     renderDots();
     updateControls();
@@ -444,11 +456,28 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
     };
   }
 
-  // Inisialisasi awal
-  carouselInstance = initPaketCarousel();
-  document.addEventListener('astro:page-load', () => {
+  if (!window.__paketPageLoadAttached) {
+    window.__paketPageLoadAttached = true;
+    document.addEventListener('astro:page-load', () => {
+      carouselInstance = initPaketCarousel();
+    });
+    document.addEventListener('astro:before-swap', () => {
+      if (window.__paketCarouselAbortController) {
+        window.__paketCarouselAbortController.abort();
+        window.__paketCarouselAbortController = null;
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!carouselInstance) {
+        carouselInstance = initPaketCarousel();
+      }
+    }, { once: true });
+  } else if (!carouselInstance) {
     carouselInstance = initPaketCarousel();
-  });
+  }
 
   // Sinkronisasi otomatis katalog paket menu dari Backend (Express / Ngrok)
   (async function() {

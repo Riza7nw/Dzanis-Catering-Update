@@ -46,7 +46,20 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
 
   <main id="konten" class="bg-bg">
     <!-- Main Detail Section -->
-    <div class="mx-auto max-w-[1280px] px-4 pt-6 sm:pt-8 lg:pt-10 pb-12 sm:pb-16 lg:pb-20 sm:px-6 lg:px-14">
+    <div
+      id="package-detail-root"
+      data-base-price={paket.harga}
+      data-package-name={formatNamaPaket(paket.nama)}
+      data-min-order={paket.minOrder}
+      data-phone={waPhoneNumber}
+      data-has-menu-selection={String(Boolean(paket.canSelectMainMenu))}
+      data-side-dishes-min={paket.sideDishesSelectMin ?? 0}
+      data-side-dishes-max={paket.sideDishesSelectMax ?? 0}
+      data-default-main-menu={defaultMainMenu}
+      data-default-side-dishes={JSON.stringify(defaultSideDishes)}
+      data-min-event-date={minEventDateString}
+      class="mx-auto max-w-[1280px] px-4 pt-6 sm:pt-8 lg:pt-10 pb-12 sm:pb-16 lg:pb-20 sm:px-6 lg:px-14"
+    >
       <div class="mb-6">
         <a
           href="/#paket"
@@ -188,7 +201,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
                   aria-pressed="true"
                 >
                   <div class="flex items-center gap-3 min-w-0">
-                    <div class="size-9 rounded-xl bg-accent text-white flex items-center justify-center flex-none font-bold shadow-xs">
+                    <div id="icon-order-default" class="size-9 rounded-xl bg-accent text-white flex items-center justify-center flex-none font-bold shadow-xs transition-colors">
                       <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
                       </svg>
@@ -217,7 +230,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
                   aria-pressed="false"
                 >
                   <div class="flex items-center gap-3 min-w-0">
-                    <div class="size-9 rounded-xl bg-surface border border-neutral-200 text-neutral-600 flex items-center justify-center flex-none group-hover:border-accent/40 group-hover:text-accent transition-colors">
+                    <div id="icon-order-custom" class="size-9 rounded-xl bg-surface border border-neutral-200 text-neutral-600 flex items-center justify-center flex-none group-hover:border-accent/40 group-hover:text-accent transition-colors">
                       <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 20h9"/>
                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
@@ -602,149 +615,231 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
   <Footer />
 </BaseLayout>
 
-<script is:inline define:vars={{
-  basePrice: paket.harga,
-  packageName: formatNamaPaket(paket.nama),
-  minOrder: paket.minOrder,
-  phone: waPhoneNumber,
-  hasMenuSelection: Boolean(paket.canSelectMainMenu),
-  sideDishesMin: paket.sideDishesSelectMin ?? 0,
-  sideDishesMax: paket.sideDishesSelectMax ?? 0,
-  defaultMainMenu: defaultMainMenu,
-  defaultSideDishes: defaultSideDishes
-}}>
-  function initPortionCalculator() {
-    const input = document.getElementById('portion-input');
+<script>
+  interface PackageConfig {
+    basePrice: number;
+    packageName: string;
+    minOrder: number;
+    phone: string;
+    hasMenuSelection: boolean;
+    sideDishesMin: number;
+    sideDishesMax: number;
+    defaultMainMenu: string;
+    defaultSideDishes: string[];
+    minEventDateString: string;
+  }
+
+  let detailPageAbortController: AbortController | null = null;
+
+  function initPortionCalculator(config: PackageConfig, signal: AbortSignal) {
+    const input = document.getElementById('portion-input') as HTMLInputElement | null;
     const display = document.getElementById('subtotal-display');
-    const btn = document.getElementById('wa-checkout-btn');
-    const eventDateInput = document.getElementById('event-date-input');
+    const btn = document.getElementById('wa-checkout-btn') as HTMLAnchorElement | null;
+    const eventDateInput = document.getElementById('event-date-input') as HTMLInputElement | null;
 
     if (!input || !display || !btn) return;
+    const checkoutBtn = btn;
+    const portionInput = input;
+
+    const {
+      basePrice,
+      packageName,
+      minOrder,
+      phone,
+      hasMenuSelection,
+      sideDishesMin,
+      sideDishesMax,
+      defaultMainMenu,
+      defaultSideDishes,
+      minEventDateString,
+    } = config;
 
     // Order Mode State: 'default' | 'custom'
-    let orderMode = 'default';
+    let orderMode: 'default' | 'custom' = 'default';
     const btnOrderDefault = document.getElementById('btn-order-default');
     const btnOrderCustom = document.getElementById('btn-order-custom');
+    const iconOrderDefault = document.getElementById('icon-order-default');
+    const iconOrderCustom = document.getElementById('icon-order-custom');
     const badgeOrderDefault = document.getElementById('badge-order-default');
     const badgeOrderCustom = document.getElementById('badge-order-custom');
     const customMenuChevron = document.getElementById('custom-menu-chevron');
-    const customMenuCollapsible = document.getElementById('custom-menu-collapsible');
+    const customMenuCollapsible = document.getElementById('custom-menu-collapsible') as HTMLElement | null;
     const defaultPresetBox = document.getElementById('default-preset-box');
 
     let selectedMainMenu = defaultMainMenu;
     let selectedSideDishes = Array.isArray(defaultSideDishes) ? [...defaultSideDishes] : [];
-    let selectedEventDate = null;
+    let selectedEventDate: string | null = null;
 
     function calculateClampedQty() {
-      let rawVal = parseInt(input.value, 10);
+      let rawVal = parseInt(input?.value || '', 10);
       if (isNaN(rawVal) || rawVal < minOrder) {
         return minOrder;
       }
       return rawVal;
     }
 
-    function setOrderMode(mode, toggleCollapse = false) {
+    function syncActiveCustomInputs() {
+      const activeRadio = document.querySelector('input[name="main-menu"]:checked') as HTMLInputElement | null;
+      if (activeRadio) {
+        selectedMainMenu = activeRadio.value;
+      }
+      const checkedCheckboxes = document.querySelectorAll('input[name="side-dishes"]:checked') as NodeListOf<HTMLInputElement>;
+      selectedSideDishes = Array.from(checkedCheckboxes).map(cb => cb.value);
+
+      const sideCount = document.getElementById('side-count');
+      if (sideCount && sideDishesMax) {
+        sideCount.textContent = `${selectedSideDishes.length} / ${sideDishesMax} pilihan`;
+      }
+    }
+
+    function setOrderMode(mode: 'default' | 'custom', updateUrl = true) {
       if (mode === 'default') {
         orderMode = 'default';
+
+        // Button Default Active
         btnOrderDefault?.setAttribute('aria-pressed', 'true');
         btnOrderDefault?.classList.add('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
         btnOrderDefault?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        if (iconOrderDefault) {
+          iconOrderDefault.className = 'size-9 rounded-xl bg-accent text-white flex items-center justify-center flex-none font-bold shadow-xs transition-colors';
+        }
         badgeOrderDefault?.classList.remove('hidden');
 
+        // Button Custom Inactive
         btnOrderCustom?.setAttribute('aria-pressed', 'false');
         btnOrderCustom?.setAttribute('aria-expanded', 'false');
         btnOrderCustom?.classList.remove('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
         btnOrderCustom?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        if (iconOrderCustom) {
+          iconOrderCustom.className = 'size-9 rounded-xl bg-surface border border-neutral-200 text-neutral-600 flex items-center justify-center flex-none group-hover:border-accent/40 group-hover:text-accent transition-colors';
+        }
         badgeOrderCustom?.classList.add('hidden');
 
+        // Collapsible closed
         customMenuChevron?.classList.remove('rotate-180');
         if (customMenuCollapsible) {
           customMenuCollapsible.setAttribute('data-buka', 'false');
           customMenuCollapsible.style.gridTemplateRows = '0fr';
         }
 
+        // Preset box shown
         defaultPresetBox?.classList.remove('hidden');
+
+        if (updateUrl) {
+          const nextUrl = new URL(window.location.href);
+          let changed = false;
+          if (nextUrl.searchParams.has('mode')) {
+            nextUrl.searchParams.delete('mode');
+            changed = true;
+          }
+          if (nextUrl.hash === '#racik' || nextUrl.hash === '#custom') {
+            nextUrl.hash = '';
+            changed = true;
+          }
+          if (changed) {
+            window.history.replaceState(null, '', nextUrl.pathname + (nextUrl.search ? nextUrl.search : '') + nextUrl.hash);
+          }
+        }
+
         updateCheckout();
       } else if (mode === 'custom') {
         orderMode = 'custom';
-        const isCurrentlyExpanded = btnOrderCustom?.getAttribute('aria-expanded') === 'true';
 
-        if (toggleCollapse && isCurrentlyExpanded) {
-          // Collapse
-          btnOrderCustom?.setAttribute('aria-expanded', 'false');
-          customMenuChevron?.classList.remove('rotate-180');
-          if (customMenuCollapsible) {
-            customMenuCollapsible.setAttribute('data-buka', 'false');
-            customMenuCollapsible.style.gridTemplateRows = '0fr';
-          }
-        } else {
-          // Expand
-          btnOrderCustom?.setAttribute('aria-pressed', 'true');
-          btnOrderCustom?.setAttribute('aria-expanded', 'true');
-          btnOrderCustom?.classList.add('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
-          btnOrderCustom?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-700');
-          badgeOrderCustom?.classList.remove('hidden');
-
-          btnOrderDefault?.setAttribute('aria-pressed', 'false');
-          btnOrderDefault?.classList.remove('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
-          btnOrderDefault?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-700');
-          badgeOrderDefault?.classList.add('hidden');
-
-          customMenuChevron?.classList.add('rotate-180');
-          if (customMenuCollapsible) {
-            customMenuCollapsible.setAttribute('data-buka', 'true');
-            customMenuCollapsible.style.gridTemplateRows = '1fr';
-          }
-          defaultPresetBox?.classList.add('hidden');
-
-          // Read custom inputs state
-          const activeRadio = document.querySelector('input[name="main-menu"]:checked');
-          if (activeRadio) {
-            selectedMainMenu = activeRadio.value;
-          }
-          const checkedCheckboxes = document.querySelectorAll('input[name="side-dishes"]:checked');
-          selectedSideDishes = Array.from(checkedCheckboxes).map(cb => cb.value);
+        // Button Custom Active
+        btnOrderCustom?.setAttribute('aria-pressed', 'true');
+        btnOrderCustom?.setAttribute('aria-expanded', 'true');
+        btnOrderCustom?.classList.add('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
+        btnOrderCustom?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        if (iconOrderCustom) {
+          iconOrderCustom.className = 'size-9 rounded-xl bg-accent text-white flex items-center justify-center flex-none font-bold shadow-xs transition-colors';
         }
+        badgeOrderCustom?.classList.remove('hidden');
+
+        // Button Default Inactive
+        btnOrderDefault?.setAttribute('aria-pressed', 'false');
+        btnOrderDefault?.classList.remove('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
+        btnOrderDefault?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        if (iconOrderDefault) {
+          iconOrderDefault.className = 'size-9 rounded-xl bg-surface border border-neutral-200 text-neutral-600 flex items-center justify-center flex-none group-hover:border-accent/40 group-hover:text-accent transition-colors';
+        }
+        badgeOrderDefault?.classList.add('hidden');
+
+        // Collapsible open
+        customMenuChevron?.classList.add('rotate-180');
+        if (customMenuCollapsible) {
+          customMenuCollapsible.setAttribute('data-buka', 'true');
+          customMenuCollapsible.style.gridTemplateRows = '1fr';
+        }
+        defaultPresetBox?.classList.add('hidden');
+
+        syncActiveCustomInputs();
         updateSummary();
         updateCheckout();
+
+        if (updateUrl) {
+          const nextUrl = new URL(window.location.href);
+          if (nextUrl.searchParams.get('mode') !== 'custom') {
+            nextUrl.searchParams.set('mode', 'custom');
+            window.history.replaceState(null, '', nextUrl.pathname + nextUrl.search + nextUrl.hash);
+          }
+        }
       }
     }
 
     if (btnOrderDefault) {
       btnOrderDefault.addEventListener('click', () => {
-        setOrderMode('default');
-        input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
+        setOrderMode('default', true);
+        portionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, { signal });
     }
 
     if (btnOrderCustom) {
       btnOrderCustom.addEventListener('click', () => {
         setOrderMode('custom', true);
-      });
+      }, { signal });
     }
 
+    // Sync from URL (Single Source of Truth)
+    function syncModeFromUrl(updateUrl = false) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlMode = urlParams.get('mode');
+      const hash = window.location.hash;
+
+      if (urlMode === 'custom' || hash === '#racik' || hash === '#custom') {
+        setOrderMode('custom', updateUrl);
+      } else {
+        setOrderMode('default', updateUrl);
+      }
+    }
+
+    window.addEventListener('popstate', () => {
+      syncModeFromUrl(false);
+    }, { signal });
+
     if (hasMenuSelection) {
-      const mainMenuRadios = document.querySelectorAll('input[name="main-menu"]');
-      const sideDishCheckboxes = document.querySelectorAll('input[name="side-dishes"]');
+      const mainMenuRadios = document.querySelectorAll<HTMLInputElement>('input[name="main-menu"]');
+      const sideDishCheckboxes = document.querySelectorAll<HTMLInputElement>('input[name="side-dishes"]');
 
       mainMenuRadios.forEach((radio) => {
         radio.addEventListener('change', (e) => {
-          if (e.target.checked) {
-            selectedMainMenu = e.target.value;
+          const target = e.target as HTMLInputElement;
+          if (target.checked) {
+            selectedMainMenu = target.value;
             updateSummary();
             updateCheckout();
           }
-        });
+        }, { signal });
       });
 
       sideDishCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', (e) => {
-          const maxSelections = parseInt(e.target.dataset.max, 10);
-          const allCheckboxes = document.querySelectorAll('input[name="side-dishes"]');
+          const target = e.target as HTMLInputElement;
+          const maxSelections = parseInt(target.dataset.max || '0', 10);
+          const allCheckboxes = document.querySelectorAll<HTMLInputElement>('input[name="side-dishes"]');
           const checkedCount = Array.from(allCheckboxes).filter(cb => cb.checked).length;
 
-          if (e.target.checked && checkedCount > maxSelections) {
-            e.target.checked = false;
+          if (target.checked && checkedCount > maxSelections) {
+            target.checked = false;
             alert(`Maksimal pilihan adalah ${maxSelections} lauk pendamping`);
             return;
           }
@@ -760,7 +855,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
 
           updateSummary();
           updateCheckout();
-        });
+        }, { signal });
       });
     }
 
@@ -790,12 +885,12 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
       }
     }
 
-    function validateMenuSelection() {
+    function validateMenuSelection(): { valid: boolean } {
       if (!hasMenuSelection || orderMode === 'default') {
         return { valid: true };
       }
 
-      let errors = [];
+      let errors: string[] = [];
 
       if (!selectedMainMenu) {
         errors.push('Pilih satu menu utama');
@@ -822,11 +917,13 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
       const qty = calculateClampedQty();
       const total = qty * basePrice;
 
-      display.textContent = new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-      }).format(total);
+      if (display) {
+        display.textContent = new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0,
+        }).format(total);
+      }
 
       let messageLines = [
         `Halo Dzanis Catering, saya ingin memesan *${packageName}* sebanyak *${qty} porsi*.`,
@@ -865,10 +962,10 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
       );
 
       const rawMessage = messageLines.join('\n');
-      btn.dataset.waMessage = rawMessage;
+      checkoutBtn.dataset.waMessage = rawMessage;
     }
 
-    btn.addEventListener('click', (e) => {
+    checkoutBtn.addEventListener('click', (e) => {
       if (hasMenuSelection) {
         const validation = validateMenuSelection();
         if (!validation.valid) {
@@ -885,51 +982,54 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
 
       if (eventDateInput && eventDateInput.value) {
         const selectedDate = new Date(`${eventDateInput.value}T00:00:00`);
-        const minSelectableDate = new Date(`${minEventDateString}T00:00:00`);
+        const minSelectableDate = minEventDateString ? new Date(`${minEventDateString}T00:00:00`) : null;
 
-        if (selectedDate < minSelectableDate) {
+        if (minSelectableDate && selectedDate < minSelectableDate) {
           e.preventDefault();
           alert('Tanggal acara tidak bisa dipilih hari ini atau hari sebelumnya. Minimal pilih tanggal besok.');
           return;
         }
       }
 
-      const waMessage = btn.dataset.waMessage;
+      const waMessage = checkoutBtn.dataset.waMessage;
       if (waMessage) {
-        btn.href = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`;
+        checkoutBtn.href = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`;
       }
-    });
+    }, { signal });
 
-    input.addEventListener('input', updateCheckout);
+    portionInput.addEventListener('input', updateCheckout, { signal });
 
-    input.addEventListener('blur', () => {
-      let val = parseInt(input.value, 10);
+    portionInput.addEventListener('blur', () => {
+      let val = parseInt(portionInput.value, 10);
       if (isNaN(val) || val < minOrder) {
-        input.value = minOrder.toString();
+        portionInput.value = minOrder.toString();
         updateCheckout();
       }
-    });
+    }, { signal });
 
     if (eventDateInput) {
       eventDateInput.addEventListener('change', (e) => {
-        selectedEventDate = e.target.value;
+        const target = e.target as HTMLInputElement;
+        selectedEventDate = target.value;
         updateCheckout();
-      });
+      }, { signal });
     }
 
+    // Initial state sync from URL / defaults
+    syncModeFromUrl(false);
     updateCheckout();
     if (hasMenuSelection) {
       updateSummary();
     }
   }
 
-  function initCompositionToggle() {
+  function initCompositionToggle(signal: AbortSignal) {
     const btn = document.getElementById('composition-toggle-btn');
-    const content = document.getElementById('composition-content');
+    const content = document.getElementById('composition-content') as HTMLElement | null;
     const chevron = document.getElementById('composition-chevron');
     if (!btn || !content || !chevron) return;
 
-    btn.onclick = () => {
+    btn.addEventListener('click', () => {
       const isExpanded = btn.getAttribute('aria-expanded') === 'true';
       const nextState = !isExpanded;
 
@@ -944,18 +1044,75 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
         content.style.gridTemplateRows = '0fr';
         chevron.classList.remove('rotate-180');
       }
-    };
+    }, { signal });
   }
 
   function initDetailPage() {
-    initPortionCalculator();
-    initCompositionToggle();
+    if (detailPageAbortController) {
+      detailPageAbortController.abort();
+      detailPageAbortController = null;
+    }
+
+    const root = document.getElementById('package-detail-root');
+    if (!root) return;
+
+    const basePrice = Number(root.dataset.basePrice) || 0;
+    const packageName = root.dataset.packageName || '';
+    const minOrder = Number(root.dataset.minOrder) || 1;
+    const phone = root.dataset.phone || '';
+    const hasMenuSelection = root.dataset.hasMenuSelection === 'true';
+    const sideDishesMin = Number(root.dataset.sideDishesMin) || 0;
+    const sideDishesMax = Number(root.dataset.sideDishesMax) || 0;
+    const defaultMainMenu = root.dataset.defaultMainMenu || '';
+    let defaultSideDishes: string[] = [];
+    try {
+      defaultSideDishes = JSON.parse(root.dataset.defaultSideDishes || '[]');
+    } catch {
+      defaultSideDishes = [];
+    }
+    const minEventDateString = root.dataset.minEventDate || '';
+
+    const config: PackageConfig = {
+      basePrice,
+      packageName,
+      minOrder,
+      phone,
+      hasMenuSelection,
+      sideDishesMin,
+      sideDishesMax,
+      defaultMainMenu,
+      defaultSideDishes,
+      minEventDateString,
+    };
+
+    detailPageAbortController = new AbortController();
+    const { signal } = detailPageAbortController;
+
+    initPortionCalculator(config, signal);
+    initCompositionToggle(signal);
   }
 
+  let isDetailPageLoaded = false;
+
+  document.addEventListener('astro:page-load', () => {
+    isDetailPageLoaded = true;
+    initDetailPage();
+  });
+
+  document.addEventListener('astro:before-swap', () => {
+    if (detailPageAbortController) {
+      detailPageAbortController.abort();
+      detailPageAbortController = null;
+    }
+  });
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDetailPage);
-  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!isDetailPageLoaded) {
+        initDetailPage();
+      }
+    }, { once: true });
+  } else if (!isDetailPageLoaded) {
     initDetailPage();
   }
-  document.addEventListener('astro:page-load', initDetailPage);
 </script>

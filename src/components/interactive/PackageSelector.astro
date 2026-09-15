@@ -260,7 +260,15 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
 </nav>
 
 <script>
+  let pkgSelectorAbortController: AbortController | null = null;
+
   function initPackageSelector() {
+    if (pkgSelectorAbortController) {
+      pkgSelectorAbortController.abort();
+    }
+    pkgSelectorAbortController = new AbortController();
+    const { signal } = pkgSelectorAbortController;
+
     const trigger = document.getElementById('pkg-selector-trigger');
     const panel = document.getElementById('pkg-selector-panel');
     const backdrop = document.getElementById('pkg-selector-backdrop');
@@ -276,8 +284,29 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
       return document.getElementById('floating-whatsapp-btn') || document.querySelector('a[aria-label="Chat WhatsApp Dzanis Catering"]');
     }
 
+    function syncLinksMode() {
+      const currentParams = new URLSearchParams(window.location.search);
+      const currentMode = currentParams.get('mode');
+      const hash = window.location.hash;
+      const isCustom = currentMode === 'custom' || hash === '#racik' || hash === '#custom';
+      const pkgLinks = panel?.querySelectorAll<HTMLAnchorElement>('a[data-pkg-item]');
+      pkgLinks?.forEach(link => {
+        const rawHref = link.getAttribute('href') || '';
+        const baseHref = rawHref.split('?')[0].split('#')[0];
+        if (isCustom) {
+          link.setAttribute('href', `${baseHref}?mode=custom`);
+        } else {
+          link.setAttribute('href', baseHref);
+        }
+      });
+    }
+
+    // Initial sync of links on mount
+    syncLinksMode();
+
     function openPanel() {
       isOpen = true;
+      syncLinksMode();
       trigger?.setAttribute('aria-expanded', 'true');
 
       // Mobile sheet open
@@ -351,28 +380,36 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
       togglePanel();
-    });
+    }, { signal });
 
     closeBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       closePanel();
-    });
+    }, { signal });
 
-    backdrop.addEventListener('click', closePanel);
+    backdrop.addEventListener('click', closePanel, { signal });
+
+    // Close panel when a package link is clicked
+    const pkgLinks = panel.querySelectorAll<HTMLAnchorElement>('a[data-pkg-item]');
+    pkgLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        closePanel();
+      }, { signal });
+    });
 
     // Outside click for desktop
     document.addEventListener('click', (e) => {
       if (isOpen && root && !root.contains(e.target as Node)) {
         closePanel();
       }
-    });
+    }, { signal });
 
     // Escape key handling
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && isOpen) {
         closePanel();
       }
-    });
+    }, { signal });
 
     // Focus trap inside panel
     panel.addEventListener('keydown', (e) => {
@@ -395,13 +432,35 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
           e.preventDefault();
         }
       }
-    });
+    }, { signal });
   }
 
+  let isPackageSelectorPageLoaded = false;
+
+  document.addEventListener('astro:page-load', () => {
+    isPackageSelectorPageLoaded = true;
+    initPackageSelector();
+  });
+
+  document.addEventListener('astro:before-swap', () => {
+    document.body.style.overflow = '';
+    const floatingWa = document.getElementById('floating-whatsapp-btn') || document.querySelector('a[aria-label="Chat WhatsApp Dzanis Catering"]');
+    if (floatingWa) {
+      floatingWa.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+    }
+    if (pkgSelectorAbortController) {
+      pkgSelectorAbortController.abort();
+      pkgSelectorAbortController = null;
+    }
+  });
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPackageSelector);
-  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!isPackageSelectorPageLoaded) {
+        initPackageSelector();
+      }
+    }, { once: true });
+  } else if (!isPackageSelectorPageLoaded) {
     initPackageSelector();
   }
-  document.addEventListener('astro:page-load', initPackageSelector);
 </script>
