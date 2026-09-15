@@ -17,101 +17,174 @@ const phone = waPhoneNumber || "6281324383858";
       </p>
     </div>
 
-    <!-- 3-Card Responsive Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-10">
-      {DAFTAR_LAYANAN_LAIN.map((item) => {
-        const rawMessage = `Halo Dzanis Catering, saya ingin konsultasi penawaran untuk layanan *${item.nama}*.\n\nDetail Rencana Acara:\n- Perkiraan Jumlah: [Isi pax / porsi]\n- Tanggal Acara: [Isi tanggal]\n- Lokasi Acara: [Isi kota/daerah]\n\nMohon informasi ketersediaan slot dan katalog lengkapnya.`;
-        const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(rawMessage)}`;
+    <!-- Carousel Wrapper -->
+    <div class="relative group/carousel mt-10">
+      <!-- Tombol Panah Kiri (‹) -->
+      <button
+        type="button"
+        id="layanan-prev"
+        aria-label="Layanan sebelumnya"
+        class="absolute -left-3 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 z-20 size-11 sm:size-12 rounded-full bg-white/95 backdrop-blur shadow-md hover:shadow-xl border border-neutral-200/90 text-neutral-800 hover:text-[#C04A27] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-0 disabled:pointer-events-none disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C04A27]"
+      >
+        <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+      </button>
 
-        return (
-          <article class="bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col justify-between transition-shadow duration-200 hover:shadow-md">
-            <!-- Top Image with Floating Badge -->
-            <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
-              <img
-                src={item.foto}
-                alt={item.fotoAlt}
-                loading="lazy"
-                decoding="async"
-                class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-              />
-              {item.badge && (
-                <span class="absolute top-3.5 left-3.5 rounded-full bg-[#C04A27] px-3 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
-                  {item.badge}
-                </span>
-              )}
-            </div>
+      <!-- Carousel Container -->
+      <div
+        id="layanan-grid"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Daftar Layanan Lainnya"
+        class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-5 pb-6 pt-1 overscroll-x-contain no-scrollbar cursor-grab select-none"
+      >
+        {DAFTAR_LAYANAN_LAIN.map((item, idx) => {
+          const rawMessage = `Halo Dzanis Catering, saya ingin konsultasi penawaran untuk layanan *${item.nama}*.\n\nDetail Rencana Acara:\n- Perkiraan Jumlah: [Isi pax / porsi]\n- Tanggal Acara: [Isi tanggal]\n- Lokasi Acara: [Isi kota/daerah]\n\nMohon informasi ketersediaan slot dan katalog lengkapnya.`;
+          const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(rawMessage)}`;
 
-            <!-- Card Content Body -->
-            <div class="p-5 md:p-6 flex flex-1 flex-col justify-between">
-              <div>
-                <!-- Title & Description -->
-                <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1.5">
-                  {item.nama}
-                </h3>
-                <p class="text-xs sm:text-sm text-neutral-600 leading-relaxed mb-4">
-                  {item.deskripsi}
-                </p>
+          return (
+            <article
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${item.nama} (${idx + 1} dari ${DAFTAR_LAYANAN_LAIN.length})`}
+              class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col justify-between transition-shadow duration-200 hover:shadow-md select-none"
+            >
+              <!-- Top Image with Floating Badge -->
+              <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
+                <img
+                  src={item.foto}
+                  alt={item.fotoAlt}
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                  class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
+                />
+                {item.badge && (
+                  <span class="absolute top-3.5 left-3.5 rounded-full bg-[#C04A27] px-3 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
+                    {item.badge}
+                  </span>
+                )}
+              </div>
 
-                <!-- Pricing & MoQ Header -->
-                <div class="mb-4">
-                  <p class="flex items-baseline gap-1.5 text-neutral-900">
-                    <span class="text-xs font-semibold text-neutral-500">Mulai</span>
-                    <span class="text-2xl font-bold font-heading text-neutral-900">
-                      {item.headlineHarga}
-                    </span>
-                    <span class="text-xs text-neutral-500 font-normal">
-                      {item.satuanHarga}
-                    </span>
+              <!-- Card Content Body -->
+              <div class="p-5 md:p-6 flex flex-1 flex-col justify-between">
+                <div>
+                  <!-- Title & Description -->
+                  <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1.5">
+                    {item.nama}
+                  </h3>
+                  <p class="text-xs sm:text-sm text-neutral-600 leading-relaxed mb-4">
+                    {item.deskripsi}
                   </p>
-                  <span class="inline-block bg-neutral-100 text-neutral-700 text-xs font-semibold px-2.5 py-1 rounded-full w-fit mt-2">
-                    {item.minOrder}
-                  </span>
+
+                  <!-- Pricing & MoQ Header -->
+                  <div class="mb-4">
+                    <p class="flex items-baseline gap-1.5 text-neutral-900">
+                      <span class="text-xs font-semibold text-neutral-500">Mulai</span>
+                      <span class="text-2xl font-bold font-heading text-neutral-900">
+                        {item.headlineHarga}
+                      </span>
+                      <span class="text-xs text-neutral-500 font-normal">
+                        {item.satuanHarga}
+                      </span>
+                    </p>
+                    <span class="inline-block bg-neutral-100 text-neutral-700 text-xs font-semibold px-2.5 py-1 rounded-full w-fit mt-2">
+                      {item.minOrder}
+                    </span>
+                  </div>
+
+                  <!-- Facility Inclusion List -->
+                  <div class="border-t border-neutral-100 pt-3.5 mb-2">
+                    <span class="block text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-2">
+                      Fasilitas Termasuk:
+                    </span>
+                    <ul class="text-xs text-neutral-600 space-y-1.5">
+                      {item.fasilitas.map((f) => (
+                        <li class="flex items-start gap-2">
+                          <span class="text-[#C04A27] font-bold flex-none">✓</span>
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <!-- Native Accordion for Menu Highlights (Zero JS) -->
+                  <details class="group border-t border-neutral-100 pt-3 mt-4">
+                    <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
+                      <span>Contoh Menu Pilihan ({item.menuHighlight.length})</span>
+                      <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
+                    </summary>
+                    <ul class="mt-2 space-y-1 text-xs text-neutral-600 pl-2">
+                      {item.menuHighlight.map((m) => (
+                        <li>• {m}</li>
+                      ))}
+                    </ul>
+                  </details>
                 </div>
 
-                <!-- Facility Inclusion List -->
-                <div class="border-t border-neutral-100 pt-3.5 mb-2">
-                  <span class="block text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-2">
-                    Fasilitas Termasuk:
-                  </span>
-                  <ul class="text-xs text-neutral-600 space-y-1.5">
-                    {item.fasilitas.map((f) => (
-                      <li class="flex items-start gap-2">
-                        <span class="text-[#C04A27] font-bold flex-none">✓</span>
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <!-- Primary CTA Button with URL-Encoded WhatsApp Payload -->
+                <div class="mt-6 pt-2">
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex w-full items-center justify-center gap-2 text-center py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition duration-200 shadow-xs"
+                  >
+                    KONSULTASI / MINTA PENAWARAN
+                  </a>
                 </div>
-
-                <!-- Native Accordion for Menu Highlights (Zero JS) -->
-                <details class="group border-t border-neutral-100 pt-3 mt-4">
-                  <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
-                    <span>Contoh Menu Pilihan ({item.menuHighlight.length})</span>
-                    <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
-                  </summary>
-                  <ul class="mt-2 space-y-1 text-xs text-neutral-600 pl-2">
-                    {item.menuHighlight.map((m) => (
-                      <li>• {m}</li>
-                    ))}
-                  </ul>
-                </details>
               </div>
+            </article>
+          );
+        })}
+      </div>
 
-              <!-- Primary CTA Button with URL-Encoded WhatsApp Payload -->
-              <div class="mt-6 pt-2">
-                <a
-                  href={waUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="flex w-full items-center justify-center gap-2 text-center py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition duration-200 shadow-xs"
-                >
-                  KONSULTASI / MINTA PENAWARAN
-                </a>
-              </div>
-            </div>
-          </article>
-        );
-      })}
+      <!-- Tombol Panah Kanan (›) -->
+      <button
+        type="button"
+        id="layanan-next"
+        aria-label="Layanan selanjutnya"
+        class="absolute -right-3 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 z-20 size-11 sm:size-12 rounded-full bg-white/95 backdrop-blur shadow-md hover:shadow-xl border border-neutral-200/90 text-neutral-800 hover:text-[#C04A27] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-0 disabled:pointer-events-none disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C04A27]"
+      >
+        <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Indikator Posisi Visual (Dots) -->
+    <div
+      id="layanan-dots"
+      role="tablist"
+      aria-label="Indikator slide layanan"
+      class="flex items-center justify-center gap-2 mt-6"
+    >
     </div>
   </div>
 </section>
+
+<script>
+  import { setupSnapCarousel } from '../../utils/carousel';
+
+  function initLayananCarousel() {
+    const grid = document.getElementById('layanan-grid');
+    const prevBtn = document.getElementById('layanan-prev');
+    const nextBtn = document.getElementById('layanan-next');
+    const dotsContainer = document.getElementById('layanan-dots');
+
+    if (grid && prevBtn && nextBtn) {
+      setupSnapCarousel({
+        grid,
+        prevBtn,
+        nextBtn,
+        dotsContainer,
+        dotAriaLabelPrefix: 'Lihat layanan slide',
+      });
+    }
+  }
+
+  // Inisialisasi awal & dukungan Astro View Transitions
+  initLayananCarousel();
+  document.addEventListener('astro:page-load', initLayananCarousel);
+</script>
