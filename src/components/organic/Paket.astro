@@ -21,105 +21,150 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       </p>
     </div>
 
-    <!-- Responsive Horizontal Scroll Container (Dinamis tersinkron ke Backend) -->
-    <div
-      id="paket-grid"
-      class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-5 pb-6 pt-1 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-14 lg:px-14 overscroll-x-contain no-scrollbar cursor-grab"
-    >
-      {DAFTAR_PAKET.map((paket) => (
-        <article class="w-[84vw] sm:w-[320px] md:w-[360px] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-shadow duration-200 hover:shadow-md">
-          <!-- Top Image with Badge -->
-          <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
-            <img
-              src={paket.foto}
-              alt={paket.fotoAlt || paket.nama}
-              loading="lazy"
-              decoding="async"
-              class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-            />
-            {paket.badge && (
-              <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
-                {paket.badge}
-              </span>
-            )}
-          </div>
+    <!-- Carousel Wrapper -->
+    <div class="relative group/carousel">
+      <!-- Tombol Panah Kiri (‹) -->
+      <button
+        type="button"
+        id="paket-prev"
+        aria-label="Paket sebelumnya"
+        class="absolute -left-3 sm:-left-4 lg:-left-6 top-1/2 -translate-y-1/2 z-20 size-11 sm:size-12 rounded-full bg-white/95 backdrop-blur shadow-md hover:shadow-xl border border-neutral-200/90 text-neutral-800 hover:text-[#C04A27] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-0 disabled:pointer-events-none disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C04A27]"
+      >
+        <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+      </button>
 
-          <!-- Card Content -->
-          <div class="p-5 md:p-6 flex flex-1 flex-col">
-            <!-- Title & Description -->
-            <div class="mb-3">
-              <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
-                {paket.nama}
-              </h3>
-              <p class="text-xs md:text-sm text-neutral-600 line-clamp-2 leading-relaxed">
-                {paket.deskripsiSingkat}
-              </p>
-            </div>
-
-            <!-- Price Display -->
-            <div class="mb-3">
-              <p class="flex items-baseline gap-1">
-                <span class="text-xs font-semibold text-neutral-500">Rp</span>
-                <span class="text-2xl font-bold font-heading text-neutral-900">
-                  {paket.harga.toLocaleString("id-ID")}
+      <!-- Carousel Container (Dinamis tersinkron ke Backend) -->
+      <div
+        id="paket-grid"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Daftar Paket Nasi Kotak"
+        class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-5 pb-6 pt-1 overscroll-x-contain no-scrollbar cursor-grab select-none"
+      >
+        {DAFTAR_PAKET.map((paket, idx) => (
+          <article
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${paket.nama} (${idx + 1} dari ${DAFTAR_PAKET.length})`}
+            class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-shadow duration-200 hover:shadow-md select-none"
+          >
+            <!-- Top Image with Badge -->
+            <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
+              <img
+                src={paket.foto}
+                alt={paket.fotoAlt || paket.nama}
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+                class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
+              />
+              {paket.badge && (
+                <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
+                  {paket.badge}
                 </span>
-                <span class="text-xs text-neutral-500 font-medium">/ box</span>
-              </p>
+              )}
             </div>
 
-            <!-- Tags Pill List -->
-            <div class="flex flex-wrap gap-1.5 mb-4">
-              {paket.tags.map((tag) => (
-                <span class="inline-flex items-center rounded-full bg-surface px-2.5 py-0.5 text-xs text-neutral-700 font-medium">
-                  ✓ {tag}
-                </span>
-              ))}
-            </div>
-
-            <!-- Menu Utama -->
-            <div class="space-y-1 mb-3">
-              {paket.menuUtama.map((menu) => (
-                <p class="text-xs text-neutral-700 flex items-start gap-1.5 leading-snug">
-                  <span class="text-[#C04A27] font-bold flex-none">•</span>
-                  <span>{menu}</span>
+            <!-- Card Content -->
+            <div class="p-5 md:p-6 flex flex-1 flex-col">
+              <!-- Title & Description -->
+              <div class="mb-3">
+                <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
+                  {paket.nama}
+                </h3>
+                <p class="text-xs md:text-sm text-neutral-600 line-clamp-2 leading-relaxed">
+                  {paket.deskripsiSingkat}
                 </p>
-              ))}
-            </div>
+              </div>
 
-            <!-- Native Accordion for Lauk Pendamping (Zero JS) -->
-            <details class="group border-t border-neutral-100 pt-3 mt-auto">
-              <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
-                <span>Lauk pendamping ({paket.laukPendamping.length})</span>
-                <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
-              </summary>
-              <ul class="mt-2 space-y-1 text-xs text-neutral-600 pl-2">
-                {paket.laukPendamping.map((lauk) => (
-                  <li>• {lauk}</li>
+              <!-- Price Display -->
+              <div class="mb-3">
+                <p class="flex items-baseline gap-1">
+                  <span class="text-xs font-semibold text-neutral-500">Rp</span>
+                  <span class="text-2xl font-bold font-heading text-neutral-900">
+                    {paket.harga.toLocaleString("id-ID")}
+                  </span>
+                  <span class="text-xs text-neutral-500 font-medium">/ box</span>
+                </p>
+              </div>
+
+              <!-- Tags Pill List -->
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                {paket.tags.map((tag) => (
+                  <span class="inline-flex items-center rounded-full bg-surface px-2.5 py-0.5 text-xs text-neutral-700 font-medium">
+                    ✓ {tag}
+                  </span>
                 ))}
-              </ul>
-            </details>
+              </div>
 
-            <!-- Actions -->
-            <div class="mt-4 pt-3 border-t border-neutral-100">
-              <a
-                href={`/paket/${paket.slug}`}
-                class="block w-full text-center py-2.5 px-4 rounded-full border border-[#C04A27] text-[#C04A27] text-xs font-semibold hover:bg-orange-50 transition"
-              >
-                Detail Lengkap
-              </a>
-              <button
-                type="button"
-                data-order-trigger
-                data-package-name={paket.nama}
-                data-price={paket.harga}
-                class="w-full mt-2 py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition cursor-pointer"
-              >
-                Pesan Paket Ini
-              </button>
+              <!-- Menu Utama -->
+              <div class="space-y-1 mb-3">
+                {paket.menuUtama.map((menu) => (
+                  <p class="text-xs text-neutral-700 flex items-start gap-1.5 leading-snug">
+                    <span class="text-[#C04A27] font-bold flex-none">•</span>
+                    <span>{menu}</span>
+                  </p>
+                ))}
+              </div>
+
+              <!-- Native Accordion for Lauk Pendamping (Zero JS) -->
+              <details class="group border-t border-neutral-100 pt-3 mt-auto">
+                <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
+                  <span>Lauk pendamping ({paket.laukPendamping.length})</span>
+                  <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
+                </summary>
+                <ul class="mt-2 space-y-1 text-xs text-neutral-600 pl-2">
+                  {paket.laukPendamping.map((lauk) => (
+                    <li>• {lauk}</li>
+                  ))}
+                </ul>
+              </details>
+
+              <!-- Actions -->
+              <div class="mt-4 pt-3 border-t border-neutral-100">
+                <a
+                  href={`/paket/${paket.slug}`}
+                  class="block w-full text-center py-2.5 px-4 rounded-full border border-[#C04A27] text-[#C04A27] text-xs font-semibold hover:bg-orange-50 transition"
+                >
+                  Detail Lengkap
+                </a>
+                <button
+                  type="button"
+                  data-order-trigger
+                  data-package-name={paket.nama}
+                  data-price={paket.harga}
+                  class="w-full mt-2 py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition cursor-pointer"
+                >
+                  Pesan Paket Ini
+                </button>
+              </div>
             </div>
-          </div>
-        </article>
-      ))}
+          </article>
+        ))}
+      </div>
+
+      <!-- Tombol Panah Kanan (›) -->
+      <button
+        type="button"
+        id="paket-next"
+        aria-label="Paket selanjutnya"
+        class="absolute -right-3 sm:-right-4 lg:-right-6 top-1/2 -translate-y-1/2 z-20 size-11 sm:size-12 rounded-full bg-white/95 backdrop-blur shadow-md hover:shadow-xl border border-neutral-200/90 text-neutral-800 hover:text-[#C04A27] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-0 disabled:pointer-events-none disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C04A27]"
+      >
+        <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Indikator Posisi Visual (Dots) -->
+    <div
+      id="paket-dots"
+      role="tablist"
+      aria-label="Indikator slide paket"
+      class="flex items-center justify-center gap-2 mt-6"
+    >
     </div>
 
     <!-- Bottom WhatsApp Consultation Link -->
@@ -137,6 +182,274 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
 </section>
 
 <script is:inline define:vars={{ publicApiUrl }}>
+  // Carousel Controller & Backend API Sync
+  let carouselInstance = null;
+
+  function initPaketCarousel() {
+    const grid = document.getElementById('paket-grid');
+    const prevBtn = document.getElementById('paket-prev');
+    const nextBtn = document.getElementById('paket-next');
+    const dotsContainer = document.getElementById('paket-dots');
+    if (!grid || !prevBtn || !nextBtn) return null;
+
+    function getMetrics() {
+      const cards = Array.from(grid.querySelectorAll('article'));
+      if (cards.length === 0) return { cards, cardWidth: 0, gap: 20, visibleCount: 1, maxStops: 1 };
+
+      const firstCard = cards[0];
+      const cardWidth = firstCard.getBoundingClientRect().width;
+      let gap = 20;
+      if (cards.length > 1) {
+        gap = cards[1].offsetLeft - (firstCard.offsetLeft + cardWidth);
+        if (gap < 0 || isNaN(gap)) gap = 20;
+      }
+
+      const containerWidth = grid.clientWidth;
+      const visibleCount = Math.max(1, Math.round((containerWidth + gap) / (cardWidth + gap)));
+      const maxStops = Math.max(1, cards.length - visibleCount + 1);
+
+      return { cards, cardWidth, gap, visibleCount, maxStops };
+    }
+
+    function getActiveIndex() {
+      const { cardWidth, gap, maxStops } = getMetrics();
+      const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      if (maxScroll <= 4 || maxStops <= 1) return 0;
+
+      if (grid.scrollLeft >= maxScroll - 6) {
+        return maxStops - 1;
+      }
+      const step = cardWidth + gap;
+      if (step <= 0) return 0;
+      const idx = Math.round(grid.scrollLeft / step);
+      return Math.min(maxStops - 1, Math.max(0, idx));
+    }
+
+    function renderDots() {
+      if (!dotsContainer) return;
+      const { cards, maxStops } = getMetrics();
+      const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+
+      // Sembunyikan dots jika seluruh card muat dalam satu layar tampilan
+      if (maxScroll <= 4 || cards.length <= 1 || maxStops <= 1) {
+        dotsContainer.innerHTML = '';
+        dotsContainer.classList.add('hidden');
+        return;
+      }
+
+      dotsContainer.classList.remove('hidden');
+      const activeIdx = getActiveIndex();
+
+      dotsContainer.innerHTML = Array.from({ length: maxStops }).map((_, idx) => `
+        <button
+          type="button"
+          role="tab"
+          aria-selected="${idx === activeIdx ? 'true' : 'false'}"
+          aria-label="Lihat paket slide ${idx + 1}"
+          data-dot-index="${idx}"
+          class="h-2.5 rounded-full transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C04A27] ${
+            idx === activeIdx
+              ? 'w-7 bg-[#C04A27]'
+              : 'w-2.5 bg-neutral-300 hover:bg-neutral-400'
+          }"
+        ></button>
+      `).join('');
+    }
+
+    function updateControls() {
+      const tolerance = 4;
+      const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      const isScrollable = maxScroll > tolerance;
+
+      if (!isScrollable) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        prevBtn.classList.add('opacity-0', 'pointer-events-none');
+        nextBtn.classList.add('opacity-0', 'pointer-events-none');
+        if (dotsContainer) dotsContainer.classList.add('hidden');
+        return;
+      }
+
+      const atStart = grid.scrollLeft <= tolerance;
+      const atEnd = grid.scrollLeft >= maxScroll - tolerance;
+
+      prevBtn.disabled = atStart;
+      nextBtn.disabled = atEnd;
+
+      if (atStart) {
+        prevBtn.classList.add('opacity-0', 'pointer-events-none');
+      } else {
+        prevBtn.classList.remove('opacity-0', 'pointer-events-none');
+      }
+
+      if (atEnd) {
+        nextBtn.classList.add('opacity-0', 'pointer-events-none');
+      } else {
+        nextBtn.classList.remove('opacity-0', 'pointer-events-none');
+      }
+
+      // Update styling dots aktif
+      if (dotsContainer) {
+        const activeIdx = getActiveIndex();
+        const dotBtns = dotsContainer.querySelectorAll('button[data-dot-index]');
+        dotBtns.forEach((btn, idx) => {
+          const isActive = idx === activeIdx;
+          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          if (isActive) {
+            btn.className = 'h-2.5 rounded-full transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C04A27] w-7 bg-[#C04A27]';
+          } else {
+            btn.className = 'h-2.5 rounded-full transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C04A27] w-2.5 bg-neutral-300 hover:bg-neutral-400';
+          }
+        });
+      }
+    }
+
+    // Geser per card
+    function scrollStep(direction) {
+      const { cardWidth, gap } = getMetrics();
+      const step = cardWidth + gap;
+      const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      if (step <= 0 || maxScroll <= 0) return;
+
+      let targetLeft = 0;
+      if (direction === 'next') {
+        targetLeft = Math.min(maxScroll, grid.scrollLeft + step);
+      } else {
+        targetLeft = Math.max(0, grid.scrollLeft - step);
+      }
+
+      grid.scrollTo({ left: targetLeft, behavior: 'smooth' });
+    }
+
+    // Event handler tombol panah
+    prevBtn.onclick = () => scrollStep('prev');
+    nextBtn.onclick = () => scrollStep('next');
+
+    // Event delegation klik dots
+    if (dotsContainer) {
+      dotsContainer.onclick = (e) => {
+        const target = e.target.closest('button[data-dot-index]');
+        if (!target) return;
+        const index = parseInt(target.getAttribute('data-dot-index') || '0', 10);
+        const { cardWidth, gap } = getMetrics();
+        const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+        const targetLeft = Math.min(maxScroll, index * (cardWidth + gap));
+        grid.scrollTo({ left: targetLeft, behavior: 'smooth' });
+      };
+    }
+
+    // Listener scroll dengan requestAnimationFrame
+    let scrollTicking = false;
+    grid.onscroll = () => {
+      if (!scrollTicking) {
+        requestAnimationFrame(() => {
+          updateControls();
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
+    };
+
+    // Resize listener
+    window.addEventListener('resize', () => {
+      renderDots();
+      updateControls();
+    });
+
+    // Mouse drag scroll dengan pencegahan seleksi teks
+    let isDown = false;
+    let isDragging = false;
+    let startX = 0;
+    let scrollLeftStart = 0;
+    let dragDistance = 0;
+
+    grid.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      if (e.target.closest('button, a, summary, input, select, textarea')) return;
+
+      isDown = true;
+      isDragging = false;
+      dragDistance = 0;
+      startX = e.pageX;
+      scrollLeftStart = grid.scrollLeft;
+
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      const deltaX = e.pageX - startX;
+      dragDistance = Math.abs(deltaX);
+
+      if (dragDistance > 5) {
+        if (!isDragging) {
+          isDragging = true;
+          grid.classList.add('cursor-grabbing');
+          document.body.classList.add('select-none');
+          window.getSelection()?.removeAllRanges();
+          grid.style.scrollBehavior = 'auto';
+          grid.style.scrollSnapType = 'none';
+        }
+        grid.scrollLeft = scrollLeftStart - deltaX;
+        window.getSelection()?.removeAllRanges();
+      }
+    });
+
+    const endDrag = () => {
+      if (!isDown) return;
+      isDown = false;
+      document.body.classList.remove('select-none');
+      grid.classList.remove('cursor-grabbing');
+
+      if (isDragging) {
+        grid.style.scrollBehavior = 'smooth';
+        grid.style.scrollSnapType = 'x mandatory';
+
+        const { cardWidth, gap } = getMetrics();
+        const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+        const step = cardWidth + gap;
+
+        if (step > 0 && maxScroll > 0) {
+          const nearestIndex = Math.round(grid.scrollLeft / step);
+          const targetLeft = Math.min(maxScroll, Math.max(0, nearestIndex * step));
+          grid.scrollTo({ left: targetLeft, behavior: 'smooth' });
+        }
+
+        setTimeout(() => {
+          isDragging = false;
+          dragDistance = 0;
+        }, 50);
+      }
+    };
+
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('mouseleave', endDrag);
+
+    // Cegah trigger link / button saat user baru saja melakukan drag
+    grid.addEventListener('click', (e) => {
+      if (isDragging || dragDistance > 5) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+
+    renderDots();
+    updateControls();
+
+    return {
+      refresh() {
+        renderDots();
+        updateControls();
+      }
+    };
+  }
+
+  // Inisialisasi awal
+  carouselInstance = initPaketCarousel();
+  document.addEventListener('astro:page-load', () => {
+    carouselInstance = initPaketCarousel();
+  });
+
   // Sinkronisasi otomatis katalog paket menu dari Backend (Express / Ngrok)
   (async function() {
     try {
@@ -173,23 +486,16 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       const grid = document.getElementById('paket-grid');
       if (!grid) return;
 
-      // Helper untuk resolusi URL foto & memastikan format .webp
       const resolvePhotoUrl = (img) => {
         if (!img) return '/images/menu/paket-20k.webp';
         let target = String(img).trim();
-
-        // 1. Data URI langsung kembalikan
         if (target.startsWith('data:')) return target;
-
-        // 2. Full HTTP/HTTPS URL
         if (target.startsWith('http://') || target.startsWith('https://')) {
           if (target.includes('ngrok')) {
             target += (target.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=69420';
           }
           return target;
         }
-
-        // 3. Path upload /uploads/...
         if (target.startsWith('/uploads/')) {
           if (apiUrl && apiUrl.includes('ngrok')) {
             return `${apiUrl}${target}${target.includes('?') ? '&' : '?'}ngrok-skip-browser-warning=69420`;
@@ -199,11 +505,10 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
           }
           return target;
         }
-
         return target;
       };
 
-      grid.innerHTML = packages.map((p) => {
+      grid.innerHTML = packages.map((p, idx) => {
         const nama = p.name || p.nama || 'Paket Menu';
         const harga = Number(p.price_per_pax || p.harga || 0);
         const slug = p.slug || (p.id ? String(p.id) : 'paket');
@@ -214,7 +519,12 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
         const items = Array.isArray(p.items) ? p.items : (p.menuUtama || []);
 
         return `
-          <article class="w-[84vw] sm:w-[320px] md:w-[360px] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md">
+          <article
+            role="group"
+            aria-roledescription="slide"
+            aria-label="${nama} (${idx + 1} dari ${packages.length})"
+            class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md select-none"
+          >
             <!-- Top Image with Badge (Format .WEBP) -->
             <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
               <img
@@ -222,7 +532,8 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 alt="${nama}"
                 loading="lazy"
                 decoding="async"
-                class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                draggable="false"
+                class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
                 onerror="if(!this.dataset.retryLocal && this.src.includes('/uploads/')){this.dataset.retryLocal='true';this.src='${rawImg}';}else{this.onerror=null;this.src='/images/menu/paket-20k.webp';}"
               />
               ${badge ? `
@@ -231,7 +542,6 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 </span>
               ` : ''}
             </div>
-
 
             <!-- Card Content -->
             <div class="p-5 md:p-6 flex flex-1 flex-col">
@@ -291,39 +601,13 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
           </article>
         `;
       }).join('');
+
+      // Refresh carousel setelah data API dimuat
+      if (carouselInstance) {
+        carouselInstance.refresh();
+      }
     } catch (err) {
       console.warn('[Dzanis Menu] Gagal sinkronisasi menu:', err);
     }
-  })();
-
-  // Mendukung swipe/drag geser menggunakan mouse di desktop
-  (function setupDragScroll() {
-    const grid = document.getElementById('paket-grid');
-    if (!grid) return;
-    let isDown = false;
-    let startX = 0;
-    let scrollLeft = 0;
-
-    grid.addEventListener('mousedown', (e) => {
-      if (e.target.closest('button') || e.target.closest('a') || e.target.closest('summary')) return;
-      isDown = true;
-      startX = e.pageX - grid.offsetLeft;
-      scrollLeft = grid.scrollLeft;
-      grid.classList.add('cursor-grabbing');
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (!isDown) return;
-      isDown = false;
-      grid.classList.remove('cursor-grabbing');
-    });
-
-    grid.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - grid.offsetLeft;
-      const walk = (x - startX) * 1.5;
-      grid.scrollLeft = scrollLeft - walk;
-    });
   })();
 </script>
