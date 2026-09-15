@@ -31,6 +31,15 @@ export interface Paket {
   populer?: boolean;
 }
 
+/**
+ * Menghilangkan akhiran angka + K (misal " 20K", " 23K") dari nama paket untuk tampilan UI.
+ * Contoh: "Paket Hemat 20K" -> "Paket Hemat"
+ */
+export function formatNamaPaket(nama: string): string {
+  if (!nama) return '';
+  return nama.replace(/\s*\d+K$/i, '').trim();
+}
+
 export const DAFTAR_PAKET: Paket[] = [
   {
     id: "paket-hemat-20k",

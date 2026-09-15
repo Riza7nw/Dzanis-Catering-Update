@@ -4,7 +4,7 @@
  */
 
 import { company, waPhoneNumber } from '../data/company';
-import { DAFTAR_PAKET, type Paket } from '../data/paket';
+import { DAFTAR_PAKET, type Paket, formatNamaPaket } from '../data/paket';
 import { DAFTAR_LAYANAN_LAIN } from '../data/layananLain';
 import { snackRingkasan } from '../data/snack';
 
@@ -80,7 +80,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
           description: "Pilihan paket nasi kotak higienis lengkap dengan alat makan steril untuk berbagai acara di Ciayumajakuning.",
           hasMenuItem: DAFTAR_PAKET.map((item) => ({
             "@type": "MenuItem",
-            name: item.nama,
+            name: formatNamaPaket(item.nama),
             description: item.deskripsiSingkat,
             image: `${site}${item.foto}`,
             url: `${site}/paket/${item.slug}`,
@@ -151,7 +151,7 @@ export function generateProductSchema(paket: Paket, siteUrl: string = DEFAULT_SI
     "@context": "https://schema.org",
     "@type": "Product",
     "@id": `${site}/paket/${paket.slug}#product`,
-    name: `${paket.nama} — Dzanis Catering`,
+    name: `${formatNamaPaket(paket.nama)} — Dzanis Catering`,
     image: [`${site}${paket.foto}`],
     description: paket.deskripsiLengkap || paket.deskripsiSingkat,
     sku: paket.id,

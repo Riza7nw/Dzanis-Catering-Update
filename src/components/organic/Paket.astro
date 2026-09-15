@@ -1,5 +1,5 @@
 ---
-import { DAFTAR_PAKET } from '../../data/paket';
+import { DAFTAR_PAKET, formatNamaPaket } from '../../data/paket';
 import { company } from '../../data/company';
 
 const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
@@ -47,14 +47,14 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
           <article
             role="group"
             aria-roledescription="slide"
-            aria-label={`${paket.nama} (${idx + 1} dari ${DAFTAR_PAKET.length})`}
+            aria-label={`${formatNamaPaket(paket.nama)} (${idx + 1} dari ${DAFTAR_PAKET.length})`}
             class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-shadow duration-200 hover:shadow-md select-none"
           >
             <!-- Top Image with Badge -->
             <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
               <img
                 src={paket.foto}
-                alt={paket.fotoAlt || paket.nama}
+                alt={formatNamaPaket(paket.fotoAlt || paket.nama)}
                 loading="lazy"
                 decoding="async"
                 draggable="false"
@@ -72,7 +72,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
               <!-- Title & Description -->
               <div class="mb-3">
                 <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
-                  {paket.nama}
+                  {formatNamaPaket(paket.nama)}
                 </h3>
                 <p class="text-xs md:text-sm text-neutral-600 line-clamp-2 leading-relaxed">
                   {paket.deskripsiSingkat}
@@ -133,7 +133,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 <button
                   type="button"
                   data-order-trigger
-                  data-package-name={paket.nama}
+                  data-package-name={formatNamaPaket(paket.nama)}
                   data-price={paket.harga}
                   class="w-full mt-2 py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition cursor-pointer"
                 >
@@ -509,7 +509,8 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       };
 
       grid.innerHTML = packages.map((p, idx) => {
-        const nama = p.name || p.nama || 'Paket Menu';
+        const rawNama = p.name || p.nama || 'Paket Menu';
+        const nama = rawNama.replace(/\s*\d+K$/i, '').trim();
         const harga = Number(p.price_per_pax || p.harga || 0);
         const slug = p.slug || (p.id ? String(p.id) : 'paket');
         const rawImg = p.image || p.foto || '';

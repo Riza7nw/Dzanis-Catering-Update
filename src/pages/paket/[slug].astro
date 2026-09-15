@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Navbar from '../../components/organic/Navbar.astro';
 import Footer from '../../components/organic/Footer.astro';
 import PackageSelector from '../../components/interactive/PackageSelector.astro';
-import { DAFTAR_PAKET, type Paket } from '../../data/paket';
+import { DAFTAR_PAKET, type Paket, formatNamaPaket } from '../../data/paket';
 import { waPhoneNumber } from '../../data/company';
 import { generateProductSchema } from '../../utils/schema';
 
@@ -20,7 +20,7 @@ interface Props {
 
 const { paket } = Astro.props;
 
-const pageTitle = `${paket.nama} | Dzanis Catering`;
+const pageTitle = `${formatNamaPaket(paket.nama)} | Dzanis Catering`;
 const pageDescription = paket.deskripsiSingkat;
 const productSchema = generateProductSchema(paket);
 
@@ -31,6 +31,9 @@ const minEventDateString = [
   String(tomorrow.getMonth() + 1).padStart(2, '0'),
   String(tomorrow.getDate()).padStart(2, '0'),
 ].join('-');
+
+const defaultMainMenu = paket.selectableMainMenus?.[0] || paket.menuUtama[0] || '';
+const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesSelectMin ?? 2) || paket.laukPendamping.slice(0, 2);
 ---
 
 <BaseLayout
@@ -42,37 +45,12 @@ const minEventDateString = [
   <Navbar />
 
   <main id="konten" class="bg-bg">
-    <!-- Breadcrumb Navigation -->
-    <div class="border-b border-divider bg-surface/50">
-      <div class="mx-auto max-w-[1280px] px-4 py-3 sm:px-6 lg:px-14">
-        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs sm:text-sm text-neutral-600">
-          <a
-            href="/"
-            class="font-medium transition-colors hover:text-accent-700"
-          >
-            Beranda
-          </a>
-          <span class="text-neutral-400" aria-hidden="true">/</span>
-          <a
-            href="/#paket"
-            class="font-medium transition-colors hover:text-accent-700"
-          >
-            Paket Nasi Kotak
-          </a>
-          <span class="text-neutral-400" aria-hidden="true">/</span>
-          <span class="font-semibold text-neutral-900 truncate" aria-current="page">
-            {paket.nama}
-          </span>
-        </nav>
-      </div>
-    </div>
-
     <!-- Main Detail Section -->
-    <div class="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12 lg:px-14 lg:py-16">
+    <div class="mx-auto max-w-[1280px] px-4 pt-6 sm:pt-8 lg:pt-10 pb-12 sm:pb-16 lg:pb-20 sm:px-6 lg:px-14">
       <div class="mb-6">
         <a
           href="/#paket"
-          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-accent-700 hover:text-accent-900 transition-colors"
+          class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-900 transition-colors"
         >
           <span aria-hidden="true">&larr;</span>
           <span>Kembali ke Daftar Paket</span>
@@ -90,13 +68,13 @@ const minEventDateString = [
           <div class="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden rounded-3xl border border-neutral-200/80 bg-surface shadow-sm">
             <img
               src={paket.foto}
-              alt={paket.fotoAlt || paket.nama}
+              alt={formatNamaPaket(paket.fotoAlt || paket.nama)}
               loading="eager"
               decoding="async"
               class="h-full w-full object-cover"
             />
             {paket.badge && (
-              <span class="absolute top-3.5 left-3.5 rounded-full bg-accent px-3 py-1 font-heading text-xs tracking-wider text-white font-bold uppercase shadow-md">
+              <span class="absolute top-3.5 left-3.5 rounded-full bg-accent px-3 py-1 font-heading text-sm tracking-wider text-white font-bold uppercase shadow-md">
                 {paket.badge}
               </span>
             )}
@@ -105,19 +83,19 @@ const minEventDateString = [
           <!-- Specs Pill Tags -->
           <div class="grid grid-cols-2 gap-3">
             <div class="rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm">
-              <span class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+              <span class="block text-[13px] font-semibold uppercase tracking-wider text-neutral-500">
                 Kemasan
               </span>
-              <span class="mt-0.5 block text-xs sm:text-sm font-bold text-neutral-900">
+              <span class="mt-0.5 block text-sm font-bold text-neutral-900">
                 {paket.kemasan}
               </span>
             </div>
 
             <div class="rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm">
-              <span class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+              <span class="block text-[13px] font-semibold uppercase tracking-wider text-neutral-500">
                 Minimum Order
               </span>
-              <span class="mt-0.5 block text-xs sm:text-sm font-bold text-neutral-900">
+              <span class="mt-0.5 block text-sm font-bold text-neutral-900">
                 {paket.minOrder} Porsi / Box
               </span>
             </div>
@@ -128,7 +106,7 @@ const minEventDateString = [
             <h4 class="font-heading text-sm font-bold text-neutral-900 mb-3 uppercase tracking-wide">
               Ketentuan Pemesanan
             </h4>
-            <ul class="space-y-2 text-xs leading-relaxed text-neutral-700">
+            <ul class="space-y-2 text-sm leading-relaxed text-neutral-700">
               <li class="flex items-start gap-2">
                 <span class="text-accent font-bold">✓</span>
                 <span><strong>Cutoff H-2 / H-3:</strong> Disarankan memesan minimal H-3 agar persiapan bahan baku optimal.</span>
@@ -154,18 +132,18 @@ const minEventDateString = [
           <!-- Header & Price -->
           <div>
             <div class="flex flex-wrap items-center gap-2 mb-2">
-              <span class="rounded-full bg-accent-2-200 text-accent-2-900 px-3 py-0.5 text-xs font-semibold">
+              <span class="rounded-full bg-accent-2-200 text-accent-2-900 px-3 py-0.5 text-sm font-semibold">
                 Nasi Kotak Higienis
               </span>
               {paket.badge && (
-                <span class="rounded-full bg-accent/10 text-accent px-3 py-0.5 text-xs font-bold uppercase tracking-wider">
+                <span class="rounded-full bg-accent/10 text-accent px-3 py-0.5 text-sm font-bold uppercase tracking-wider">
                   {paket.badge}
                 </span>
               )}
             </div>
 
             <h1 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight">
-              {paket.nama}
+              {formatNamaPaket(paket.nama)}
             </h1>
 
             <div class="mt-3 flex items-baseline gap-2">
@@ -182,163 +160,224 @@ const minEventDateString = [
 
             <div class="mt-4 flex flex-wrap gap-1.5">
               {paket.tags.map((tag) => (
-                <span class="inline-flex items-center rounded-full bg-white border border-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-800 shadow-2xs">
+                <span class="inline-flex items-center rounded-full bg-white border border-neutral-200 px-3 py-1 text-sm font-semibold text-neutral-800 shadow-2xs">
                   ✓ {tag}
                 </span>
               ))}
             </div>
           </div>
 
-          <!-- Structured Menu Breakdown -->
-          <div class="border-t border-divider pt-6">
-            <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900 mb-4">
-              Komposisi & Menu Sajian
-            </h3>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
-                <div class="flex items-center gap-2 mb-2.5">
-                  <span class="text-base" aria-hidden="true">🍗</span>
-                  <h4 class="font-heading text-xs font-bold uppercase tracking-wider text-neutral-900">
-                    Menu Utama
-                  </h4>
-                </div>
-                <ul class="space-y-1.5 text-xs sm:text-sm text-neutral-700">
-                  {paket.menuUtama.map((item) => (
-                    <li class="flex items-start gap-2">
-                      <span class="text-accent font-bold flex-none">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
-                <div class="flex items-center gap-2 mb-2.5">
-                  <span class="text-base" aria-hidden="true">🥗</span>
-                  <h4 class="font-heading text-xs font-bold uppercase tracking-wider text-neutral-900">
-                    Lauk Pendamping
-                  </h4>
-                </div>
-                <ul class="space-y-1.5 text-xs sm:text-sm text-neutral-700">
-                  {paket.laukPendamping.map((item) => (
-                    <li class="flex items-start gap-2">
-                      <span class="text-accent font-bold flex-none">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
-                <div class="flex items-center gap-2 mb-2.5">
-                  <span class="text-base" aria-hidden="true">🌶️</span>
-                  <h4 class="font-heading text-xs font-bold uppercase tracking-wider text-neutral-900">
-                    Sambal & Lalapan
-                  </h4>
-                </div>
-                <ul class="space-y-1.5 text-xs sm:text-sm text-neutral-700">
-                  {paket.sambalLalapan.map((item) => (
-                    <li class="flex items-start gap-2">
-                      <span class="text-accent font-bold flex-none">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
-                <div class="flex items-center gap-2 mb-2.5">
-                  <span class="text-base" aria-hidden="true">🍱</span>
-                  <h4 class="font-heading text-xs font-bold uppercase tracking-wider text-neutral-900">
-                    Pelengkap & Kemasan
-                  </h4>
-                </div>
-                <ul class="space-y-1.5 text-xs sm:text-sm text-neutral-700">
-                  {paket.pelengkap.map((item) => (
-                    <li class="flex items-start gap-2">
-                      <span class="text-accent font-bold flex-none">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
           {paket.canSelectMainMenu && paket.selectableMainMenus && paket.selectableSideDishes && (
-            <div class="border-t border-divider pt-6">
-              <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900 mb-5">
-                Pilih Menu Anda
-              </h3>
+            <div class="border-t border-divider pt-6" id="section-pilihan-menu">
+              <div class="mb-4">
+                <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900">
+                  Pilihan Menu Sajian
+                </h3>
+                <p class="text-[13px] sm:text-sm text-neutral-600 mt-1">
+                  Pilih menu standar rekomendasi kami atau racik kombinasi lauk sesuai selera Anda.
+                </p>
+              </div>
 
-              <div class="space-y-6">
-                <div>
-                  <label class="block text-sm font-bold text-neutral-900 mb-3">
-                    🍗 Pilih Menu Utama
-                  </label>
-                  <div class="space-y-2">
-                    {paket.selectableMainMenus!.map((menu, idx) => (
-                      <label class="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200 cursor-pointer hover:bg-accent/5 hover:border-accent/40 transition group">
-                        <input
-                          type="radio"
-                          name="main-menu"
-                          value={menu}
-                          data-menu-id={`main-menu-${idx}`}
-                          class="w-4 h-4 cursor-pointer accent-accent"
-                          checked={idx === 0}
-                        />
-                        <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
-                          {menu}
-                        </span>
-                      </label>
-                    ))}
+              <!-- 2 Tombol Pilihan Jalur Pemesanan -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <!-- Tombol 1: Pesan Paket Default -->
+                <button
+                  type="button"
+                  id="btn-order-default"
+                  class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border-2 border-accent bg-accent/8 hover:bg-accent/12 transition-all duration-200 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent shadow-2xs group"
+                  aria-pressed="true"
+                >
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="size-9 rounded-xl bg-accent text-white flex items-center justify-center flex-none font-bold shadow-xs">
+                      <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div class="min-w-0">
+                      <span class="block font-heading text-sm sm:text-base font-bold text-neutral-900 truncate">
+                        Pesan Paket Default
+                      </span>
+                      <span class="block text-[13px] text-neutral-600 mt-0.5 truncate">
+                        Menu bawaan standar (terfavorit)
+                      </span>
+                    </div>
                   </div>
-                </div>
+                  <span id="badge-order-default" class="text-[13px] font-bold text-accent bg-white border border-accent/30 px-2.5 py-1 rounded-full flex-none shadow-2xs">
+                    Aktif
+                  </span>
+                </button>
 
-                <div>
-                  <div class="flex items-center justify-between mb-3">
-                    <label class="block text-sm font-bold text-neutral-900">
-                      🥗 Pilih {paket.sideDishesSelectMin}-{paket.sideDishesSelectMax} Lauk Pendamping
-                    </label>
-                    <span class="text-xs font-medium text-neutral-500" id="side-count" aria-live="polite">
-                      0 / {paket.sideDishesSelectMax} pilihan
+                <!-- Tombol 2: Racik Menu Sendiri -->
+                <button
+                  type="button"
+                  id="btn-order-custom"
+                  aria-expanded="false"
+                  aria-controls="custom-menu-collapsible"
+                  class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border-2 border-neutral-200/90 bg-white hover:bg-surface/80 hover:border-neutral-300 transition-all duration-200 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent shadow-2xs group"
+                  aria-pressed="false"
+                >
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="size-9 rounded-xl bg-surface border border-neutral-200 text-neutral-600 flex items-center justify-center flex-none group-hover:border-accent/40 group-hover:text-accent transition-colors">
+                      <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 20h9"/>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                      </svg>
+                    </div>
+                    <div class="min-w-0">
+                      <span class="block font-heading text-sm sm:text-base font-bold text-neutral-900 group-hover:text-accent-700 transition-colors truncate">
+                        Racik Menu Sendiri
+                      </span>
+                      <span class="block text-[13px] text-neutral-600 mt-0.5 truncate">
+                        Kustomisasi menu & lauk
+                      </span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5 flex-none">
+                    <span id="badge-order-custom" class="hidden text-[13px] font-bold text-accent bg-white border border-accent/30 px-2.5 py-1 rounded-full shadow-2xs">
+                      Aktif
+                    </span>
+                    <span class="size-7 rounded-lg bg-surface flex items-center justify-center text-neutral-500 group-hover:text-accent-700 transition-colors">
+                      <svg
+                        id="custom-menu-chevron"
+                        class="size-4.5 transition-transform duration-300 ease-in-out"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
                     </span>
                   </div>
-                  <div class="space-y-2">
-                    {paket.selectableSideDishes!.map((dish, idx) => (
-                      <label class="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200 cursor-pointer hover:bg-accent/5 hover:border-accent/40 transition group has-[:checked]:bg-accent/10 has-[:checked]:border-accent/40">
-                        <input
-                          type="checkbox"
-                          name="side-dishes"
-                          value={dish}
-                          data-dish-id={`side-dish-${idx}`}
-                          class="w-4 h-4 cursor-pointer accent-accent"
-                          data-min={paket.sideDishesSelectMin}
-                          data-max={paket.sideDishesSelectMax}
-                        />
-                        <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
-                          {dish}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                  <p class="text-xs text-neutral-500 mt-3">
-                    Pilih minimal {paket.sideDishesSelectMin} dan maksimal {paket.sideDishesSelectMax} lauk pendamping.
-                  </p>
-                </div>
+                </button>
+              </div>
 
-                <div class="rounded-2xl border border-accent/20 bg-accent/5 p-4">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2">
-                    Ringkasan Pilihan Anda:
-                  </h4>
-                  <div class="text-sm text-neutral-800">
-                    <p id="menu-summary-main" class="font-medium text-accent-700">
-                      Menu: {paket.selectableMainMenus![0]}
+              <!-- Default Preset Information Box (Tampil saat default aktif) -->
+              <div
+                id="default-preset-box"
+                class="rounded-2xl border border-accent/20 bg-accent/5 p-4 sm:p-4.5 mb-4 transition-all duration-200"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 mb-1.5">
+                      <span class="inline-flex items-center justify-center size-5 rounded-full bg-accent text-white text-xs font-bold" aria-hidden="true">✓</span>
+                      <h4 class="font-heading text-sm sm:text-base font-bold text-neutral-900">
+                        Menu Bawaan Rekomendasi Terpasang
+                      </h4>
+                    </div>
+                    <p class="text-sm text-neutral-700">
+                      <span class="font-semibold text-accent-700">Menu Utama:</span> {defaultMainMenu}
                     </p>
-                    <p id="menu-summary-sides" class="text-neutral-700 text-xs mt-1">
-                      Lauk: —
+                    <p class="text-sm text-neutral-700 mt-0.5">
+                      <span class="font-semibold text-neutral-800">Lauk Pendamping:</span> {defaultSideDishes.join(', ')}
                     </p>
+                  </div>
+                  <span class="text-[13px] font-semibold text-neutral-500 bg-white/90 border border-neutral-200/90 px-2.5 py-1 rounded-lg flex-none shadow-2xs hidden sm:inline-block">
+                    Preset Bawaan
+                  </span>
+                </div>
+              </div>
+
+              <!-- Collapsible Custom Menu Container (Akordeon CSS Grid Transition) -->
+              <div
+                id="custom-menu-collapsible"
+                class="akordeon-panel mb-2"
+                data-buka="false"
+              >
+                <div class="overflow-hidden">
+                  <div class="pt-2 pb-4 space-y-6">
+                    <div>
+                      <div class="flex items-center justify-between mb-3">
+                        <span class="block text-sm font-bold text-neutral-900">
+                          🍗 Pilih Menu Utama
+                        </span>
+                        <span class="text-[13px] text-neutral-500">Pilih 1 menu</span>
+                      </div>
+                      <div class="space-y-2">
+                        {paket.selectableMainMenus!.map((menu, idx) => {
+                          const inputId = `main-menu-${idx}`;
+                          return (
+                            <label
+                              for={inputId}
+                              class="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200 bg-white cursor-pointer hover:bg-accent/5 hover:border-accent/40 transition group has-[:checked]:border-accent has-[:checked]:bg-accent/5 shadow-2xs"
+                            >
+                              <input
+                                type="radio"
+                                id={inputId}
+                                name="main-menu"
+                                value={menu}
+                                class="w-4 h-4 cursor-pointer accent-accent"
+                                checked={idx === 0}
+                              />
+                              <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
+                                {menu}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="flex items-center justify-between mb-3">
+                        <span class="block text-sm font-bold text-neutral-900">
+                          🥗 Pilih {paket.sideDishesSelectMin}-{paket.sideDishesSelectMax} Lauk Pendamping
+                        </span>
+                        <span class="text-sm font-medium text-neutral-500" id="side-count" aria-live="polite">
+                          {defaultSideDishes.length} / {paket.sideDishesSelectMax} pilihan
+                        </span>
+                      </div>
+                      <div class="space-y-2">
+                        {paket.selectableSideDishes!.map((dish, idx) => {
+                          const inputId = `side-dish-${idx}`;
+                          return (
+                            <label
+                              for={inputId}
+                              class="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200 bg-white cursor-pointer hover:bg-accent/5 hover:border-accent/40 transition group has-[:checked]:bg-accent/10 has-[:checked]:border-accent/40 shadow-2xs"
+                            >
+                              <input
+                                type="checkbox"
+                                id={inputId}
+                                name="side-dishes"
+                                value={dish}
+                                class="w-4 h-4 cursor-pointer accent-accent"
+                                data-min={paket.sideDishesSelectMin}
+                                data-max={paket.sideDishesSelectMax}
+                                checked={idx < (paket.sideDishesSelectMin ?? 2)}
+                              />
+                              <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
+                                {dish}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <p class="text-sm text-neutral-500 mt-3">
+                        Pilih minimal {paket.sideDishesSelectMin} dan maksimal {paket.sideDishesSelectMax} lauk pendamping.
+                      </p>
+                    </div>
+
+                    <div class="rounded-2xl border border-accent/20 bg-accent/5 p-4">
+                      <div class="flex items-center justify-between gap-2 mb-2">
+                        <h4 class="text-sm font-bold uppercase tracking-wider text-neutral-600">
+                          Ringkasan Pilihan Anda:
+                        </h4>
+                        <span id="validation-indicator" class="text-xs font-semibold text-accent-700">
+                          ✓ Pilihan Siap
+                        </span>
+                      </div>
+                      <div class="text-sm text-neutral-800 space-y-1">
+                        <p id="menu-summary-main" class="font-medium text-accent-700">
+                          Menu: {defaultMainMenu}
+                        </p>
+                        <p id="menu-summary-sides" class="text-neutral-700 text-sm">
+                          Lauk: {defaultSideDishes.join(', ')}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -351,14 +390,14 @@ const minEventDateString = [
               <h3 class="font-heading text-xl font-bold text-neutral-900">
                 Kalkulator Porsi & Pemesanan
               </h3>
-              <p class="text-xs sm:text-sm text-neutral-600 mt-1">
+              <p class="text-sm text-neutral-600 mt-1">
                 Tentukan jumlah porsi yang dibutuhkan untuk menghitung estimasi biaya dan membuat format pesan WhatsApp otomatis.
               </p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
               <div class="sm:col-span-5">
-                <label for="portion-input" class="block text-xs font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
+                <label for="portion-input" class="block text-sm font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
                   Jumlah Porsi (Min. {paket.minOrder})
                 </label>
                 <div class="relative">
@@ -370,14 +409,14 @@ const minEventDateString = [
                     value={paket.minOrder}
                     class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-base sm:text-lg font-bold text-neutral-900 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition shadow-2xs"
                   />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-neutral-500 pointer-events-none">
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-neutral-500 pointer-events-none">
                     porsi
                   </span>
                 </div>
               </div>
 
               <div class="sm:col-span-7 rounded-2xl border border-neutral-200 bg-white p-3.5 sm:p-4 shadow-2xs flex flex-col justify-center">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                <span class="text-[13px] font-bold uppercase tracking-wider text-neutral-500">
                   Estimasi Total Biaya:
                 </span>
                 <span
@@ -392,7 +431,7 @@ const minEventDateString = [
             </div>
 
             <div class="mt-4">
-              <label for="event-date-input" class="block text-xs font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
+              <label for="event-date-input" class="block text-sm font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
                 Tanggal Acara
               </label>
               <input
@@ -402,7 +441,7 @@ const minEventDateString = [
                 required
                 class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-base font-medium text-neutral-900 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition shadow-2xs"
               />
-              <p class="text-xs text-neutral-500 mt-2">
+              <p class="text-sm text-neutral-500 mt-2">
                 Pilih tanggal acara Anda untuk memudahkan proses pemesanan.
               </p>
             </div>
@@ -421,15 +460,138 @@ const minEventDateString = [
                 <span>Pesan Sekarang via WhatsApp</span>
               </a>
               {paket.canSelectMainMenu && (
-                <p class="mt-2 text-center text-xs text-neutral-500" id="validation-message" role="alert" aria-live="assertive">
+                <p class="mt-2 text-center text-sm text-neutral-500" id="validation-message" role="alert" aria-live="assertive">
                   Pastikan Anda telah memilih menu dan lauk pendamping sebelum memesan.
                 </p>
               )}
               {!paket.canSelectMainMenu && (
-                <p class="mt-2 text-center text-xs text-neutral-500">
+                <p class="mt-2 text-center text-sm text-neutral-500">
                   Format pesan WhatsApp akan otomatis terisi dengan rincian paket dan jumlah porsi.
                 </p>
               )}
+            </div>
+          </div>
+
+          <!-- Collapsible Komposisi & Menu Sajian -->
+          <div class="border-t border-neutral-200/80 pt-6" id="composition-collapsible-section">
+            <button
+              type="button"
+              id="composition-toggle-btn"
+              aria-expanded="false"
+              aria-controls="composition-content"
+              class="w-full flex items-center justify-between gap-3 p-4 sm:p-4.5 rounded-2xl bg-white hover:bg-surface/70 border border-neutral-200/90 hover:border-accent/40 shadow-2xs transition-all duration-200 group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="size-9 sm:size-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent flex-none group-hover:scale-105 transition-transform duration-200">
+                  <svg class="size-4.5 sm:size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                  </svg>
+                </div>
+                <div class="text-left min-w-0">
+                  <h3 class="font-heading text-sm sm:text-base font-bold text-neutral-900 group-hover:text-accent-700 transition-colors truncate">
+                    Lihat Komposisi & Menu Sajian
+                  </h3>
+                  <p class="text-sm text-neutral-500 mt-0.5 truncate">
+                    Rincian menu utama, lauk pendamping, sambal & pelengkap
+                  </p>
+                </div>
+              </div>
+              <div class="size-8 rounded-full bg-surface border border-neutral-200 flex items-center justify-center text-neutral-600 group-hover:text-accent-700 group-hover:border-accent/40 shadow-2xs flex-none transition-colors">
+                <svg
+                  id="composition-chevron"
+                  class="size-4.5 transition-transform duration-300 ease-in-out"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </div>
+            </button>
+
+            <!-- Animated Collapsible Content (CSS Grid Transition) -->
+            <div
+              id="composition-content"
+              class="akordeon-panel"
+              data-buka="false"
+            >
+              <div class="overflow-hidden">
+                <div class="pt-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
+                      <div class="flex items-center gap-2 mb-2.5">
+                        <span class="text-base" aria-hidden="true">🍗</span>
+                        <h4 class="font-heading text-sm font-bold uppercase tracking-wider text-neutral-900">
+                          Menu Utama
+                        </h4>
+                      </div>
+                      <ul class="space-y-1.5 text-sm text-neutral-700">
+                        {paket.menuUtama.map((item) => (
+                          <li class="flex items-start gap-2">
+                            <span class="text-accent font-bold flex-none">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
+                      <div class="flex items-center gap-2 mb-2.5">
+                        <span class="text-base" aria-hidden="true">🥗</span>
+                        <h4 class="font-heading text-sm font-bold uppercase tracking-wider text-neutral-900">
+                          Lauk Pendamping
+                        </h4>
+                      </div>
+                      <ul class="space-y-1.5 text-sm text-neutral-700">
+                        {paket.laukPendamping.map((item) => (
+                          <li class="flex items-start gap-2">
+                            <span class="text-accent font-bold flex-none">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
+                      <div class="flex items-center gap-2 mb-2.5">
+                        <span class="text-base" aria-hidden="true">🌶️</span>
+                        <h4 class="font-heading text-sm font-bold uppercase tracking-wider text-neutral-900">
+                          Sambal & Lalapan
+                        </h4>
+                      </div>
+                      <ul class="space-y-1.5 text-sm text-neutral-700">
+                        {paket.sambalLalapan.map((item) => (
+                          <li class="flex items-start gap-2">
+                            <span class="text-accent font-bold flex-none">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-2xs">
+                      <div class="flex items-center gap-2 mb-2.5">
+                        <span class="text-base" aria-hidden="true">🍱</span>
+                        <h4 class="font-heading text-sm font-bold uppercase tracking-wider text-neutral-900">
+                          Pelengkap & Kemasan
+                        </h4>
+                      </div>
+                      <ul class="space-y-1.5 text-sm text-neutral-700">
+                        {paket.pelengkap.map((item) => (
+                          <li class="flex items-start gap-2">
+                            <span class="text-accent font-bold flex-none">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -440,7 +602,17 @@ const minEventDateString = [
   <Footer />
 </BaseLayout>
 
-<script is:inline define:vars={{ basePrice: paket.harga, packageName: paket.nama, minOrder: paket.minOrder, phone: waPhoneNumber, hasMenuSelection: Boolean(paket.canSelectMainMenu), sideDishesMin: paket.sideDishesSelectMin ?? 0, sideDishesMax: paket.sideDishesSelectMax ?? 0 }}>
+<script is:inline define:vars={{
+  basePrice: paket.harga,
+  packageName: formatNamaPaket(paket.nama),
+  minOrder: paket.minOrder,
+  phone: waPhoneNumber,
+  hasMenuSelection: Boolean(paket.canSelectMainMenu),
+  sideDishesMin: paket.sideDishesSelectMin ?? 0,
+  sideDishesMax: paket.sideDishesSelectMax ?? 0,
+  defaultMainMenu: defaultMainMenu,
+  defaultSideDishes: defaultSideDishes
+}}>
   function initPortionCalculator() {
     const input = document.getElementById('portion-input');
     const display = document.getElementById('subtotal-display');
@@ -449,8 +621,18 @@ const minEventDateString = [
 
     if (!input || !display || !btn) return;
 
-    let selectedMainMenu = null;
-    let selectedSideDishes = [];
+    // Order Mode State: 'default' | 'custom'
+    let orderMode = 'default';
+    const btnOrderDefault = document.getElementById('btn-order-default');
+    const btnOrderCustom = document.getElementById('btn-order-custom');
+    const badgeOrderDefault = document.getElementById('badge-order-default');
+    const badgeOrderCustom = document.getElementById('badge-order-custom');
+    const customMenuChevron = document.getElementById('custom-menu-chevron');
+    const customMenuCollapsible = document.getElementById('custom-menu-collapsible');
+    const defaultPresetBox = document.getElementById('default-preset-box');
+
+    let selectedMainMenu = defaultMainMenu;
+    let selectedSideDishes = Array.isArray(defaultSideDishes) ? [...defaultSideDishes] : [];
     let selectedEventDate = null;
 
     function calculateClampedQty() {
@@ -461,13 +643,89 @@ const minEventDateString = [
       return rawVal;
     }
 
+    function setOrderMode(mode, toggleCollapse = false) {
+      if (mode === 'default') {
+        orderMode = 'default';
+        btnOrderDefault?.setAttribute('aria-pressed', 'true');
+        btnOrderDefault?.classList.add('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
+        btnOrderDefault?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        badgeOrderDefault?.classList.remove('hidden');
+
+        btnOrderCustom?.setAttribute('aria-pressed', 'false');
+        btnOrderCustom?.setAttribute('aria-expanded', 'false');
+        btnOrderCustom?.classList.remove('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
+        btnOrderCustom?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        badgeOrderCustom?.classList.add('hidden');
+
+        customMenuChevron?.classList.remove('rotate-180');
+        if (customMenuCollapsible) {
+          customMenuCollapsible.setAttribute('data-buka', 'false');
+          customMenuCollapsible.style.gridTemplateRows = '0fr';
+        }
+
+        defaultPresetBox?.classList.remove('hidden');
+        updateCheckout();
+      } else if (mode === 'custom') {
+        orderMode = 'custom';
+        const isCurrentlyExpanded = btnOrderCustom?.getAttribute('aria-expanded') === 'true';
+
+        if (toggleCollapse && isCurrentlyExpanded) {
+          // Collapse
+          btnOrderCustom?.setAttribute('aria-expanded', 'false');
+          customMenuChevron?.classList.remove('rotate-180');
+          if (customMenuCollapsible) {
+            customMenuCollapsible.setAttribute('data-buka', 'false');
+            customMenuCollapsible.style.gridTemplateRows = '0fr';
+          }
+        } else {
+          // Expand
+          btnOrderCustom?.setAttribute('aria-pressed', 'true');
+          btnOrderCustom?.setAttribute('aria-expanded', 'true');
+          btnOrderCustom?.classList.add('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
+          btnOrderCustom?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+          badgeOrderCustom?.classList.remove('hidden');
+
+          btnOrderDefault?.setAttribute('aria-pressed', 'false');
+          btnOrderDefault?.classList.remove('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
+          btnOrderDefault?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+          badgeOrderDefault?.classList.add('hidden');
+
+          customMenuChevron?.classList.add('rotate-180');
+          if (customMenuCollapsible) {
+            customMenuCollapsible.setAttribute('data-buka', 'true');
+            customMenuCollapsible.style.gridTemplateRows = '1fr';
+          }
+          defaultPresetBox?.classList.add('hidden');
+
+          // Read custom inputs state
+          const activeRadio = document.querySelector('input[name="main-menu"]:checked');
+          if (activeRadio) {
+            selectedMainMenu = activeRadio.value;
+          }
+          const checkedCheckboxes = document.querySelectorAll('input[name="side-dishes"]:checked');
+          selectedSideDishes = Array.from(checkedCheckboxes).map(cb => cb.value);
+        }
+        updateSummary();
+        updateCheckout();
+      }
+    }
+
+    if (btnOrderDefault) {
+      btnOrderDefault.addEventListener('click', () => {
+        setOrderMode('default');
+        input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+
+    if (btnOrderCustom) {
+      btnOrderCustom.addEventListener('click', () => {
+        setOrderMode('custom', true);
+      });
+    }
+
     if (hasMenuSelection) {
       const mainMenuRadios = document.querySelectorAll('input[name="main-menu"]');
       const sideDishCheckboxes = document.querySelectorAll('input[name="side-dishes"]');
-
-      if (mainMenuRadios.length > 0) {
-        selectedMainMenu = mainMenuRadios[0].value;
-      }
 
       mainMenuRadios.forEach((radio) => {
         radio.addEventListener('change', (e) => {
@@ -504,15 +762,12 @@ const minEventDateString = [
           updateCheckout();
         });
       });
-
-      if (mainMenuRadios.length > 0) {
-        mainMenuRadios[0].checked = true;
-      }
     }
 
     function updateSummary() {
       const summaryMain = document.getElementById('menu-summary-main');
       const summarySides = document.getElementById('menu-summary-sides');
+      const validationIndicator = document.getElementById('validation-indicator');
 
       if (summaryMain && selectedMainMenu) {
         summaryMain.textContent = `Menu: ${selectedMainMenu}`;
@@ -521,16 +776,25 @@ const minEventDateString = [
       if (summarySides && selectedSideDishes.length > 0) {
         summarySides.textContent = `Lauk: ${selectedSideDishes.join(', ')}`;
       } else if (summarySides) {
-        summarySides.textContent = 'Lauk: —';
+        summarySides.textContent = 'Lauk: — (Belum dipilih)';
+      }
+
+      if (validationIndicator) {
+        if (selectedSideDishes.length >= sideDishesMin && selectedSideDishes.length <= sideDishesMax && selectedMainMenu) {
+          validationIndicator.textContent = '✓ Pilihan Siap';
+          validationIndicator.className = 'text-xs font-semibold text-accent-700';
+        } else {
+          validationIndicator.textContent = `Pilih min. ${sideDishesMin} lauk`;
+          validationIndicator.className = 'text-xs font-semibold text-amber-600';
+        }
       }
     }
 
     function validateMenuSelection() {
-      if (!hasMenuSelection) {
+      if (!hasMenuSelection || orderMode === 'default') {
         return { valid: true };
       }
 
-      const validationMessage = document.getElementById('validation-message');
       let errors = [];
 
       if (!selectedMainMenu) {
@@ -547,17 +811,8 @@ const minEventDateString = [
 
       if (errors.length > 0) {
         const errorMsg = errors.join('\n');
-        if (validationMessage) {
-          validationMessage.textContent = '❌ ' + errors.join(' & ');
-          validationMessage.classList.add('text-red-600');
-        }
-        alert('Mohon lengkapi pilihan menu:\n\n' + errorMsg);
+        alert('Mohon lengkapi racikan menu Anda:\n\n' + errorMsg + '\n\nAtau klik tombol "Pesan Paket Default" jika ingin menggunakan racikan menu standar.');
         return { valid: false };
-      }
-
-      if (validationMessage) {
-        validationMessage.textContent = '✓ Pilihan menu Anda sudah lengkap';
-        validationMessage.classList.remove('text-red-600');
       }
 
       return { valid: true };
@@ -578,11 +833,18 @@ const minEventDateString = [
       ];
 
       if (hasMenuSelection) {
-        if (selectedMainMenu) {
-          messageLines.push(`Menu Utama: ${selectedMainMenu}`);
-        }
-        if (selectedSideDishes.length > 0) {
-          messageLines.push(`Lauk Pendamping: ${selectedSideDishes.join(', ')}`);
+        if (orderMode === 'default') {
+          messageLines.push(`Pilihan Paket: Default (Menu Standar)`);
+          messageLines.push(`Menu Utama: ${defaultMainMenu}`);
+          messageLines.push(`Lauk Pendamping: ${Array.isArray(defaultSideDishes) ? defaultSideDishes.join(', ') : defaultSideDishes}`);
+        } else {
+          messageLines.push(`Pilihan Paket: Racik Menu Sendiri`);
+          if (selectedMainMenu) {
+            messageLines.push(`Menu Utama: ${selectedMainMenu}`);
+          }
+          if (selectedSideDishes.length > 0) {
+            messageLines.push(`Lauk Pendamping: ${selectedSideDishes.join(', ')}`);
+          }
         }
       }
 
@@ -661,10 +923,39 @@ const minEventDateString = [
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPortionCalculator);
-  } else {
-    initPortionCalculator();
+  function initCompositionToggle() {
+    const btn = document.getElementById('composition-toggle-btn');
+    const content = document.getElementById('composition-content');
+    const chevron = document.getElementById('composition-chevron');
+    if (!btn || !content || !chevron) return;
+
+    btn.onclick = () => {
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      const nextState = !isExpanded;
+
+      btn.setAttribute('aria-expanded', String(nextState));
+
+      if (nextState) {
+        content.setAttribute('data-buka', 'true');
+        content.style.gridTemplateRows = '1fr';
+        chevron.classList.add('rotate-180');
+      } else {
+        content.setAttribute('data-buka', 'false');
+        content.style.gridTemplateRows = '0fr';
+        chevron.classList.remove('rotate-180');
+      }
+    };
   }
-  document.addEventListener('astro:page-load', initPortionCalculator);
+
+  function initDetailPage() {
+    initPortionCalculator();
+    initCompositionToggle();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDetailPage);
+  } else {
+    initDetailPage();
+  }
+  document.addEventListener('astro:page-load', initDetailPage);
 </script>
