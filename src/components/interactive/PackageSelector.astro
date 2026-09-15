@@ -1,0 +1,407 @@
+---
+import { DAFTAR_PAKET, type Paket } from '../../data/paket';
+
+interface Props {
+  currentPaket: Paket;
+  packages?: Paket[];
+}
+
+const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
+---
+
+<nav aria-label="Pilihan Paket Nasi Kotak" class="relative w-full max-w-full mb-8 lg:mb-10 z-30" id="package-selector-root">
+  <!-- Context Title -->
+  <div class="flex items-center justify-between gap-3 mb-2.5">
+    <div class="flex items-center gap-2">
+      <span class="inline-block size-2 rounded-full bg-[#C04A27]" aria-hidden="true"></span>
+      <h2 class="font-heading text-xs sm:text-sm font-bold uppercase tracking-wider text-neutral-700">
+        Pilihan Paket Nasi Kotak
+      </h2>
+    </div>
+    <span class="text-[11px] text-neutral-500 hidden sm:inline-block">
+      Beralih antar paket tanpa kembali ke beranda
+    </span>
+  </div>
+
+  <!-- Trigger Button: Menampilkan Paket Aktif Saat Ini -->
+  <button
+    type="button"
+    id="pkg-selector-trigger"
+    aria-haspopup="dialog"
+    aria-expanded="false"
+    aria-controls="pkg-selector-panel"
+    class="w-full text-left bg-white hover:bg-surface/50 active:bg-surface/80 border border-neutral-200/90 hover:border-accent/50 rounded-2xl p-3 sm:p-4 shadow-2xs transition-all duration-200 flex items-center justify-between gap-3 sm:gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent group cursor-pointer"
+  >
+    <!-- Left: Status Aktif, Nama Paket, Badge, dan Harga -->
+    <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+      <!-- Active checkmark badge -->
+      <div
+        class="inline-flex items-center justify-center size-8 sm:size-9 rounded-full bg-[#C04A27] text-white flex-none shadow-xs"
+        aria-hidden="true"
+      >
+        <svg class="size-4 sm:size-4.5" viewBox="0 0 20 20" fill="currentColor">
+          <path
+            fill-rule="evenodd"
+            d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-heading text-sm sm:text-base font-bold text-neutral-900 group-hover:text-accent-700 transition-colors truncate">
+            {currentPaket.nama}
+          </span>
+          {currentPaket.badge && (
+            <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20 flex-none shadow-2xs">
+              {currentPaket.badge}
+            </span>
+          )}
+          <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#C04A27]/10 text-[#C04A27] border border-[#C04A27]/20 flex-none">
+            Aktif Saat Ini
+          </span>
+        </div>
+        <div class="flex items-baseline gap-1 mt-0.5">
+          <span class="font-heading text-xs sm:text-sm font-bold text-[#C04A27]">
+            Rp {currentPaket.harga.toLocaleString("id-ID")}
+          </span>
+          <span class="text-[11px] text-neutral-500 font-medium">/ porsi</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: "Ganti Pilihan" & Expand Chevron -->
+    <div class="flex items-center gap-2 flex-none pl-2.5 sm:pl-3 border-l border-neutral-200/80">
+      <span class="text-xs font-semibold text-neutral-600 group-hover:text-accent-700 hidden sm:inline-block">
+        Ganti Pilihan
+      </span>
+      <span class="inline-flex items-center justify-center size-7 sm:size-8 rounded-xl bg-surface/80 group-hover:bg-accent/10 text-neutral-600 group-hover:text-accent-700 transition-colors">
+        <svg
+          id="pkg-selector-chevron"
+          class="size-4 transition-transform duration-200"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </span>
+    </div>
+  </button>
+
+  <!-- Mobile Backdrop Overlay (< md) -->
+  <div
+    id="pkg-selector-backdrop"
+    class="fixed inset-0 bg-neutral-900/50 backdrop-blur-xs z-[60] md:hidden opacity-0 pointer-events-none transition-opacity duration-250"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Responsive Panel: Bottom Sheet (Mobile) & Popover Dropdown (Desktop) -->
+  <div
+    id="pkg-selector-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Daftar Pilihan Paket Nasi Kotak"
+    class="
+      fixed inset-x-0 bottom-0 z-[70] rounded-t-3xl bg-white p-5 shadow-2xl border-t border-neutral-200/90
+      translate-y-full transition-transform duration-300 ease-out flex flex-col max-h-[82vh]
+      md:fixed-none md:absolute md:inset-auto md:top-full md:left-0 md:w-full md:max-w-2xl md:mt-2 md:z-40
+      md:rounded-2xl md:border md:border-neutral-200/90 md:p-3.5 md:shadow-xl md:translate-y-0
+      md:opacity-0 md:pointer-events-none md:invisible md:scale-98 md:transition-all md:duration-150
+    "
+  >
+    <!-- Header inside Panel -->
+    <div class="flex items-center justify-between gap-3 pb-3 mb-2 border-b border-neutral-100 flex-none">
+      <!-- Mobile drag handle -->
+      <div
+        class="w-10 h-1 rounded-full bg-neutral-300 md:hidden absolute top-2.5 left-1/2 -translate-x-1/2"
+        aria-hidden="true"
+      ></div>
+
+      <div>
+        <h3 class="font-heading text-sm sm:text-base font-bold text-neutral-900">
+          Pilih Paket Nasi Kotak
+        </h3>
+        <p class="text-[11px] text-neutral-500">
+          {packages.length} pilihan paket tersedia
+        </p>
+      </div>
+
+      <button
+        type="button"
+        id="pkg-selector-close"
+        aria-label="Tutup pilihan paket"
+        class="size-8 rounded-full bg-surface hover:bg-neutral-200/80 text-neutral-500 hover:text-neutral-800 flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path
+            d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Scalable Vertical List: No fixed height cutting off items -->
+    <div
+      class="overflow-y-auto overscroll-contain flex-1 max-h-[55vh] md:max-h-[380px] space-y-2 py-1 pr-1 focus-visible:outline-none [scrollbar-width:thin]"
+      tabindex="0"
+      role="region"
+      aria-label="Daftar Paket"
+    >
+      {packages.map((item) => {
+        const isCurrent = item.slug === currentPaket.slug;
+        return (
+          <a
+            href={`/paket/${item.slug}`}
+            aria-current={isCurrent ? "page" : undefined}
+            tabindex={isCurrent ? -1 : 0}
+            data-pkg-item
+            class:list={[
+              "w-full rounded-xl p-3 sm:p-3.5 transition-all duration-150 flex items-center justify-between gap-3 border text-left min-h-[64px]",
+              isCurrent
+                ? "bg-[#C04A27]/8 border-[#C04A27] ring-1 ring-[#C04A27]/25 pointer-events-none cursor-default"
+                : "bg-white hover:bg-surface/50 border-neutral-200/80 hover:border-accent/50 shadow-2xs group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            ]}
+          >
+            <!-- Left Info: Indicator + Title + Badge + Price -->
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+              <!-- Checkmark circle / dot indicator -->
+              <div
+                class:list={[
+                  "size-6 sm:size-7 rounded-full flex items-center justify-center flex-none text-xs font-bold transition-colors",
+                  isCurrent
+                    ? "bg-[#C04A27] text-white shadow-2xs"
+                    : "bg-surface text-neutral-400 group-hover:bg-accent/10 group-hover:text-accent"
+                ]}
+                aria-hidden="true"
+              >
+                {isCurrent ? (
+                  <svg class="size-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                ) : (
+                  <span class="size-2 rounded-full bg-neutral-300 group-hover:bg-accent"></span>
+                )}
+              </div>
+
+              <!-- Titles & Badges (Rapi baik dengan atau tanpa badge) -->
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span
+                    class:list={[
+                      "font-heading text-xs sm:text-sm font-bold truncate",
+                      isCurrent ? "text-[#C04A27]" : "text-neutral-900 group-hover:text-accent-700"
+                    ]}
+                  >
+                    {item.nama}
+                  </span>
+
+                  {item.badge && (
+                    <span
+                      class:list={[
+                        "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-none shadow-2xs",
+                        isCurrent
+                          ? "bg-[#C04A27] text-white"
+                          : "bg-accent/10 text-accent border border-accent/20"
+                      ]}
+                    >
+                      Favorit
+                    </span>
+                  )}
+
+                  {isCurrent && (
+                    <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#C04A27]/10 text-[#C04A27] border border-[#C04A27]/20 flex-none">
+                      Sedang Dilihat
+                    </span>
+                  )}
+                </div>
+
+                <div class="flex items-baseline gap-1 mt-0.5">
+                  <span
+                    class:list={[
+                      "font-heading text-xs sm:text-sm font-bold",
+                      isCurrent ? "text-[#C04A27]" : "text-neutral-700 group-hover:text-accent-700"
+                    ]}
+                  >
+                    Rp {item.harga.toLocaleString("id-ID")}
+                  </span>
+                  <span class="text-[10px] text-neutral-500 font-medium">/ porsi</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Action / Status -->
+            <div class="flex-none pl-2">
+              {isCurrent ? (
+                <span class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-[#C04A27] bg-[#C04A27]/10 px-2.5 py-1 rounded-lg">
+                  <span>Aktif</span>
+                </span>
+              ) : (
+                <span class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-accent-700 group-hover:text-accent-900 group-hover:translate-x-0.5 transition-all bg-surface/80 group-hover:bg-accent/10 px-2.5 py-1 rounded-lg border border-neutral-200/60 group-hover:border-accent/30">
+                  <span>Pilih</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </span>
+              )}
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</nav>
+
+<script>
+  function initPackageSelector() {
+    const trigger = document.getElementById('pkg-selector-trigger');
+    const panel = document.getElementById('pkg-selector-panel');
+    const backdrop = document.getElementById('pkg-selector-backdrop');
+    const closeBtn = document.getElementById('pkg-selector-close');
+    const chevron = document.getElementById('pkg-selector-chevron');
+    const root = document.getElementById('package-selector-root');
+
+    if (!trigger || !panel || !backdrop) return;
+
+    let isOpen = false;
+
+    function getFloatingWa() {
+      return document.getElementById('floating-whatsapp-btn') || document.querySelector('a[aria-label="Chat WhatsApp Dzanis Catering"]');
+    }
+
+    function openPanel() {
+      isOpen = true;
+      trigger?.setAttribute('aria-expanded', 'true');
+
+      // Mobile sheet open
+      panel?.classList.remove('translate-y-full');
+      backdrop?.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop?.classList.add('opacity-100', 'pointer-events-auto');
+
+      // Desktop dropdown open
+      panel?.classList.remove('md:opacity-0', 'md:pointer-events-none', 'md:invisible', 'md:scale-98');
+      panel?.classList.add('md:opacity-100', 'md:pointer-events-auto', 'md:visible', 'md:scale-100');
+
+      if (chevron) {
+        chevron.classList.add('rotate-180');
+      }
+
+      // Lock body scroll and hide floating WA button on mobile
+      if (window.innerWidth < 768) {
+        document.body.style.overflow = 'hidden';
+        const floatingWa = getFloatingWa();
+        if (floatingWa) {
+          floatingWa.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+        }
+      }
+
+      // Focus management: focus first interactive element
+      setTimeout(() => {
+        const focusable = panel?.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable && focusable.length > 0) {
+          (focusable[0] as HTMLElement).focus();
+        }
+      }, 50);
+    }
+
+    function closePanel() {
+      if (!isOpen) return;
+      isOpen = false;
+      trigger?.setAttribute('aria-expanded', 'false');
+
+      // Mobile sheet close
+      panel?.classList.add('translate-y-full');
+      backdrop?.classList.remove('opacity-100', 'pointer-events-auto');
+      backdrop?.classList.add('opacity-0', 'pointer-events-none');
+
+      // Desktop dropdown close
+      panel?.classList.add('md:opacity-0', 'md:pointer-events-none', 'md:invisible', 'md:scale-98');
+      panel?.classList.remove('md:opacity-100', 'md:pointer-events-auto', 'md:visible', 'md:scale-100');
+
+      if (chevron) {
+        chevron.classList.remove('rotate-180');
+      }
+
+      // Restore body scroll and floating WA button
+      document.body.style.overflow = '';
+      const floatingWa = getFloatingWa();
+      if (floatingWa) {
+        floatingWa.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+      }
+
+      // Return focus to trigger
+      trigger?.focus();
+    }
+
+    function togglePanel() {
+      if (isOpen) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    }
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePanel();
+    });
+
+    closeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closePanel();
+    });
+
+    backdrop.addEventListener('click', closePanel);
+
+    // Outside click for desktop
+    document.addEventListener('click', (e) => {
+      if (isOpen && root && !root.contains(e.target as Node)) {
+        closePanel();
+      }
+    });
+
+    // Escape key handling
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        closePanel();
+      }
+    });
+
+    // Focus trap inside panel
+    panel.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || !isOpen) return;
+
+      const focusable = panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+
+      const firstElement = focusable[0] as HTMLElement;
+      const lastElement = focusable[focusable.length - 1] as HTMLElement;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          e.preventDefault();
+        }
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPackageSelector);
+  } else {
+    initPackageSelector();
+  }
+  document.addEventListener('astro:page-load', initPackageSelector);
+</script>

@@ -14,10 +14,10 @@ const tautan = [
 ];
 ---
 
-<header class="sticky top-0 z-50 bg-bg lg:border-b lg:border-divider">
-  <div class="mx-auto flex max-w-[1280px] items-center gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-3)] lg:gap-[var(--space-7)] lg:px-14 lg:py-[22px]">
-    <!-- Brand — mr-auto pushes nav + CTA to the right -->
-    <a href="/" class="mr-auto flex items-center gap-[var(--space-2)] lg:gap-[var(--space-3)] text-text no-underline hover:opacity-90 transition-opacity">
+<header class="sticky top-0 z-50 bg-bg border-b border-divider">
+  <div class="mx-auto flex max-w-[1280px] items-center justify-between gap-3 px-4 py-3 md:gap-6 lg:gap-[var(--space-7)] lg:px-14 lg:py-[18px]">
+    <!-- Brand -->
+    <a href="/" class="flex items-center gap-2 lg:gap-3 text-text no-underline hover:opacity-90 transition-opacity">
       <img
         src={company.mark}
         alt={company.name}
@@ -31,30 +31,276 @@ const tautan = [
       </span>
     </a>
 
-    <!-- Desktop Nav Links -->
+    <!-- Desktop Nav Links (≥ md) -->
     <nav
       aria-label="Navigasi utama"
-      class="hidden items-center gap-[34px] text-[15px] lg:flex"
+      class="hidden md:flex items-center gap-6 lg:gap-[34px] text-[15px]"
     >
       {tautan.map((t) => (
         <a
           href={t.href}
-          class="flex min-h-11 items-center text-text no-underline transition-colors hover:text-accent-700"
+          class="flex min-h-11 items-center text-text no-underline transition-colors hover:text-accent-700 font-medium"
         >
           {t.label}
         </a>
       ))}
     </nav>
 
-    <!-- CTA Button — direct WhatsApp link matching production -->
+    <!-- Desktop CTA Button (≥ md) -->
+    <div class="hidden md:flex items-center">
+      <a
+        class="btn btn-primary px-[18px] lg:px-[var(--space-5)] text-sm font-semibold inline-flex items-center justify-center shadow-xs hover:shadow-sm transition-all"
+        href={waGeneral}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span>Pesan sekarang</span>
+      </a>
+    </div>
+
+    <!-- Mobile Hamburger Toggle Button (< md) -->
+    <button
+      type="button"
+      id="mobile-menu-toggle"
+      aria-label="Buka menu navigasi"
+      aria-expanded="false"
+      aria-controls="mobile-nav-drawer"
+      class="md:hidden inline-flex items-center justify-center size-10 rounded-xl bg-surface/80 hover:bg-surface active:bg-neutral-200/80 text-text transition-colors border border-neutral-200/90 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+    >
+      <!-- Hamburger Icon (Closed state) -->
+      <svg id="hamburger-icon-open" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="18" x2="20" y2="18"></line>
+      </svg>
+      <!-- Close Icon (Open state) -->
+      <svg id="hamburger-icon-close" class="size-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Backdrop Overlay (< md) -->
+<div
+  id="mobile-nav-backdrop"
+  class="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs z-[80] md:hidden opacity-0 pointer-events-none transition-opacity duration-300"
+  aria-hidden="true"
+></div>
+
+<!-- Mobile Slide-out Drawer (< md) -->
+<aside
+  id="mobile-nav-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Menu navigasi utama"
+  class="fixed top-0 right-0 bottom-0 w-[84vw] max-w-xs bg-bg border-l border-divider z-[90] p-5 sm:p-6 shadow-2xl translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between md:hidden"
+>
+  <!-- Top Section: Drawer Header & Links -->
+  <div class="flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between pb-4 mb-3 border-b border-divider">
+      <div class="flex items-center gap-2">
+        <img
+          src={company.mark}
+          alt={company.name}
+          width="32"
+          height="32"
+          class="size-7 rounded-full object-contain"
+        />
+        <span class="font-heading text-base font-bold text-neutral-900">
+          Menu Dzanis
+        </span>
+      </div>
+      <button
+        type="button"
+        id="mobile-nav-close-btn"
+        aria-label="Tutup menu navigasi"
+        class="size-8 rounded-full bg-surface hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Vertical Nav Links -->
+    <nav aria-label="Menu navigasi mobile" class="space-y-1 pt-1">
+      {tautan.map((t) => (
+        <a
+          href={t.href}
+          data-mobile-nav-link
+          class="flex items-center justify-between p-3 rounded-xl text-base font-semibold text-text hover:text-accent-700 hover:bg-surface/70 transition-all group"
+        >
+          <span>{t.label}</span>
+          <span class="text-neutral-400 group-hover:text-accent-700 group-hover:translate-x-1 transition-all text-xs" aria-hidden="true">&rarr;</span>
+        </a>
+      ))}
+    </nav>
+  </div>
+
+  <!-- Bottom Section: Primary Action WhatsApp CTA -->
+  <div class="pt-4 border-t border-divider mt-auto flex flex-col gap-2.5">
     <a
-      class="btn btn-primary px-[18px] lg:px-[var(--space-5)]"
       href={waGeneral}
       target="_blank"
       rel="noopener noreferrer"
+      data-mobile-nav-link
+      class="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#C04A27] hover:bg-accent-700 text-white py-3.5 px-4 font-heading text-sm font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
     >
-      <span class="lg:hidden">Pesan</span>
-      <span class="hidden lg:inline">Pesan sekarang</span>
+      <svg class="size-4.5 flex-none" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 016.988 2.896 9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+      </svg>
+      <span>Pesan Sekarang via WA</span>
     </a>
+    <p class="text-[11px] text-center text-neutral-500">
+      Respons cepat &bull; Konsultasi menu gratis
+    </p>
   </div>
-</header>
+</aside>
+
+<script>
+  function initMobileNavbar() {
+    const toggleBtn = document.getElementById('mobile-menu-toggle');
+    const drawer = document.getElementById('mobile-nav-drawer');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
+    const closeBtn = document.getElementById('mobile-nav-close-btn');
+    const iconOpen = document.getElementById('hamburger-icon-open');
+    const iconClose = document.getElementById('hamburger-icon-close');
+
+    if (!toggleBtn || !drawer || !backdrop) return;
+
+    let isOpen = false;
+
+    function getFloatingWa() {
+      return document.getElementById('floating-whatsapp-btn') || document.querySelector('a[aria-label="Chat WhatsApp Dzanis Catering"]');
+    }
+
+    function openDrawer() {
+      if (isOpen) return;
+      isOpen = true;
+      toggleBtn?.setAttribute('aria-expanded', 'true');
+      toggleBtn?.setAttribute('aria-label', 'Tutup menu navigasi');
+      iconOpen?.classList.add('hidden');
+      iconClose?.classList.remove('hidden');
+
+      drawer?.classList.remove('translate-x-full');
+      backdrop?.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop?.classList.add('opacity-100', 'pointer-events-auto');
+
+      // Sembunyikan tombol floating WhatsApp agar tidak bertumpuk dengan drawer
+      const floatingWa = getFloatingWa();
+      if (floatingWa) {
+        floatingWa.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+      }
+
+      document.body.style.overflow = 'hidden';
+
+      // Focus management
+      setTimeout(() => {
+        const focusable = drawer?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable && focusable.length > 0) {
+          focusable[0].focus();
+        }
+      }, 50);
+    }
+
+    function closeDrawer() {
+      if (!isOpen) return;
+      isOpen = false;
+      toggleBtn?.setAttribute('aria-expanded', 'false');
+      toggleBtn?.setAttribute('aria-label', 'Buka menu navigasi');
+      iconOpen?.classList.remove('hidden');
+      iconClose?.classList.add('hidden');
+
+      drawer?.classList.add('translate-x-full');
+      backdrop?.classList.remove('opacity-100', 'pointer-events-auto');
+      backdrop?.classList.add('opacity-0', 'pointer-events-none');
+
+      // Munculkan kembali tombol floating WhatsApp saat drawer tertutup
+      const floatingWa = getFloatingWa();
+      if (floatingWa) {
+        floatingWa.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+      }
+
+      document.body.style.overflow = '';
+
+      toggleBtn?.focus();
+    }
+
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isOpen) closeDrawer();
+      else openDrawer();
+    });
+
+    closeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeDrawer();
+    });
+
+    backdrop.addEventListener('click', closeDrawer);
+
+    // Auto-close on any link click (both anchor links and full page navigation)
+    drawer.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        closeDrawer();
+      });
+    });
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        closeDrawer();
+      }
+    });
+
+    // Focus trap
+    drawer.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || !isOpen) return;
+      const focusable = drawer.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          last.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === last) {
+          first.focus();
+          e.preventDefault();
+        }
+      }
+    });
+
+    // Auto-close / reset when resizing or rotating to desktop width (≥ 768px)
+    const mql = window.matchMedia('(min-width: 768px)');
+    const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches && isOpen) {
+        closeDrawer();
+      }
+    };
+
+    if (typeof mql.addEventListener === 'function') {
+      mql.addEventListener('change', handleMediaChange);
+    } else {
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768 && isOpen) {
+          closeDrawer();
+        }
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileNavbar);
+  } else {
+    initMobileNavbar();
+  }
+  document.addEventListener('astro:page-load', initMobileNavbar);
+</script>
