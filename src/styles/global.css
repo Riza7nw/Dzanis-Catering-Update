@@ -32,7 +32,7 @@
   --color-neutral-400: #c3baa8;
   --color-neutral-700: #7a7263;
   --color-neutral-800: #4f4a40;
-  --color-neutral-900: #2a271f;
+  --color-neutral-900: #171717;
 
   /* Aksen 1 — terakota */
   --color-accent-200: #f6dccb;
@@ -53,15 +53,18 @@
   --color-wa: #25d366;
   --color-wa-gelap: #1da851;
 
+  --font-sans: 'Plus Jakarta Sans Variable', sans-serif;
   --font-heading: 'Bricolage Grotesque', var(--font-bricolage), "Trebuchet MS", sans-serif;
-  --font-body: 'Instrument Sans', var(--font-instrument), system-ui, -apple-system, sans-serif;
+  --font-body: 'Plus Jakarta Sans Variable', var(--font-sans), system-ui, -apple-system, sans-serif;
   --font-bricolage: 'Bricolage Grotesque', "Trebuchet MS", sans-serif;
-  --font-instrument: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+  --font-instrument: 'Plus Jakarta Sans Variable', system-ui, -apple-system, sans-serif;
 }
 
 :root {
+  --font-sans: 'Plus Jakarta Sans Variable', sans-serif;
+  --font-body: 'Plus Jakarta Sans Variable', var(--font-sans), system-ui, -apple-system, sans-serif;
   --font-bricolage: 'Bricolage Grotesque', "Trebuchet MS", sans-serif;
-  --font-instrument: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+  --font-instrument: 'Plus Jakarta Sans Variable', system-ui, -apple-system, sans-serif;
 
   /* Skala jarak — basis 4px, melebar di ujung atas supaya seksi bernapas.
      Nama mengikuti artboard (--space-1 .. --space-8). */
@@ -84,10 +87,14 @@
   /* ── Gerak ──────────────────────────────────────────────────────────
      Satu easing untuk seluruh situs; konsistensi lebih penting daripada
      variasi pada sistem sekalem ini. */
-  --durasi-cepat: 180ms; /* hover, pergantian tanda +/− */
-  --durasi-sedang: 260ms; /* buka-tutup akordeon */
-  --durasi-lambat: 420ms; /* animasi masuk seksi */
-  --jeda-stagger: 60ms; /* jarak antar anak dalam satu seksi */
+  --durasi-cepat: 180ms;
+  /* hover, pergantian tanda +/− */
+  --durasi-sedang: 260ms;
+  /* buka-tutup akordeon */
+  --durasi-lambat: 420ms;
+  /* animasi masuk seksi */
+  --jeda-stagger: 60ms;
+  /* jarak antar anak dalam satu seksi */
   --jarak-naik: 16px;
   --easing-keluar: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -100,7 +107,7 @@ summary::marker {
   content: '';
 }
 
-details > summary {
+details>summary {
   list-style: none;
 }
 
@@ -265,7 +272,7 @@ h4 {
    Keadaan diam (di luar media query) sengaja "terlihat": penyembunyian
    hanya berlaku bila JS sudah menandai dokumen DAN pengguna tidak minta
    animasi dikurangi. Tanpa salah satunya, konten tampil apa adanya. */
-[data-reveal] > * {
+[data-reveal]>* {
   transition:
     opacity var(--durasi-lambat) var(--easing-keluar),
     translate var(--durasi-lambat) var(--easing-keluar),
@@ -277,19 +284,36 @@ h4 {
 }
 
 @media screen and (prefers-reduced-motion: no-preference) {
-  [data-js] [data-reveal]:not([data-terlihat]) > * {
+  [data-js] [data-reveal]:not([data-terlihat])>* {
     opacity: 0;
     translate: 0 var(--jarak-naik);
   }
 }
 
 /* Giliran bawaan untuk seksi yang tidak menyetel --i sendiri. */
-[data-reveal] > *:nth-child(2) { --i: 1; }
-[data-reveal] > *:nth-child(3) { --i: 2; }
-[data-reveal] > *:nth-child(4) { --i: 3; }
-[data-reveal] > *:nth-child(5) { --i: 4; }
-[data-reveal] > *:nth-child(6) { --i: 5; }
-[data-reveal] > *:nth-child(n + 7) { --i: 6; }
+[data-reveal]>*:nth-child(2) {
+  --i: 1;
+}
+
+[data-reveal]>*:nth-child(3) {
+  --i: 2;
+}
+
+[data-reveal]>*:nth-child(4) {
+  --i: 3;
+}
+
+[data-reveal]>*:nth-child(5) {
+  --i: 4;
+}
+
+[data-reveal]>*:nth-child(6) {
+  --i: 5;
+}
+
+[data-reveal]>*:nth-child(n + 7) {
+  --i: 6;
+}
 
 /* Enam item beruntun terasa lamban pada 60ms; grid foto snack box memakai
    giliran yang lebih rapat. */
@@ -312,7 +336,7 @@ h4 {
 }
 
 @media screen and (prefers-reduced-motion: no-preference) {
-  [data-js] [data-reveal].giliran-manual:not([data-terlihat]) > * {
+  [data-js] [data-reveal].giliran-manual:not([data-terlihat])>* {
     opacity: 1;
     translate: none;
   }
@@ -343,6 +367,7 @@ h4 {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -362,17 +387,31 @@ h4 {
 }
 
 @media screen and (prefers-reduced-motion: no-preference) {
-  .hero-masuk > * {
+  .hero-masuk>* {
     animation: hero-naik var(--durasi-lambat) var(--easing-keluar) both;
     animation-delay: calc(var(--i, 0) * var(--jeda-stagger));
   }
-  .hero-masuk > *:nth-child(2) { --i: 1; }
-  .hero-masuk > *:nth-child(3) { --i: 2; }
-  .hero-masuk > *:nth-child(4) { --i: 3; }
+
+  .hero-masuk>*:nth-child(2) {
+    --i: 1;
+  }
+
+  .hero-masuk>*:nth-child(3) {
+    --i: 2;
+  }
+
+  .hero-masuk>*:nth-child(4) {
+    --i: 3;
+  }
 
   @media (min-width: 1024px) {
-    .hero-masuk > *:nth-child(3) { --i: 1; }
-    .hero-masuk > *:nth-child(4) { --i: 2; }
+    .hero-masuk>*:nth-child(3) {
+      --i: 1;
+    }
+
+    .hero-masuk>*:nth-child(4) {
+      --i: 2;
+    }
   }
 
   .lingkaran-sage {
@@ -398,7 +437,7 @@ h4 {
   grid-template-rows: 1fr;
 }
 
-.akordeon-panel > * {
+.akordeon-panel>* {
   overflow: hidden;
 }
 
@@ -445,8 +484,8 @@ h4 {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-

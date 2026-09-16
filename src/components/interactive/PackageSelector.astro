@@ -13,7 +13,7 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
   <!-- Context Title -->
   <div class="flex items-center gap-2 mb-2.5">
     <span class="inline-block size-2 rounded-full bg-[#C04A27]" aria-hidden="true"></span>
-    <h2 class="font-heading text-sm font-bold uppercase tracking-wider text-neutral-700">
+    <h2 class="font-heading text-sm font-bold uppercase tracking-wider text-neutral-900">
       Pilihan Paket Nasi Kotak
     </h2>
   </div>
@@ -222,7 +222,7 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
                   <span
                     class:list={[
                       "font-heading text-sm font-bold",
-                      isCurrent ? "text-[#C04A27]" : "text-neutral-700 group-hover:text-accent-700"
+                      isCurrent ? "text-[#C04A27]" : "text-neutral-900 group-hover:text-accent-700"
                     ]}
                   >
                     Rp {item.harga.toLocaleString("id-ID")}

@@ -1,0 +1,76 @@
+[
+  {
+    "id": "paket-favorit-23k",
+    "nama": "Paket Favorit 23K",
+    "harga": 23000,
+    "gambar": "/images/menu/paket-23k.webp",
+    "alt": "Paket Favorit 23K Dzanis Catering",
+    "deskripsi": "Ayam bakar madu, telur balado 1/2, bakmi goreng gurih, sambal, dan pisang.",
+    "items": [
+      "Ayam Bakar Madu / Ayam Goreng Lengkuas",
+      "Telur Balado 1/2 Butir",
+      "Bakmi Goreng Gurih",
+      "Sambal Bajak / Sambal Terasi",
+      "Buah Pisang Segar",
+      "Kerupuk Renyah"
+    ],
+    "slug": "paket-favorit-23k",
+    "badge": "PALING SERING DIPESAN",
+    "tags": ["Nasi Pulen", "Telur Balado 1/2", "Pisang", "Kerupuk"],
+    "laukPendamping": [
+      "Bakmi Goreng Gurih",
+      "Capcay Bakso Sayur",
+      "Sambal Goreng Kentang",
+      "Tempe Orek Manis Gurih"
+    ]
+  },
+  {
+    "id": "paket-hemat-20k",
+    "nama": "Paket Hemat 20K",
+    "harga": 20000,
+    "gambar": "/images/menu/paket-20k.webp",
+    "alt": "Paket Hemat 20K Dzanis Catering",
+    "deskripsi": "Ayam goreng lengkuas/serundeng, oseng tempe kacang, sambal terasi, dan kerupuk.",
+    "items": [
+      "Ayam Goreng Serundeng Lengkuas",
+      "Tahu & Tempe Goreng Gurih",
+      "Oseng Kacang Panjang Tempe",
+      "Sambal Terasi Matang",
+      "Kerupuk Bawang"
+    ],
+    "slug": "paket-hemat-20k",
+    "badge": null,
+    "tags": ["Nasi Pulen", "Sambal Terasi", "Kerupuk"],
+    "laukPendamping": [
+      "Oseng Kacang Panjang Tempe",
+      "Bihun Goreng Sayur",
+      "Tumis Buncis Jagung",
+      "Capcay Gurih"
+    ]
+  },
+  {
+    "id": "paket-spesial-25k",
+    "nama": "Paket Spesial 25K",
+    "harga": 25000,
+    "gambar": "/images/menu/paket-25k.webp",
+    "alt": "Paket Spesial 25K Dzanis Catering",
+    "deskripsi": "Ayam rica-rica / rolade daging, sambal goreng ati kentang, capcay bakso, dan kerupuk udang.",
+    "items": [
+      "Rolade Daging Sapi Olahan / Ayam Rica Kemangi",
+      "Telur Balado Bumbu Merah",
+      "Sambal Goreng Ati Kentang",
+      "Capcay Bakso Sosis",
+      "Kerupuk Udang",
+      "Buah Segar / Puding Cup"
+    ],
+    "slug": "paket-spesial-25k",
+    "badge": null,
+    "tags": ["Nasi Pulen", "Sambal Goreng Ati", "Buah Segar", "Kerupuk Udang"],
+    "laukPendamping": [
+      "Sambal Goreng Ati Kentang",
+      "Capcay Bakso Sosis",
+      "Mie Goreng Spesial",
+      "Tumis Buncis Jagung Manis"
+    ]
+  }
+]

@@ -1,4 +1,5 @@
 ---
+import menuData from '../../data/menu.json';
 import { DAFTAR_PAKET, formatNamaPaket } from '../../data/paket';
 import { company } from '../../data/company';
 
@@ -7,6 +8,42 @@ const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
 const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${encodeURIComponent(
   'Halo Dzanis Catering, saya ingin melihat katalog menu nasi kotak lengkap'
 )}`;
+
+// Hybrid Resilience: Gunakan data statis lokal menu.json untuk SSG dengan fallback ke DAFTAR_PAKET
+let menuKatalog: any[] = (Array.isArray(menuData) && menuData.length > 0)
+  ? menuData
+  : DAFTAR_PAKET;
+
+// Pemanggilan fetch dinamis saat build untuk sinkronisasi dengan backend
+try {
+  const apiUrl = import.meta.env.PUBLIC_API_URL || 'https://alkalize-rewire-scruffy.ngrok-free.dev';
+  const res = await fetch(`${apiUrl}/api/menu`, {
+    headers: {
+      'ngrok-skip-browser-warning': 'true',
+      'Accept': 'application/json'
+    },
+    signal: AbortSignal.timeout(2000)
+  });
+  if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await res.json();
+      const packages = Array.isArray(data)
+        ? data
+        : (Array.isArray(data?.packages) ? data.packages : (Array.isArray(data?.data) ? data.data : null));
+      if (packages && packages.length > 0) {
+        menuKatalog = packages;
+      }
+    } else {
+      console.warn(`[Dzanis Menu Build] Respons API bukan JSON (${contentType}), menggunakan fallback cadangan.`);
+    }
+  } else {
+    console.warn(`[Dzanis Menu Build] API menu merespon status ${res.status}, menggunakan fallback cadangan (menu.json / DAFTAR_PAKET).`);
+  }
+} catch (err) {
+  // Jika fetch gagal (karena tunnel ngrok mati/offline), jadikan DAFTAR_PAKET atau menu.json sebagai fallback cadangan agar build Astro tidak gagal/crash
+  console.warn('[Dzanis Menu Build] Menggunakan fallback cadangan (menu.json / DAFTAR_PAKET):', (err as Error)?.message || err);
+}
 ---
 
 <section id="paket" class="py-14 md:py-20 bg-surface/40">
@@ -16,7 +53,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       <h2 class="font-heading text-3xl md:text-5xl font-bold tracking-tight text-neutral-900 uppercase">
         Paket Nasi Kotak
       </h2>
-      <p class="text-sm md:text-base text-neutral-700 leading-relaxed">
+      <p class="text-sm md:text-base text-neutral-900 leading-relaxed">
         Pilihan paket nasi kotak higienis, lengkap dengan alat makan steril. Lauk pendamping dapat disesuaikan.
       </p>
     </div>
@@ -43,26 +80,59 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
         aria-label="Daftar Paket Nasi Kotak"
         class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-5 pb-6 pt-1 overscroll-x-contain no-scrollbar cursor-grab select-none"
       >
-        {DAFTAR_PAKET.map((paket, idx) => (
-          <article
+        {menuKatalog.map((paket: any, idx: number) => {
+          const rawNama = paket.name || paket.nama || paket.title || 'Paket Menu';
+          const nama = formatNamaPaket(rawNama);
+          const harga = Number(paket.price_per_pax || paket.harga || paket.price || 0);
+          const slug = paket.slug || (paket.id ? String(paket.id) : 'paket');
+          let foto = paket.gambar || paket.foto || paket.image || '/images/menu/paket-20k.webp';
+          if (foto.startsWith('uploads/')) {
+            foto = '/' + foto;
+          }
+          if (foto.startsWith('/uploads/')) {
+            const apiBase = import.meta.env.PUBLIC_API_URL || 'https://alkalize-rewire-scruffy.ngrok-free.dev';
+            foto = `${apiBase}${foto}`;
+          }
+          if (foto.includes('ngrok')) {
+            foto += (foto.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=true';
+          }
+          const fotoAlt = formatNamaPaket(paket.alt || paket.fotoAlt || rawNama);
+          const deskripsi = paket.deskripsi || paket.deskripsiSingkat || paket.deskripsi_singkat || paket.description || '';
+          const isPopular = (paket as any).isPopular || (paket as any).is_popular || (paket as any).populer;
+          const badge = (paket as any).badge || (isPopular ? 'FAVORIT' : ((paket as any).category ? (paket as any).category : null));
+          const items = Array.isArray((paket as any).items)
+            ? (paket as any).items
+            : ((paket as any).menuUtama || (paket as any).menu_utama || []);
+          const laukPendamping = Array.isArray((paket as any).laukPendamping)
+            ? (paket as any).laukPendamping
+            : ((paket as any).lauk_pendamping || []);
+          const tags = Array.isArray((paket as any).tags)
+            ? (paket as any).tags
+            : ((paket as any).badges || ((items as string[]).slice(0, 3)));
+
+          return (
+          <div
             role="group"
             aria-roledescription="slide"
-            aria-label={`${formatNamaPaket(paket.nama)} (${idx + 1} dari ${DAFTAR_PAKET.length})`}
+            aria-label={`${nama} (${idx + 1} dari ${menuKatalog.length})`}
             class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-shadow duration-200 hover:shadow-md select-none"
           >
             <!-- Top Image with Badge -->
             <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
               <img
-                src={paket.foto}
-                alt={formatNamaPaket(paket.fotoAlt || paket.nama)}
-                loading="lazy"
+                src={foto}
+                alt={fotoAlt}
+                loading={idx === 0 ? "eager" : "lazy"}
+                fetchpriority={idx === 0 ? "high" : undefined}
+                width="600"
+                height="450"
                 decoding="async"
                 draggable="false"
                 class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
               />
-              {paket.badge && (
+              {badge && (
                 <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
-                  {paket.badge}
+                  {badge}
                 </span>
               )}
             </div>
@@ -72,10 +142,10 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
               <!-- Title & Description -->
               <div class="mb-3">
                 <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
-                  {formatNamaPaket(paket.nama)}
+                  {nama}
                 </h3>
-                <p class="text-xs md:text-sm text-neutral-600 line-clamp-2 leading-relaxed">
-                  {paket.deskripsiSingkat}
+                <p class="text-xs md:text-sm text-neutral-900 line-clamp-2 leading-relaxed">
+                  {deskripsi}
                 </p>
               </div>
 
@@ -84,48 +154,50 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 <p class="flex items-baseline gap-1">
                   <span class="text-xs font-semibold text-neutral-500">Rp</span>
                   <span class="text-2xl font-bold font-heading text-neutral-900">
-                    {paket.harga.toLocaleString("id-ID")}
+                    {harga.toLocaleString("id-ID")}
                   </span>
                   <span class="text-xs text-neutral-500 font-medium">/ box</span>
                 </p>
               </div>
 
-              <!-- Tags Pill List -->
+              <!-- Tags Pill List (Badge Komposisi Menu) -->
               <div class="flex flex-wrap gap-1.5 mb-4">
-                {paket.tags.map((tag) => (
-                  <span class="inline-flex items-center rounded-full bg-surface px-2.5 py-0.5 text-xs text-neutral-700 font-medium">
+                {tags.map((tag: string) => (
+                  <span class="inline-flex items-center rounded-full bg-white text-neutral-900 border border-neutral-300 font-medium px-2.5 py-0.5 text-xs">
                     ✓ {tag}
                   </span>
                 ))}
               </div>
 
-              <!-- Menu Utama -->
+              <!-- Menu Utama / Items -->
               <div class="space-y-1 mb-3">
-                {paket.menuUtama.map((menu) => (
-                  <p class="text-xs text-neutral-700 flex items-start gap-1.5 leading-snug">
+                {items.map((item: string) => (
+                  <p class="text-xs text-neutral-900 flex items-start gap-1.5 leading-snug">
                     <span class="text-[#C04A27] font-bold flex-none">•</span>
-                    <span>{menu}</span>
+                    <span>{item}</span>
                   </p>
                 ))}
               </div>
 
               <!-- Native Accordion for Lauk Pendamping (Zero JS) -->
-              <details class="group border-t border-neutral-100 pt-3 mt-auto">
-                <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
-                  <span>Lauk pendamping ({paket.laukPendamping.length})</span>
-                  <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
-                </summary>
-                <ul class="mt-2 space-y-1 text-xs text-neutral-600 pl-2">
-                  {paket.laukPendamping.map((lauk) => (
-                    <li>• {lauk}</li>
-                  ))}
-                </ul>
-              </details>
+              {laukPendamping.length > 0 && (
+                <details class="group border-t border-neutral-100 pt-3 mt-auto">
+                  <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
+                    <span>Lauk pendamping ({laukPendamping.length})</span>
+                    <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
+                  </summary>
+                  <ul class="mt-2 space-y-1 text-xs text-neutral-900 pl-2">
+                    {laukPendamping.map((lauk: string) => (
+                      <li>• {lauk}</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
 
               <!-- Actions -->
               <div class="mt-4 pt-3 border-t border-neutral-100">
                 <a
-                  href={`/paket/${paket.slug}`}
+                  href={`/paket/${slug}`}
                   class="block w-full text-center py-2.5 px-4 rounded-full border border-[#C04A27] text-[#C04A27] text-xs font-semibold hover:bg-orange-50 transition"
                 >
                   Detail Lengkap
@@ -133,16 +205,17 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 <button
                   type="button"
                   data-order-trigger
-                  data-package-name={formatNamaPaket(paket.nama)}
-                  data-price={paket.harga}
+                  data-package-name={nama}
+                  data-price={harga}
                   class="w-full mt-2 py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition cursor-pointer"
                 >
                   Pesan Paket Ini
                 </button>
               </div>
             </div>
-          </article>
-        ))}
+          </div>
+          );
+        })}
       </div>
 
       <!-- Tombol Panah Kanan (›) -->
@@ -161,8 +234,6 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
     <!-- Indikator Posisi Visual (Dots) -->
     <div
       id="paket-dots"
-      role="tablist"
-      aria-label="Indikator slide paket"
       class="flex items-center justify-center gap-2 mt-6"
     >
     </div>
@@ -205,7 +276,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
     const { signal } = window.__paketCarouselAbortController;
 
     function getMetrics() {
-      const cards = Array.from(grid.querySelectorAll('article'));
+      const cards = Array.from(grid.querySelectorAll('[role="group"]'));
       if (cards.length === 0) return { cards, cardWidth: 0, gap: 20, visibleCount: 1, maxStops: 1 };
 
       const firstCard = cards[0];
@@ -246,9 +317,13 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       if (maxScroll <= 4 || cards.length <= 1 || maxStops <= 1) {
         dotsContainer.innerHTML = '';
         dotsContainer.classList.add('hidden');
+        dotsContainer.removeAttribute('role');
+        dotsContainer.removeAttribute('aria-label');
         return;
       }
 
+      dotsContainer.setAttribute('role', 'tablist');
+      dotsContainer.setAttribute('aria-label', 'Indikator slide paket');
       dotsContainer.classList.remove('hidden');
       const activeIdx = getActiveIndex();
 
@@ -479,7 +554,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
     carouselInstance = initPaketCarousel();
   }
 
-  // Sinkronisasi otomatis katalog paket menu dari Backend (Express / Ngrok)
+  // Sinkronisasi katalog paket menu jika API URL dikonfigurasi
   (async function() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -497,7 +572,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       console.log('[Dzanis Menu] Menghubungi API menu:', apiUrl);
       const res = await fetch(`${apiUrl}/api/menu`, {
         headers: {
-          'ngrok-skip-browser-warning': '69420',
+          'ngrok-skip-browser-warning': 'true',
           'Accept': 'application/json'
         }
       });
@@ -506,8 +581,16 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
         return;
       }
 
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        console.warn('[Dzanis Menu] Respons API bukan JSON:', contentType);
+        return;
+      }
+
       const data = await res.json();
-      const packages = data.packages || [];
+      const packages = Array.isArray(data)
+        ? data
+        : (Array.isArray(data.packages) ? data.packages : (Array.isArray(data.data) ? data.data : []));
       if (!packages || packages.length === 0) return;
 
       console.log('[Dzanis Menu] Menerima data paket:', packages.length, 'paket');
@@ -521,13 +604,16 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
         if (target.startsWith('data:')) return target;
         if (target.startsWith('http://') || target.startsWith('https://')) {
           if (target.includes('ngrok')) {
-            target += (target.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=69420';
+            target += (target.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=true';
           }
           return target;
         }
+        if (target.startsWith('uploads/')) {
+          target = '/' + target;
+        }
         if (target.startsWith('/uploads/')) {
           if (apiUrl && apiUrl.includes('ngrok')) {
-            return `${apiUrl}${target}${target.includes('?') ? '&' : '?'}ngrok-skip-browser-warning=69420`;
+            return `${apiUrl}${target}${target.includes('?') ? '&' : '?'}ngrok-skip-browser-warning=true`;
           }
           if (apiUrl) {
             return `${apiUrl}${target}`;
@@ -538,29 +624,35 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
       };
 
       grid.innerHTML = packages.map((p, idx) => {
-        const rawNama = p.name || p.nama || 'Paket Menu';
+        const rawNama = p.name || p.nama || p.title || 'Paket Menu';
         const nama = rawNama.replace(/\s*\d+K$/i, '').trim();
-        const harga = Number(p.price_per_pax || p.harga || 0);
+        const harga = Number(p.price_per_pax || p.harga || p.price || 0);
         const slug = p.slug || (p.id ? String(p.id) : 'paket');
-        const rawImg = p.image || p.foto || '';
+        const rawImg = p.image || p.foto || p.gambar || '';
         const foto = resolvePhotoUrl(rawImg);
-        const deskripsi = p.description || p.deskripsiSingkat || 'Pilihan menu lezat higienis Dzanis Catering.';
-        const badge = p.badge || (p.category ? p.category : null);
-        const items = Array.isArray(p.items) ? p.items : (p.menuUtama || []);
+        const deskripsi = p.description || p.deskripsiSingkat || p.deskripsi_singkat || p.deskripsi || 'Pilihan menu lezat higienis Dzanis Catering.';
+        const isPopular = p.isPopular || p.is_popular || p.populer;
+        const badge = p.badge || (isPopular ? 'FAVORIT' : (p.category ? p.category : null));
+        const items = Array.isArray(p.items) ? p.items : (p.menuUtama || p.menu_utama || []);
+        const laukPendamping = Array.isArray(p.laukPendamping) ? p.laukPendamping : (p.lauk_pendamping || []);
+        const tags = Array.isArray(p.tags) ? p.tags : (Array.isArray(p.badges) ? p.badges : (Array.isArray(items) ? items.slice(0, 3) : []));
 
         return `
-          <article
+          <div
             role="group"
             aria-roledescription="slide"
             aria-label="${nama} (${idx + 1} dari ${packages.length})"
             class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md select-none"
           >
-            <!-- Top Image with Badge (Format .WEBP) -->
+            <!-- Top Image with Badge -->
             <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
               <img
                 src="${foto}"
                 alt="${nama}"
-                loading="lazy"
+                loading="${idx === 0 ? 'eager' : 'lazy'}"
+                ${idx === 0 ? 'fetchpriority="high"' : ''}
+                width="600"
+                height="450"
                 decoding="async"
                 draggable="false"
                 class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
@@ -580,7 +672,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
                   ${nama}
                 </h3>
-                <p class="text-xs md:text-sm text-neutral-600 line-clamp-2 leading-relaxed">
+                <p class="text-xs md:text-sm text-neutral-900 line-clamp-2 leading-relaxed">
                   ${deskripsi}
                 </p>
               </div>
@@ -596,18 +688,42 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 </p>
               </div>
 
+              <!-- Tags Pill List (Badge Komposisi Menu) -->
+              ${tags && tags.length > 0 ? `
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                ${tags.map(tag => `
+                  <span class="inline-flex items-center rounded-full bg-white text-neutral-900 border border-neutral-300 font-medium px-2.5 py-0.5 text-xs">
+                    ✓ ${tag}
+                  </span>
+                `).join('')}
+              </div>
+              ` : ''}
+
               <!-- Menu Items Preview -->
               <div class="space-y-1 mb-4">
                 ${items.slice(0, 4).map(item => `
-                  <p class="text-xs text-neutral-700 flex items-start gap-1.5 leading-snug">
+                  <p class="text-xs text-neutral-900 flex items-start gap-1.5 leading-snug">
                     <span class="text-[#C04A27] font-bold flex-none">•</span>
                     <span>${item}</span>
                   </p>
                 `).join('')}
                 ${items.length > 4 ? `
-                  <p class="text-[11px] text-neutral-500 italic pl-3">+ ${items.length - 4} lauk lainnya</p>
+                  <p class="text-[11px] text-neutral-900 italic pl-3">+ ${items.length - 4} lauk lainnya</p>
                 ` : ''}
               </div>
+
+              <!-- Native Accordion for Lauk Pendamping (Zero JS) -->
+              ${laukPendamping && laukPendamping.length > 0 ? `
+              <details class="group border-t border-neutral-100 pt-3 mt-auto">
+                <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
+                  <span>Lauk pendamping (${laukPendamping.length})</span>
+                  <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
+                </summary>
+                <ul class="mt-2 space-y-1 text-xs text-neutral-900 pl-2">
+                  ${laukPendamping.map(lauk => `<li>• ${lauk}</li>`).join('')}
+                </ul>
+              </details>
+              ` : ''}
 
               <!-- Actions -->
               <div class="mt-auto pt-3 border-t border-neutral-100">
@@ -628,7 +744,7 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
                 </button>
               </div>
             </div>
-          </article>
+          </div>
         `;
       }).join('');
 

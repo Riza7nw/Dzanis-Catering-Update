@@ -20,14 +20,14 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
         <h3 class="m-0 font-heading text-2xl leading-tight text-neutral-900">
           Form Pemesanan
         </h3>
-        <p class="mt-1 text-sm text-neutral-700">
+        <p class="mt-1 text-sm text-neutral-900">
           Lengkapi data untuk membuat format pemesanan WhatsApp otomatis.
         </p>
       </div>
       <button
         type="button"
         id="modal-close-icon"
-        class="inline-flex size-8 items-center justify-center rounded-full text-neutral-700 hover:bg-neutral-200 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-accent cursor-pointer"
+        class="inline-flex size-8 items-center justify-center rounded-full text-neutral-900 hover:bg-neutral-200 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-accent cursor-pointer"
         aria-label="Tutup form"
       >
         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -40,7 +40,7 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
     <form id="order-form" method="dialog" class="mt-5 flex flex-col gap-4">
       <!-- Paket Terpilih -->
       <div class="rounded-[var(--radius-md)] bg-[var(--color-surface)] p-3.5">
-        <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-700">
+        <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-900">
           Paket Terpilih
         </label>
         <div id="display-package-name" class="mt-0.5 font-heading text-lg font-bold text-accent-700">
@@ -92,7 +92,7 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
             value="20"
             class="mt-1.5 w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none"
           />
-          <span class="mt-1 block text-xs text-neutral-700">Minimal 20 box</span>
+          <span class="mt-1 block text-xs text-neutral-900">Minimal 20 box</span>
         </div>
       </div>
 

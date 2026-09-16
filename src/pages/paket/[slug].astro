@@ -100,7 +100,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
             <span class="text-sm font-medium text-neutral-600">/ porsi</span>
           </div>
 
-          <p class="mt-4 text-sm sm:text-base text-neutral-700 leading-relaxed">
+          <p class="mt-4 text-sm sm:text-base text-neutral-900 leading-relaxed">
             {paket.deskripsiLengkap}
           </p>
 
@@ -133,6 +133,9 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
               src={paket.foto}
               alt={formatNamaPaket(paket.fotoAlt || paket.nama)}
               loading="eager"
+              fetchpriority="high"
+              width="600"
+              height="450"
               decoding="async"
               class="h-full w-full object-cover"
             />
@@ -204,7 +207,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
                           Menu Utama
                         </h4>
                       </div>
-                      <ul class="space-y-1.5 text-sm text-neutral-700">
+                      <ul class="space-y-1.5 text-sm text-neutral-900">
                         {paket.menuUtama.map((item) => (
                           <li class="flex items-start gap-2">
                             <span class="text-accent font-bold flex-none">•</span>
@@ -221,7 +224,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
                           Lauk Pendamping
                         </h4>
                       </div>
-                      <ul class="space-y-1.5 text-sm text-neutral-700">
+                      <ul class="space-y-1.5 text-sm text-neutral-900">
                         {paket.laukPendamping.map((item) => (
                           <li class="flex items-start gap-2">
                             <span class="text-accent font-bold flex-none">•</span>
@@ -238,7 +241,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
                           Sambal & Lalapan
                         </h4>
                       </div>
-                      <ul class="space-y-1.5 text-sm text-neutral-700">
+                      <ul class="space-y-1.5 text-sm text-neutral-900">
                         {paket.sambalLalapan.map((item) => (
                           <li class="flex items-start gap-2">
                             <span class="text-accent font-bold flex-none">•</span>
@@ -255,7 +258,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
                           Pelengkap & Kemasan
                         </h4>
                       </div>
-                      <ul class="space-y-1.5 text-sm text-neutral-700">
+                      <ul class="space-y-1.5 text-sm text-neutral-900">
                         {paket.pelengkap.map((item) => (
                           <li class="flex items-start gap-2">
                             <span class="text-accent font-bold flex-none">•</span>
@@ -275,7 +278,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
             <h4 class="font-heading text-sm font-bold text-neutral-900 mb-3 uppercase tracking-wide">
               Ketentuan Pemesanan
             </h4>
-            <ul class="space-y-2 text-sm leading-relaxed text-neutral-700">
+            <ul class="space-y-2 text-sm leading-relaxed text-neutral-900">
               <li class="flex items-start gap-2">
                 <span class="text-accent font-bold">✓</span>
                 <span><strong>Cutoff H-2 / H-3:</strong> Disarankan memesan minimal H-3 agar persiapan bahan baku optimal.</span>
@@ -399,10 +402,10 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
                         Menu Bawaan Rekomendasi Terpasang
                       </h4>
                     </div>
-                    <p class="text-sm text-neutral-700">
+                    <p class="text-sm text-neutral-900">
                       <span class="font-semibold text-accent-700">Menu Utama:</span> {defaultMainMenu}
                     </p>
-                    <p class="text-sm text-neutral-700 mt-0.5">
+                    <p class="text-sm text-neutral-900 mt-0.5">
                       <span class="font-semibold text-neutral-800">Lauk Pendamping:</span> {defaultSideDishes.join(', ')}
                     </p>
                   </div>
@@ -504,7 +507,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
                         <p id="menu-summary-main" class="font-medium text-accent-700">
                           Menu: {defaultMainMenu}
                         </p>
-                        <p id="menu-summary-sides" class="text-neutral-700 text-sm">
+                        <p id="menu-summary-sides" class="text-neutral-900 text-sm">
                           Lauk: {defaultSideDishes.join(', ')}
                         </p>
                       </div>
@@ -694,7 +697,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
         // Button Default Active
         btnOrderDefault?.setAttribute('aria-pressed', 'true');
         btnOrderDefault?.classList.add('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
-        btnOrderDefault?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        btnOrderDefault?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-900');
         if (iconOrderDefault) {
           iconOrderDefault.className = 'size-9 rounded-xl bg-accent text-white flex items-center justify-center flex-none font-bold shadow-xs transition-colors';
         }
@@ -704,7 +707,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
         btnOrderCustom?.setAttribute('aria-pressed', 'false');
         btnOrderCustom?.setAttribute('aria-expanded', 'false');
         btnOrderCustom?.classList.remove('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
-        btnOrderCustom?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        btnOrderCustom?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-900');
         if (iconOrderCustom) {
           iconOrderCustom.className = 'size-9 rounded-xl bg-surface border border-neutral-200 text-neutral-600 flex items-center justify-center flex-none group-hover:border-accent/40 group-hover:text-accent transition-colors';
         }
@@ -744,7 +747,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
         btnOrderCustom?.setAttribute('aria-pressed', 'true');
         btnOrderCustom?.setAttribute('aria-expanded', 'true');
         btnOrderCustom?.classList.add('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
-        btnOrderCustom?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        btnOrderCustom?.classList.remove('border-neutral-200/90', 'bg-white', 'text-neutral-900');
         if (iconOrderCustom) {
           iconOrderCustom.className = 'size-9 rounded-xl bg-accent text-white flex items-center justify-center flex-none font-bold shadow-xs transition-colors';
         }
@@ -753,7 +756,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
         // Button Default Inactive
         btnOrderDefault?.setAttribute('aria-pressed', 'false');
         btnOrderDefault?.classList.remove('border-accent', 'bg-accent/8', 'text-neutral-900', 'shadow-2xs');
-        btnOrderDefault?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-700');
+        btnOrderDefault?.classList.add('border-neutral-200/90', 'bg-white', 'text-neutral-900');
         if (iconOrderDefault) {
           iconOrderDefault.className = 'size-9 rounded-xl bg-surface border border-neutral-200 text-neutral-600 flex items-center justify-center flex-none group-hover:border-accent/40 group-hover:text-accent transition-colors';
         }
