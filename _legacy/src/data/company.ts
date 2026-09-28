@@ -5,7 +5,7 @@
  * Versi sebelumnya berisi profil Puncak/Bogor/Jabodetabek dengan nomor
  * 081286803447. Baik artboard Claude Design maupun poster harga resmi
  * (dzanis-paket-*.png, dzanis-snackbox-*.png) sama-sama menyebut
- * Majalengka dan 081 324 383858, jadi profil lama diperlakukan sebagai
+ * Majalengka dan 0857 2633 1579, jadi profil lama diperlakukan sebagai
  * data usang dan tidak dibawa ke sini.
  *
  * Field yang dulu ada tapi tidak bisa diverifikasi dari sumber mana pun
@@ -13,7 +13,7 @@
  * dihapus, bukan ditebak — lihat catatan di StructuredData.tsx.
  */
 
-const WA_NUMBER = "6281324383858";
+const WA_NUMBER = "6285726331579";
 
 export function waLink(pesan?: string) {
   const base = `https://wa.me/${WA_NUMBER}`;
@@ -32,12 +32,12 @@ export const company = {
     "Katering rumahan dari Majalengka. Nasi kotak mulai Rp20.000 per box, snack box 51 pilihan, dan prasmanan untuk resepsi, syukuran, serta acara kantor. Mengantar ke Cirebon, Indramayu, Majalengka, dan Kuningan.",
 
   contact: {
-    whatsapp: "081324383858",
-    whatsappDisplay: "081 324 383858",
+    whatsapp: "085726331579",
+    whatsappDisplay: "0857 2633 1579",
     whatsappLink: waLink(
       "Halo Dzanis Catering, saya mau tanya-tanya soal pesanan catering.",
     ),
-    phoneHref: "tel:081324383858",
+    phoneHref: "tel:085726331579",
     /** Lokasi dapur, bukan batas pengantaran — lihat ketentuan.areaAntar. */
     address: "Majalengka, Jawa Barat",
     operatingHours: "Menerima pesanan setiap hari, pengantaran mulai pukul 06.00.",

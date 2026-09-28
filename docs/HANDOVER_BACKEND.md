@@ -20,7 +20,7 @@ A core architectural principle of this system is **Zero-Framework Client Runtime
 - Page rendering achieves near-instant First Contentful Paint (FCP) and optimal SEO performance across local search indices for the Ciayumajakuning (Cirebon, Indramayu, Majalengka, Kuningan) market.
 
 ### 2. Integration Objective
-Currently, product packages, pricing tiers, and event services reside in static TypeScript files (`src/data/paket.ts`, `src/data/layananLain.ts`, `src/data/menu.ts`, `src/data/company.ts`). Order inquiries and custom portion calculations are dispatched via parameterized WhatsApp URL payloads directly to the official company contact (`6281324383858`).
+Currently, product packages, pricing tiers, and event services reside in static TypeScript files (`src/data/paket.ts`, `src/data/layananLain.ts`, `src/data/menu.ts`, `src/data/company.ts`). Order inquiries and custom portion calculations are dispatched via parameterized WhatsApp URL payloads directly to the official company contact (`6285726331579`).
 
 The goal of this backend integration is to:
 1. **Decouple Data Management**: Transition from static code-committed datasets to a headless database-backed REST API, allowing the business operations team to update menus, pricing, and availability without code deployments.
@@ -493,7 +493,7 @@ Ingests a customer inquiry before routing to WhatsApp. Allows the business to tr
     "leadNumber": "DZ-202609-0142",
     "status": "NEW",
     "createdAt": "2026-09-08T16:35:10Z",
-    "whatsappRedirectUrl": "https://wa.me/6281324383858?text=Halo%20Dzanis%20Catering%2C%20saya%20ingin%20memesan%20*Paket%20Favorit%2023K*..."
+    "whatsappRedirectUrl": "https://wa.me/6285726331579?text=Halo%20Dzanis%20Catering%2C%20saya%20ingin%20memesan%20*Paket%20Favorit%2023K*..."
   }
 }
 ```
@@ -531,8 +531,8 @@ To ensure defensive operation, the backend must guard against the following clie
   - Enforce maximum lengths: `customerName` (max 128 chars), `notes` (max 1,000 chars).
 - **Phone Number Normalization**:
   - Automatically normalize Indonesian mobile formats:
-    - Input: `081324383858` $\rightarrow$ Normalized: `6281324383858`.
-    - Input: `+62 813-2438-3858` $\rightarrow$ Normalized: `6281324383858`.
+    - Input: `085726331579` $\rightarrow$ Normalized: `6285726331579`.
+    - Input: `+62 857-2633-1579` $\rightarrow$ Normalized: `6285726331579`.
 - **Rate Limiting**:
   - Apply IP-based and session-based rate limits to `POST /api/v1/leads` (e.g., maximum 5 lead submissions per 10 minutes per IP) to prevent spamming WhatsApp triggers.
 

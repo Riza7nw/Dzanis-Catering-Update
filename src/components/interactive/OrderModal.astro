@@ -1,5 +1,5 @@
 ---
-import { waPhoneNumber } from '../../data/company';
+import { waPhoneNumber } from "../../data/company";
 
 interface Props {
   phoneNumber?: string;
@@ -15,7 +15,9 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
 >
   <div class="relative flex flex-col p-6 sm:p-8">
     <!-- Header -->
-    <div class="flex items-start justify-between border-b border-[var(--color-divider)] pb-4">
+    <div
+      class="flex items-start justify-between border-b border-[var(--color-divider)] pb-4"
+    >
       <div>
         <h3 class="m-0 font-heading text-2xl leading-tight text-neutral-900">
           Form Pemesanan
@@ -30,8 +32,18 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
         class="inline-flex size-8 items-center justify-center rounded-full text-neutral-900 hover:bg-neutral-200 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-accent cursor-pointer"
         aria-label="Tutup form"
       >
-        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        <svg
+          class="size-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
     </div>
@@ -40,18 +52,31 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
     <form id="order-form" method="dialog" class="mt-5 flex flex-col gap-4">
       <!-- Paket Terpilih -->
       <div class="rounded-[var(--radius-md)] bg-[var(--color-surface)] p-3.5">
-        <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-900">
+        <label
+          class="block text-xs font-semibold uppercase tracking-wider text-neutral-900"
+        >
           Paket Terpilih
         </label>
-        <div id="display-package-name" class="mt-0.5 font-heading text-lg font-bold text-accent-700">
+        <div
+          id="display-package-name"
+          class="mt-0.5 font-heading text-lg font-bold text-accent-700"
+        >
           Snack Box Dzanis
         </div>
-        <input type="hidden" name="packageName" id="input-package-name" value="Snack Box Dzanis" />
+        <input
+          type="hidden"
+          name="packageName"
+          id="input-package-name"
+          value="Snack Box Dzanis"
+        />
       </div>
 
       <!-- Nama Pemesan -->
       <div>
-        <label for="customer-name" class="block text-sm font-semibold text-neutral-900">
+        <label
+          for="customer-name"
+          class="block text-sm font-semibold text-neutral-900"
+        >
           Nama Pemesan <span class="text-accent">*</span>
         </label>
         <input
@@ -67,7 +92,10 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
       <!-- Grid: Tanggal Acara & Jumlah Porsi -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label for="event-date" class="block text-sm font-semibold text-neutral-900">
+          <label
+            for="event-date"
+            class="block text-sm font-semibold text-neutral-900"
+          >
             Tanggal Acara <span class="text-accent">*</span>
           </label>
           <input
@@ -80,7 +108,10 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
         </div>
 
         <div>
-          <label for="portion-count" class="block text-sm font-semibold text-neutral-900">
+          <label
+            for="portion-count"
+            class="block text-sm font-semibold text-neutral-900"
+          >
             Jumlah Porsi (box) <span class="text-accent">*</span>
           </label>
           <input
@@ -92,13 +123,17 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
             value="20"
             class="mt-1.5 w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none"
           />
-          <span class="mt-1 block text-xs text-neutral-900">Minimal 20 box</span>
+          <span class="mt-1 block text-xs text-neutral-900">Minimal 20 box</span
+          >
         </div>
       </div>
 
       <!-- Catatan Tambahan -->
       <div>
-        <label for="order-notes" class="block text-sm font-semibold text-neutral-900">
+        <label
+          for="order-notes"
+          class="block text-sm font-semibold text-neutral-900"
+        >
           Catatan Tambahan (Opsional)
         </label>
         <textarea
@@ -111,7 +146,9 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
       </div>
 
       <!-- Tombol Aksi -->
-      <div class="mt-2 flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:justify-end">
+      <div
+        class="mt-2 flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:justify-end"
+      >
         <button
           type="button"
           id="modal-cancel-btn"
@@ -119,10 +156,7 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
         >
           Batal
         </button>
-        <button
-          type="submit"
-          class="btn btn-primary min-h-[44px] text-sm"
-        >
+        <button type="submit" class="btn btn-primary min-h-[44px] text-sm">
           Lanjutkan ke WhatsApp &rarr;
         </button>
       </div>
@@ -132,46 +166,68 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
 
 <script>
   function setupOrderModal() {
-    const dialog = document.getElementById('order-modal') as HTMLDialogElement | null;
-    const form = document.getElementById('order-form') as HTMLFormElement | null;
-    const displayPackage = document.getElementById('display-package-name');
-    const inputPackage = document.getElementById('input-package-name') as HTMLInputElement | null;
-    const eventDateInput = document.getElementById('event-date') as HTMLInputElement | null;
+    const dialog = document.getElementById(
+      "order-modal",
+    ) as HTMLDialogElement | null;
+    const form = document.getElementById(
+      "order-form",
+    ) as HTMLFormElement | null;
+    const displayPackage = document.getElementById("display-package-name");
+    const inputPackage = document.getElementById(
+      "input-package-name",
+    ) as HTMLInputElement | null;
+    const eventDateInput = document.getElementById(
+      "event-date",
+    ) as HTMLInputElement | null;
 
     if (!dialog || !form) return;
 
     if (eventDateInput) {
-      eventDateInput.min = new Date().toISOString().split('T')[0];
+      eventDateInput.min = new Date().toISOString().split("T")[0];
     }
 
-    window.addEventListener('open-order-modal', ((e: CustomEvent<{ packageName?: string }>) => {
-      const pkg = e.detail?.packageName || 'Snack Box Dzanis';
+    window.addEventListener("open-order-modal", ((
+      e: CustomEvent<{ packageName?: string }>,
+    ) => {
+      const pkg = e.detail?.packageName || "Snack Box Dzanis";
       if (displayPackage) displayPackage.textContent = pkg;
       if (inputPackage) inputPackage.value = pkg;
       if (!dialog.open) dialog.showModal();
     }) as EventListener);
 
-    document.addEventListener('click', (e) => {
-      const trigger = (e.target as HTMLElement).closest('[data-order-trigger]');
+    document.addEventListener("click", (e) => {
+      const trigger = (e.target as HTMLElement).closest("[data-order-trigger]");
       if (trigger) {
         e.preventDefault();
-        const packageName = trigger.getAttribute('data-package-name') || 'Snack Box Dzanis';
-        window.dispatchEvent(new CustomEvent('open-order-modal', { detail: { packageName } }));
+        const packageName =
+          trigger.getAttribute("data-package-name") || "Snack Box Dzanis";
+        window.dispatchEvent(
+          new CustomEvent("open-order-modal", { detail: { packageName } }),
+        );
       }
     });
 
     const closeModal = () => dialog.open && dialog.close();
-    document.getElementById('modal-close-icon')?.addEventListener('click', closeModal);
-    document.getElementById('modal-cancel-btn')?.addEventListener('click', closeModal);
+    document
+      .getElementById("modal-close-icon")
+      ?.addEventListener("click", closeModal);
+    document
+      .getElementById("modal-cancel-btn")
+      ?.addEventListener("click", closeModal);
 
-    dialog.addEventListener('click', (e) => {
+    dialog.addEventListener("click", (e) => {
       const r = dialog.getBoundingClientRect();
-      if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
+      if (
+        e.clientY < r.top ||
+        e.clientY > r.bottom ||
+        e.clientX < r.left ||
+        e.clientX > r.right
+      ) {
         dialog.close();
       }
     });
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
       if (!form.checkValidity()) {
         form.reportValidity();
@@ -179,31 +235,37 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
       }
 
       const data = new FormData(form);
-      const pkg = String(data.get('packageName') || 'Snack Box Dzanis');
-      const name = String(data.get('customerName') || '').trim();
-      const date = String(data.get('eventDate') || '');
-      const count = Number(data.get('portionCount')) || 20;
-      const notes = String(data.get('notes') || '').trim();
+      const pkg = String(data.get("packageName") || "Snack Box Dzanis");
+      const name = String(data.get("customerName") || "").trim();
+      const date = String(data.get("eventDate") || "");
+      const count = Number(data.get("portionCount")) || 20;
+      const notes = String(data.get("notes") || "").trim();
 
       const text = [
-        'Halo Dzanis Catering, saya ingin memesan:',
+        "Halo Dzanis Catering, saya ingin memesan:",
         `- Paket: ${pkg}`,
         `- Jumlah: ${count} box`,
         `- Tanggal Acara: ${date}`,
         `- Nama Pemesan: ${name}`,
-        `- Catatan: ${notes || '-'}`,
-      ].join('\n');
+        `- Catatan: ${notes || "-"}`,
+      ].join("\n");
 
-      let phone = (dialog.dataset.phone || '6281324383858').replace(/\D/g, '');
-      if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+      let phone = (dialog.dataset.phone || "6285726331579").replace(/\D/g, "");
+      if (phone.startsWith("0")) phone = "62" + phone.slice(1);
 
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+      window.open(
+        `https://wa.me/${phone}?text=${encodeURIComponent(text)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
 
       form.reset();
       if (inputPackage) inputPackage.value = pkg;
       if (displayPackage) displayPackage.textContent = pkg;
-      const portionInput = document.getElementById('portion-count') as HTMLInputElement | null;
-      if (portionInput) portionInput.value = '20';
+      const portionInput = document.getElementById(
+        "portion-count",
+      ) as HTMLInputElement | null;
+      if (portionInput) portionInput.value = "20";
       dialog.close();
     });
   }

@@ -2,7 +2,7 @@
  * Identitas & kontak Dzanis Catering.
  */
 
-export const waPhoneNumber = "6281324383858";
+export const waPhoneNumber = "6285726331579";
 const WA_NUMBER = waPhoneNumber;
 
 /**
@@ -69,12 +69,12 @@ export const company: Company = {
   waConsultationNumber,
 
   contact: {
-    whatsapp: "081324383858",
-    whatsappDisplay: "081 324 383858",
+    whatsapp: "085726331579",
+    whatsappDisplay: "0857 2633 1579",
     whatsappLink: waLink(
       "Halo Dzanis Catering, saya mau tanya-tanya soal pesanan catering.",
     ),
-    phoneHref: "tel:081324383858",
+    phoneHref: "tel:085726331579",
     address: "Majalengka, Jawa Barat",
     operatingHours: "Menerima pesanan setiap hari, pengantaran mulai pukul 06.00.",
   },
