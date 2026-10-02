@@ -1,0 +1,371 @@
+---
+// src/components/organic/ShowcaseSertifikat.astro
+
+// Data default sertifikat resmi (fallback jika API backend offline)
+const defaultCertificates = [
+  {
+    id: 1,
+    title: "Sertifikat Halal Indonesia",
+    no: "ID33110001234560723",
+    date: "8 APRIL 2024",
+    badge: "HALAL",
+    docUrl: "/images/brand/halal-cert.png"
+  },
+  {
+    id: 2,
+    title: "Sertifikat Laik Higiene Sanitasi (SLHS)",
+    no: "440/089/SLHS/2023",
+    date: "14 MEI 2023",
+    badge: "SLHS",
+    docUrl: "/images/brand/halal-cert.png"
+  },
+  {
+    id: 3,
+    title: "Sertifikat Penjamah Makanan",
+    no: "057/SK-PM/2024",
+    date: "26 JUNI 2024",
+    badge: "K3",
+    docUrl: "/images/brand/halal-cert.png"
+  },
+  {
+    id: 4,
+    title: "Sertifikat Pangan",
+    no: "220/KP/2024",
+    date: "2 JULI 2024",
+    badge: "PANGAN",
+    docUrl: "/images/brand/halal-cert.png"
+  },
+  {
+    id: 5,
+    title: "Nomor Induk Berusaha (NIB Resmi)",
+    no: "1209230045678",
+    date: "10 JANUARI 2023",
+    badge: "LEGAL",
+    docUrl: "/images/brand/halal-cert.png"
+  },
+  {
+    id: 6,
+    title: "Uji Lab Mikrobiologi Air Bersih",
+    no: "LAB/BMS/VIII/2024",
+    date: "15 AGUSTUS 2024",
+    badge: "LAB",
+    docUrl: "/images/brand/halal-cert.png"
+  }
+];
+---
+
+<section class="py-14 bg-[#fcfbf7] relative overflow-x-clip" id="showcase-sertifikat-section">
+  <div class="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 relative">
+    
+    <!-- Header Bagian -->
+    <div class="mb-8">
+      <span class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">DOKUMEN LENGKAP</span>
+      <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Showcase Sertifikat Resmi Berlaku</h2>
+    </div>
+
+    <!-- Kontainer Slider dengan Panah Melayang & Gap Ekstra -->
+    <div class="relative px-2 sm:px-4 md:px-6">
+      
+      <!-- Tombol Panah Kiri (<) -->
+      <button 
+        type="button" 
+        id="cert-prev-btn"
+        aria-label="Halaman Sebelumnya"
+        class="absolute -left-2 sm:-left-5 md:-left-7 lg:-left-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/95 border border-[#e5ded0] text-slate-700 hover:bg-[#b04a22] hover:text-white hover:border-[#b04a22] shadow-md flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <!-- Viewport Grid Kartu (2x2) -->
+      <div class="overflow-hidden w-full rounded-2xl">
+        <div 
+          id="cert-slider-track" 
+          class="flex transition-transform duration-500 ease-out will-change-transform"
+          data-certificates={JSON.stringify(defaultCertificates)}
+        >
+          <!-- Konten Slide dirender secara dinamis oleh skrip client-side -->
+        </div>
+      </div>
+
+      <!-- Tombol Panah Kanan (>) -->
+      <button 
+        type="button" 
+        id="cert-next-btn"
+        aria-label="Halaman Selanjutnya"
+        class="absolute -right-2 sm:-right-5 md:-right-7 lg:-right-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/95 border border-[#e5ded0] text-slate-700 hover:bg-[#b04a22] hover:text-white hover:border-[#b04a22] shadow-md flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- Indikator Titik Posisi (Pagination Dots) -->
+    <div id="cert-dots-container" class="flex items-center justify-center gap-2 mt-8">
+      <!-- Titik-titik aktif dirender oleh skrip -->
+    </div>
+
+  </div>
+
+  <!-- LIGHTBOX MODAL PREVIEW DOKUMEN ASLI -->
+  <div id="cert-lightbox-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+        <div>
+          <h4 id="cert-modal-title" class="font-bold text-slate-900 text-base">Pratinjau Dokumen Legalitas</h4>
+          <p class="text-xs text-slate-400 mt-0.5">Dokumen Resmi Dzanis Catering Terverifikasi</p>
+        </div>
+        <button id="cert-modal-close-btn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold transition cursor-pointer">✕</button>
+      </div>
+      <div class="flex-1 overflow-auto rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-4 min-h-[350px]">
+        <img id="cert-modal-img" src="" alt="Dokumen Sertifikat" class="max-h-[65vh] object-contain rounded-lg shadow-sm" />
+        <iframe id="cert-modal-iframe" src="" class="w-full h-[65vh] rounded-lg border border-slate-100 hidden" title="Dokumen PDF Asli"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+(function initCertShowcaseSlider() {
+  const track = document.getElementById('cert-slider-track');
+  const dotsContainer = document.getElementById('cert-dots-container');
+  const prevBtn = document.getElementById('cert-prev-btn');
+  const nextBtn = document.getElementById('cert-next-btn');
+  const modal = document.getElementById('cert-lightbox-modal');
+  const modalImg = document.getElementById('cert-modal-img');
+  const modalIframe = document.getElementById('cert-modal-iframe');
+  const modalTitle = document.getElementById('cert-modal-title');
+  const modalCloseBtn = document.getElementById('cert-modal-close-btn');
+
+  if (!track) return;
+
+  // Baca data sertifikat
+  let certList = [];
+  try {
+    certList = JSON.parse(track.getAttribute('data-certificates') || '[]');
+  } catch (e) {
+    certList = [];
+  }
+
+  // Pengaturan Ukuran Halaman (Mobile: 2 kartu per slide, Desktop: 4 kartu per slide / 2x2)
+  const getPageSize = () => (window.innerWidth < 768 ? 2 : 4);
+  let pageSize = getPageSize();
+  let currentPage = 0;
+  let totalPages = Math.max(1, Math.ceil(certList.length / pageSize));
+
+  // Render Seluruh Halaman Slide
+  function renderSlides() {
+    pageSize = getPageSize();
+    totalPages = Math.max(1, Math.ceil(certList.length / pageSize));
+    if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
+
+    let html = '';
+    for (let p = 0; p < totalPages; p++) {
+      const pageCerts = certList.slice(p * pageSize, (p + 1) * pageSize);
+      
+      html += `
+        <div class="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-5 px-1">
+          ${pageCerts.map(cert => `
+            <div class="bg-[#f6f2e9] border border-[#e8e1d3] rounded-3xl p-6 flex flex-col justify-between hover:shadow-sm transition duration-200">
+              <div>
+                <div class="flex items-center justify-between text-xs mb-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#efe7da] text-[#8c6d48] tracking-wider uppercase">${cert.badge || 'RESMI'}</span>
+                  <span class="text-slate-500 text-xs font-medium">${cert.date || '-'}</span>
+                </div>
+                <h3 class="font-bold text-slate-900 text-base sm:text-lg mt-3 leading-snug">${cert.title}</h3>
+                <p class="text-xs text-slate-500 font-mono mt-1">No. ${cert.no}</p>
+              </div>
+
+              <div class="flex items-center justify-between pt-5 mt-5 border-t border-[#e5ded0] text-xs">
+                <span class="font-bold text-slate-500 text-[11px] tracking-wider uppercase">DOKUMEN TERVERIFIKASI</span>
+                <button 
+                  type="button"
+                  data-view-doc="${cert.docUrl || '/images/brand/halal-cert.png'}"
+                  data-view-title="${cert.title}"
+                  class="btn-view-cert text-[#b04a22] font-semibold hover:underline flex items-center gap-1.5 transition cursor-pointer">
+                  <span>Lihat Dokumen Asli</span>
+                  <span>&rarr;</span>
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    track.innerHTML = html;
+    updateTrackPosition();
+    renderDots();
+  }
+
+  // Pembaruan Posisi Slide
+  function updateTrackPosition() {
+    track.style.transform = `translateX(-${currentPage * 100}%)`;
+    updateDots();
+  }
+
+  // Render Indikator Titik
+  function renderDots() {
+    if (!dotsContainer) return;
+    dotsContainer.innerHTML = '';
+    
+    // Jangan tampilkan titik jika hanya ada 1 halaman
+    if (totalPages <= 1) {
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+      return;
+    } else {
+      if (prevBtn) prevBtn.style.display = 'flex';
+      if (nextBtn) nextBtn.style.display = 'flex';
+    }
+
+    for (let i = 0; i < totalPages; i++) {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = `h-2 rounded-full transition-all duration-300 focus:outline-none cursor-pointer ${i === currentPage ? 'w-7 bg-[#b04a22]' : 'w-2 bg-[#d8d0c0] hover:bg-[#b8ae9c]'}`;
+      dot.setAttribute('aria-label', `Halaman ${i + 1}`);
+      dot.addEventListener('click', () => {
+        currentPage = i;
+        updateTrackPosition();
+      });
+      dotsContainer.appendChild(dot);
+    }
+  }
+
+  function updateDots() {
+    if (!dotsContainer) return;
+    const dots = dotsContainer.querySelectorAll('button');
+    dots.forEach((dot, idx) => {
+      if (idx === currentPage) {
+        dot.className = 'h-2 w-7 rounded-full bg-[#b04a22] transition-all duration-300 focus:outline-none cursor-pointer';
+      } else {
+        dot.className = 'h-2 w-2 rounded-full bg-[#d8d0c0] hover:bg-[#b8ae9c] transition-all duration-300 focus:outline-none cursor-pointer';
+      }
+    });
+  }
+
+  // Navigasi Panah
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      currentPage = currentPage > 0 ? currentPage - 1 : totalPages - 1;
+      updateTrackPosition();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      currentPage = currentPage < totalPages - 1 ? currentPage + 1 : 0;
+      updateTrackPosition();
+    });
+  }
+
+  // Dukungan Touch Swipe di Mobile
+  let touchStartX = 0;
+  track.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  track.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) nextBtn && nextBtn.click();
+      else prevBtn && prevBtn.click();
+    }
+  }, { passive: true });
+
+  // Event Delegation Lightbox Modal
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('.btn-view-cert');
+    if (target && modal && modalTitle) {
+      const docUrl = target.getAttribute('data-view-doc') || '';
+      const title = target.getAttribute('data-view-title') || 'Dokumen Sertifikat';
+      modalTitle.innerText = title;
+      const isPdf = docUrl.toLowerCase().endsWith('.pdf');
+
+      if (isPdf && modalIframe) {
+        if (modalImg) modalImg.classList.add('hidden');
+        modalIframe.classList.remove('hidden');
+        modalIframe.src = docUrl;
+      } else if (modalImg) {
+        if (modalIframe) {
+          modalIframe.classList.add('hidden');
+          modalIframe.src = '';
+        }
+        modalImg.classList.remove('hidden');
+        modalImg.src = docUrl;
+      }
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+  });
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    if (modalIframe) modalIframe.src = '';
+    if (modalImg) modalImg.src = '';
+    document.body.style.overflow = '';
+  }
+
+  if (modalCloseBtn && modal) {
+    modalCloseBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  // Auto Render saat Load & Resize
+  renderSlides();
+  window.addEventListener('resize', () => {
+    const newPageSize = getPageSize();
+    if (newPageSize !== pageSize) {
+      renderSlides();
+    }
+  });
+
+  // Sinkronisasi Dinamis dari Backend API jika tersedia
+  (async function syncCertificatesFromBackend() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryApi = urlParams.get('apiUrl');
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
+      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
+      const apiUrl = queryApi || (isLocal ? defaultLocalApi : 'https://alkalize-rewire-scruffy.ngrok-free.dev');
+      
+      const res = await fetch(`${apiUrl}/api/certifications?active=true`, {
+        headers: { 'ngrok-skip-browser-warning': 'true', 'Accept': 'application/json' }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const rawCerts = Array.isArray(data) ? data : (Array.isArray(data.certifications) ? data.certifications : (Array.isArray(data.data) ? data.data : []));
+      if (!rawCerts || rawCerts.length === 0) return;
+
+      const activeCerts = rawCerts.filter(c => c.is_active !== 0 && c.is_active !== false && (c.category || '').toLowerCase() === 'sertifikat');
+      if (activeCerts.length > 0) {
+        certList = activeCerts.map((c, i) => ({
+          id: c.id || (i + 1),
+          title: c.title || c.label || 'Sertifikat Resmi',
+          no: c.cert_number || c.meta || '-',
+          date: (c.valid_until || c.date || '-').toUpperCase(),
+          badge: c.badge || 'RESMI',
+          docUrl: c.document_url || '/images/brand/halal-cert.png'
+        }));
+        renderSlides();
+      }
+    } catch (e) {
+      // Menggunakan fallback data default
+    }
+  })();
+})();
+</script>
