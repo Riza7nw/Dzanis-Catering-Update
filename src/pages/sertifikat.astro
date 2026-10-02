@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/organic/Navbar.astro';
 import Footer from '../components/organic/Footer.astro';
+import ShowcaseSertifikat from '../components/organic/ShowcaseSertifikat.astro';
 
 const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
 
@@ -10,21 +11,29 @@ const legalCards = [
     label: 'NIB / Izin Usaha',
     detail: 'Legalitas usaha untuk menjalankan aktivitas usaha katering secara resmi.',
     status: 'Legal',
+    document_url: '/images/brand/halal-cert.png',
+    file_type: 'image',
   },
   {
     label: 'Uji Lab Mikrobiologi & Air Bersih',
     detail: 'Hasil uji kualitas air dan sanitasi dapur sesuai standar keamanan pangan.',
     status: 'Uji Lab',
+    document_url: '/images/brand/halal-cert.png',
+    file_type: 'image',
   },
   {
     label: 'Pangan Sanitasi & Kesehatan',
     detail: 'Sertifikat kesehatan untuk operasional dapur dan keamanan makanan.',
     status: 'Sanitasi',
+    document_url: '/images/brand/halal-cert.png',
+    file_type: 'image',
   },
   {
     label: 'Legalitas & Izin Lainnya',
     detail: 'Dokumen pendukung terkait proses bisnis dan pengelolaan usaha.',
     status: 'Dokumen',
+    document_url: '/images/brand/halal-cert.png',
+    file_type: 'image',
   },
 ];
 
@@ -34,24 +43,36 @@ const sertifikat = [
     meta: 'No. 123456789012345678',
     date: '8 April 2024',
     badge: 'HALAL',
+    issuer: 'BPJPH & Majelis Ulama Indonesia',
+    document_url: '/images/brand/halal-cert.png',
+    file_type: 'image',
   },
   {
     label: 'Sertifikat Laik Higiene Sanitasi (SLHS)',
     meta: 'No. 440/…/2023',
     date: '14 Mei 2023',
     badge: 'SLHS',
+    issuer: 'Dinas Kesehatan Kabupaten Majalengka',
+    document_url: '/images/brand/halal-cert.png',
+    file_type: 'image',
   },
   {
     label: 'Sertifikat Penjemahan Makanan',
     meta: 'No. 057/…/2024',
     date: '26 Juni 2024',
     badge: 'K3',
+    issuer: 'Higiene Sanitasi Makanan & K3',
+    document_url: '/images/brand/halal-cert.png',
+    file_type: 'image',
   },
   {
     label: 'Sertifikat Pangan',
     meta: 'No. 220/…/2024',
     date: '2 Juli 2024',
     badge: 'PANGAN',
+    issuer: 'Pengawasan Keamanan Pangan Olahan',
+    document_url: '/images/brand/halal-cert.png',
+    file_type: 'image',
   },
 ];
 
@@ -115,7 +136,7 @@ const prosesVerifikasi = [
             <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
               <div class="rounded-2xl border border-divider bg-bg p-3">
                 <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-900">NIB</p>
-                <p class="mt-1 font-semibold text-text">123456789012345</p>
+                <p class="mt-1 font-semibold text-text font-mono">123456789012345</p>
               </div>
               <div class="rounded-2xl border border-divider bg-bg p-3">
                 <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-900">Status</p>
@@ -141,46 +162,8 @@ const prosesVerifikasi = [
       </div>
     </section>
 
-    <section class="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-14 lg:py-12">
-      <div class="mb-5">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-900">Dokumen lengkap</p>
-        <h2 class="mt-2 font-heading text-2xl font-bold text-text sm:text-4xl">
-          Showcase Sertifikat Resmi Berlaku
-        </h2>
-      </div>
-
-      <div id="sertifikat-grid" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {sertifikat.map((item) => (
-          <article class="rounded-[28px] border border-divider bg-surface p-4 shadow-[var(--shadow-md)]">
-            <div class="flex items-center justify-between gap-3">
-              <span class:list={[
-                "rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em]",
-                item.badge === 'HALAL'
-                  ? "bg-accent-200 text-accent-900"
-                  : "bg-accent-2-200 text-accent-2-900"
-              ]}>
-                {item.badge}
-              </span>
-              <span class="text-[10px] font-semibold uppercase tracking-[0.15em] text-neutral-900">
-                {item.date}
-              </span>
-            </div>
-
-            <h3 class="mt-4 font-heading text-lg font-bold leading-snug text-text">
-              {item.label}
-            </h3>
-
-            <p class="mt-3 text-sm leading-6 text-neutral-800">
-              {item.meta}
-            </p>
-
-            <div class="mt-5 rounded-2xl bg-bg p-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-800">
-              Dokumen terverifikasi
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
+    <!-- SHOWCASE SERTIFIKAT PAGINATED GRID SLIDER -->
+    <ShowcaseSertifikat />
 
     <section class="bg-accent-900 py-10 text-bg sm:py-12">
       <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-14">
@@ -191,7 +174,7 @@ const prosesVerifikasi = [
           </h2>
         </div>
 
-        <div id="legal-grid" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div id="legal-grid" class="grid gap-5 md:grid-cols-2">
           {legalCards.map((item) => (
             <article class="rounded-[24px] border border-white/15 bg-surface p-4 text-text shadow-[var(--shadow-md)]">
               <div class="flex items-center justify-between gap-3">
@@ -211,6 +194,25 @@ const prosesVerifikasi = [
               <p class="mt-3 text-sm leading-6 text-neutral-800">
                 {item.detail}
               </p>
+              {item.document_url && (
+                <div class="mt-4 pt-2 border-t border-divider/40 flex justify-end">
+                  <button 
+                    type="button" 
+                    class="text-accent-700 hover:text-accent-900 text-[10px] font-bold cursor-pointer hover:underline flex items-center gap-1"
+                    onclick={`window.openDocModal({
+                      label: ${JSON.stringify(item.label)},
+                      meta: ${JSON.stringify(item.detail)},
+                      date: 'Berlaku Aktif',
+                      badge: ${JSON.stringify(item.status)},
+                      issuer: 'Dzanis Catering & Rekanan',
+                      document_url: ${JSON.stringify(item.document_url)},
+                      file_type: ${JSON.stringify(item.file_type || 'image')}
+                    })`}
+                  >
+                    <span>Lihat &rarr;</span>
+                  </button>
+                </div>
+              )}
             </article>
           ))}
         </div>
@@ -286,7 +288,196 @@ const prosesVerifikasi = [
 
   <Footer />
 
+  <!-- ================= LIGHTBOX MODAL: LIHAT DOKUMEN ASLI ================= -->
+  <div 
+    id="doc-lightbox-modal" 
+    class="fixed inset-0 z-[100] bg-black/75 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-6 transition-all duration-200"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-doc-title"
+  >
+    <div 
+      id="doc-lightbox-card"
+      class="bg-surface border border-divider rounded-[28px] max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
+    >
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between p-4 sm:p-5 border-b border-divider bg-bg/60">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <span id="modal-doc-badge" class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-accent-200 text-accent-900 shrink-0">
+            RESMI
+          </span>
+          <div class="truncate">
+            <h3 id="modal-doc-title" class="font-heading text-base sm:text-lg font-bold text-text truncate">
+              Dokumen Sertifikasi Resmi
+            </h3>
+            <p class="text-xs text-neutral-700 truncate mt-0.5">
+              <span id="modal-doc-issuer" class="font-semibold text-accent-900">Lembaga Terkait</span> &bull; 
+              <span id="modal-doc-number" class="font-mono font-semibold">No. -</span>
+            </p>
+          </div>
+        </div>
+
+        <button 
+          id="btn-close-doc-modal" 
+          type="button"
+          class="w-9 h-9 rounded-full bg-surface border border-divider text-neutral-700 hover:text-text hover:bg-neutral-200 transition flex items-center justify-center shrink-0 ml-2 cursor-pointer"
+          aria-label="Tutup jendela dokumen"
+        >
+          <span class="text-lg leading-none">&times;</span>
+        </button>
+      </div>
+
+      <!-- Modal Body: Scanned Document Viewer -->
+      <div class="p-4 sm:p-6 overflow-y-auto flex-1 flex items-center justify-center bg-neutral-900/5 min-h-[360px] text-center">
+        <!-- Image Viewer -->
+        <div id="modal-img-container" class="w-full flex flex-col items-center justify-center">
+          <img 
+            id="modal-doc-img" 
+            src="" 
+            alt="Scan Dokumen Asli" 
+            class="max-h-[64vh] w-auto max-w-full object-contain rounded-xl shadow-lg border border-divider bg-white"
+          />
+          <p class="mt-3 text-[11px] text-neutral-600 font-body">
+            Dokumen pindaian resmi beresolusi tinggi dengan stempel sah lembaga penerbit.
+          </p>
+        </div>
+
+        <!-- PDF Viewer -->
+        <div id="modal-pdf-container" class="w-full h-full hidden">
+          <iframe 
+            id="modal-doc-iframe" 
+            src="" 
+            class="w-full h-[65vh] rounded-xl border border-divider bg-white"
+            title="Dokumen PDF Asli"
+          ></iframe>
+        </div>
+
+        <!-- Empty State -->
+        <div id="modal-empty-state" class="hidden flex-col items-center justify-center py-12 text-neutral-600">
+          <span class="text-4xl mb-2">📄</span>
+          <p class="text-sm font-semibold text-text">Berkas Dokumen Asli Belum Diunggah</p>
+          <p class="text-xs text-neutral-700 mt-1">Sertifikat terdaftar dan terverifikasi di pangkalan data resmi.</p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-divider bg-bg/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+        <div class="text-neutral-700">
+          <span>Masa Berlaku / Terbit: </span>
+          <strong id="modal-doc-valid" class="text-text font-semibold">-</strong>
+        </div>
+
+        <div class="flex items-center space-x-2.5 self-end sm:self-auto">
+          <a 
+            id="modal-doc-download" 
+            href="#" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="px-4 py-2 rounded-xl bg-surface border border-divider text-text hover:bg-neutral-100 transition font-heading font-semibold text-xs tracking-wider inline-flex items-center gap-1.5"
+          >
+            <span>Buka Berkas</span>
+            <span>&nearr;</span>
+          </a>
+          <button 
+            id="btn-close-doc-modal-footer" 
+            type="button" 
+            class="px-5 py-2 rounded-xl bg-accent-900 text-bg hover:bg-accent-800 transition font-heading font-semibold text-xs tracking-wider uppercase cursor-pointer"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script is:inline define:vars={{ publicApiUrl }}>
+    // Controller Lightbox Modal Dokumen Asli
+    (function initDocModal() {
+      const modal = document.getElementById('doc-lightbox-modal');
+      const titleEl = document.getElementById('modal-doc-title');
+      const issuerEl = document.getElementById('modal-doc-issuer');
+      const numberEl = document.getElementById('modal-doc-number');
+      const badgeEl = document.getElementById('modal-doc-badge');
+      const validEl = document.getElementById('modal-doc-valid');
+      const imgEl = document.getElementById('modal-doc-img');
+      const iframeEl = document.getElementById('modal-doc-iframe');
+      const imgContainer = document.getElementById('modal-img-container');
+      const pdfContainer = document.getElementById('modal-pdf-container');
+      const emptyState = document.getElementById('modal-empty-state');
+      const downloadLink = document.getElementById('modal-doc-download');
+      const closeBtn = document.getElementById('btn-close-doc-modal');
+      const closeFooterBtn = document.getElementById('btn-close-doc-modal-footer');
+
+      function openDocModal(doc) {
+        if (!doc) return;
+        const title = doc.title || doc.label || 'Dokumen Resmi';
+        const issuer = doc.issuer || doc.detail || 'Lembaga Penerbit';
+        const certNumber = doc.cert_number || doc.meta || 'Nomor SK Resmi';
+        const validUntil = doc.valid_until || doc.date || 'Aktif';
+        const badge = doc.badge || doc.status || 'RESMI';
+        const docUrl = doc.document_url || '';
+        const isPdf = doc.file_type === 'pdf' || docUrl.toLowerCase().endsWith('.pdf');
+
+        titleEl.textContent = title;
+        issuerEl.textContent = issuer;
+        numberEl.textContent = certNumber;
+        validEl.textContent = validUntil;
+        badgeEl.textContent = badge;
+
+        if (docUrl) {
+          downloadLink.href = docUrl;
+          downloadLink.classList.remove('hidden');
+
+          if (isPdf) {
+            imgContainer.classList.add('hidden');
+            emptyState.classList.add('hidden');
+            pdfContainer.classList.remove('hidden');
+            iframeEl.src = docUrl;
+          } else {
+            pdfContainer.classList.add('hidden');
+            emptyState.classList.add('hidden');
+            imgContainer.classList.remove('hidden');
+            imgEl.src = docUrl;
+          }
+        } else {
+          imgContainer.classList.add('hidden');
+          pdfContainer.classList.add('hidden');
+          emptyState.classList.remove('hidden');
+          downloadLink.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeDocModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if (iframeEl) iframeEl.src = '';
+        if (imgEl) imgEl.src = '';
+        document.body.style.overflow = '';
+      }
+
+      window.openDocModal = openDocModal;
+      window.closeDocModal = closeDocModal;
+
+      if (closeBtn) closeBtn.addEventListener('click', closeDocModal);
+      if (closeFooterBtn) closeFooterBtn.addEventListener('click', closeDocModal);
+
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) closeDocModal();
+        });
+      }
+
+      window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeDocModal();
+        }
+      });
+    })();
+
     // Sinkronisasi otomatis jika admin mengubah/menambah sertifikat di backend
     (async function() {
       try {
@@ -325,41 +516,7 @@ const prosesVerifikasi = [
         console.log('[Dzanis Certs] Data sertifikat diterima:', certs.length, 'item');
         if (!certs || certs.length === 0) return;
 
-        const sertifikatItems = certs.filter(c => (c.category || '').toLowerCase() === 'sertifikat');
         const legalItems = certs.filter(c => (c.category || '').toLowerCase() === 'legalitas');
-
-        const certGrid = document.getElementById('sertifikat-grid');
-        if (certGrid && sertifikatItems.length > 0) {
-          certGrid.innerHTML = sertifikatItems.map(item => {
-            const isHalal = item.badge === 'HALAL';
-            const badgeClass = isHalal
-              ? 'bg-accent-200 text-accent-900'
-              : 'bg-accent-2-200 text-accent-2-900';
-            return `
-              <article class="rounded-[28px] border border-divider bg-surface p-4 shadow-[var(--shadow-md)] transition-all">
-                <div class="flex items-center justify-between gap-3">
-                  <span class="rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] ${badgeClass}">
-                    ${item.badge || 'RESMI'}
-                  </span>
-                  <span class="text-[10px] font-semibold uppercase tracking-[0.15em] text-neutral-900">
-                    ${item.date || ''}
-                  </span>
-                </div>
-                <h3 class="mt-4 font-heading text-lg font-bold leading-snug text-text">
-                  ${item.label}
-                </h3>
-                <p class="mt-3 text-sm leading-6 text-neutral-800">
-                  ${item.meta || ''}
-                </p>
-                ${item.detail ? `<p class="mt-1 text-xs text-neutral-600">${item.detail}</p>` : ''}
-                <div class="mt-5 rounded-2xl bg-bg p-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-800 flex items-center justify-between">
-                  <span>Dokumen terverifikasi</span>
-                  ${item.document_url ? `<a href="${item.document_url}" target="_blank" class="text-accent-700 hover:underline text-[10px]">Lihat &rarr;</a>` : ''}
-                </div>
-              </article>
-            `;
-          }).join('');
-        }
 
         const legalGrid = document.getElementById('legal-grid');
         if (legalGrid && legalItems.length > 0) {
@@ -368,20 +525,46 @@ const prosesVerifikasi = [
             const badgeClass = isLegal
               ? 'bg-accent-200 text-accent-900'
               : 'bg-accent-2-200 text-accent-2-900';
+            const title = item.title || item.label || 'Legalitas Usaha';
+            const detail = item.detail || item.meta || '';
+            const docUrl = item.document_url || '/images/brand/halal-cert.png';
+            const fileType = item.file_type || (docUrl.endsWith('.pdf') ? 'pdf' : 'image');
+
+            const payloadStr = JSON.stringify({
+              label: title,
+              title: title,
+              meta: detail,
+              date: item.valid_until || item.date || 'Aktif',
+              badge: item.badge || item.status || 'Legal',
+              issuer: item.issuer || 'Dzanis Catering',
+              document_url: docUrl,
+              file_type: fileType
+            }).replace(/"/g, '&quot;');
+
             return `
-              <article class="rounded-[24px] border border-white/15 bg-surface p-4 text-text shadow-[var(--shadow-md)]">
-                <div class="flex items-center justify-between gap-3">
+              <article class="rounded-[24px] border border-white/15 bg-surface p-5 text-text shadow-[var(--shadow-md)] flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-3">
                   <span class="text-[18px]" aria-hidden="true">✦</span>
                   <span class="rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] ${badgeClass}">
                     ${item.badge || item.status || 'Legal'}
                   </span>
                 </div>
                 <h3 class="mt-4 font-heading text-lg font-bold leading-tight text-text">
-                  ${item.label}
+                  ${title}
                 </h3>
                 <p class="mt-3 text-sm leading-6 text-neutral-800">
-                  ${item.detail || item.meta || ''}
+                  ${detail}
                 </p>
+                <div class="mt-4 pt-2 border-t border-divider/40 flex justify-end">
+                  <button 
+                    type="button" 
+                    class="text-accent-700 hover:text-accent-900 text-[10px] font-bold cursor-pointer hover:underline flex items-center gap-1"
+                    onclick='window.openDocModal(${payloadStr})'
+                  >
+                    <span>Lihat &rarr;</span>
+                  </button>
+                </div>
               </article>
             `;
           }).join('');
