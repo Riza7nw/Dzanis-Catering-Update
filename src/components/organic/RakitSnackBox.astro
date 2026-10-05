@@ -186,7 +186,7 @@ try {
                           </span>
                           <div class="min-w-0 flex-1">
                             <span class="font-semibold text-neutral-900 block truncate">{slot.name}:</span>
-                            <span class="text-accent-700 font-medium truncate block">{slot.default_item || '-'}</span>
+                            <span class="slot-display-item text-accent-700 font-medium truncate block">{slot.default_item || '-'}</span>
                           </div>
                         </div>
                       ))}
@@ -213,7 +213,7 @@ try {
                     data-package-name={pkg.name}
                     data-price={pkg.price_per_pax}
                     data-min-pax={pkg.min_pax}
-                    data-default-items={slots.map((s) => `${s.name}: ${s.default_item}`).join('\n')}
+                    data-default-items={slots.map((s) => `• ${s.name}: ${s.default_item}`).join('\n')}
                   >
                     <span>Pesan Sesuai Template (Tanpa Ubah)</span>
                   </button>
@@ -450,8 +450,26 @@ try {
       }
     }
 
-    tabBtnTemplate?.addEventListener('click', () => switchTab('template'));
-    tabBtnCustom?.addEventListener('click', () => switchTab('custom'));
+    tabBtnTemplate?.addEventListener('click', () => {
+      if (window.location.hash !== '#template') {
+        history.replaceState(null, '', '#template');
+      }
+      switchTab('template');
+    });
+    tabBtnCustom?.addEventListener('click', () => {
+      if (window.location.hash !== '#custom') {
+        history.replaceState(null, '', '#custom');
+      }
+      switchTab('custom');
+    });
+
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash === '#custom') {
+        switchTab('custom');
+      } else {
+        switchTab('template');
+      }
+    });
 
     // Check URL Hash on load
     if (window.location.hash === '#custom') {
@@ -478,6 +496,18 @@ try {
       const plusBtn = card.querySelector<HTMLButtonElement>('.btn-custom-pax-plus');
       const paxDisplay = card.querySelector<HTMLElement>('.custom-pax-display');
       const totalDisplay = card.querySelector<HTMLElement>('.custom-total-display');
+
+      const selects = card.querySelectorAll<HTMLSelectElement>('.slot-selector');
+      const displays = card.querySelectorAll<HTMLElement>('.slot-display-item');
+
+      // Live sync: saat pilihan kolom di dropdown diubah, perbarui label tampilan di atas kartu
+      selects.forEach((sel, sIdx) => {
+        sel.addEventListener('change', () => {
+          if (displays[sIdx]) {
+            displays[sIdx].textContent = sel.value;
+          }
+        });
+      });
 
       function updateCustomSummary() {
         if (paxDisplay) paxDisplay.textContent = String(currentPax);
@@ -514,7 +544,7 @@ try {
           new CustomEvent('open-order-modal', {
             detail: {
               packageName: `${pkgName} (Sesuai Template)`,
-              portionCount: minPax,
+              portionCount: currentPax,
               customDetails: defaultItems
             }
           })
@@ -523,7 +553,6 @@ try {
 
       // Customized template order
       submitCustomBtn?.addEventListener('click', () => {
-        const selects = card.querySelectorAll<HTMLSelectElement>('.slot-selector');
         const customLines: string[] = [];
         selects.forEach((sel) => {
           const slotName = sel.dataset.slotName || 'Kolom';
