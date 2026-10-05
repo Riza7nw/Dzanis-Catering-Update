@@ -1,5 +1,64 @@
 ---
-import { snackKategori, MIN_BOX, formatRupiah } from '../../data/snack';
+import {
+  snackKategori,
+  MIN_BOX,
+  formatRupiah,
+  defaultSnackTemplates,
+  type SnackTemplatePackage,
+  type SnackSlot
+} from '../../data/snack';
+
+let snackTemplates: SnackTemplatePackage[] = defaultSnackTemplates;
+
+try {
+  const apiUrl = import.meta.env.PUBLIC_API_URL || 'https://alkalize-rewire-scruffy.ngrok-free.dev';
+  const res = await fetch(`${apiUrl}/api/menu`, {
+    headers: {
+      'ngrok-skip-browser-warning': 'true',
+      'Accept': 'application/json'
+    },
+    signal: AbortSignal.timeout(2000)
+  });
+  if (res.ok) {
+    const data = await res.json();
+    const pkgs = Array.isArray(data)
+      ? data
+      : (Array.isArray(data?.packages) ? data.packages : (Array.isArray(data?.data) ? data.data : []));
+    const snackPkgs = pkgs.filter((p: any) =>
+      String(p.category || '').toLowerCase().includes('snack')
+    );
+    if (snackPkgs && snackPkgs.length > 0) {
+      snackTemplates = snackPkgs.map((p: any) => {
+        let slots: SnackSlot[] = [];
+        if (p.custom_slots) {
+          slots = typeof p.custom_slots === 'string' ? JSON.parse(p.custom_slots) : p.custom_slots;
+        } else if (Array.isArray(p.items)) {
+          slots = p.items.map((it: string, idx: number) => ({
+            name: `Slot ${idx + 1}`,
+            default_item: it,
+            options: it
+          }));
+        }
+        return {
+          id: p.id || p.slug || 'snack-pkg',
+          slug: p.slug || p.id || 'snack-pkg',
+          name: p.name || 'Paket Snack Box',
+          category: p.category || 'Snack Box',
+          price_per_pax: Number(p.price_per_pax || p.price || 15000),
+          min_pax: Number(p.min_pax || 20),
+          badge: p.badge || null,
+          description: p.description || '',
+          image: p.image || p.foto || '/images/menu/snack-puding-buah.webp',
+          foto: p.foto || p.image || '/images/menu/snack-puding-buah.webp',
+          items: Array.isArray(p.items) ? p.items : [],
+          custom_slots: slots
+        };
+      });
+    }
+  }
+} catch {
+  // Gunakan fallback defaultSnackTemplates
+}
 ---
 
 <section id="rakit" class="px-[var(--space-4)] py-[var(--space-8)] lg:px-14 lg:py-20 bg-surface/60">
@@ -7,226 +66,571 @@ import { snackKategori, MIN_BOX, formatRupiah } from '../../data/snack';
     <!-- Section Header -->
     <div class="mb-8 lg:mb-12 flex flex-col items-center text-center">
       <span class="tag tag-accent text-xs uppercase tracking-widest font-bold mb-3">
-        Interactive Builder
+        Interactive Snack Experience
       </span>
-      <h2 class="font-heading text-[32px] leading-tight lg:text-[52px] lg:leading-[1] text-neutral-900 uppercase">
-        Rakit Snack Box Sendiri
-      </h2>
-      <p class="mt-3 max-w-xl text-[16px] leading-relaxed text-neutral-900">
-        Pilih aneka jajan pasar, kue basah, pastry, dan puding sesuai selera acara Anda. Harga dihitung transparan per box secara real-time.
+      <h1 class="font-heading text-[32px] leading-tight lg:text-[52px] lg:leading-[1] text-neutral-900 uppercase">
+        Pemesanan Snack Box
+      </h1>
+      <p class="mt-3 max-w-2xl text-[16px] leading-relaxed text-neutral-800">
+        Pilih paket template favorit dengan kolom isian fleksibel, atau rancang sendiri snack box impian dari 51 pilihan jajanan higienis.
       </p>
-    </div>
 
-    <!-- Builder Container Card -->
-    <div id="snack-builder" class="rounded-[32px] border border-divider bg-bg p-6 lg:p-10 shadow-[var(--shadow-lg)]">
-      <!-- Portion & Box Settings Bar -->
-      <div class="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-divider pb-6">
-        <div>
-          <h3 class="font-heading text-xl text-neutral-900">Pilihan Jajanan</h3>
-          <p class="text-xs text-neutral-900">Centang jajanan yang ingin dimasukkan ke dalam setiap box.</p>
-        </div>
-        <div class="flex items-center gap-3 bg-surface px-4 py-2 rounded-full border border-divider">
-          <span class="text-xs font-semibold text-neutral-800">Jumlah Box:</span>
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              id="builder-box-minus"
-              class="size-8 rounded-full border border-accent text-accent font-bold hover:bg-accent hover:text-bg transition-colors flex items-center justify-center cursor-pointer text-base"
-              aria-label="Kurangi jumlah box"
-            >
-              −
-            </button>
-            <span
-              id="builder-box-count"
-              role="spinbutton"
-              aria-valuemin="20"
-              aria-valuenow={MIN_BOX}
-              aria-label="Jumlah box"
-              class="font-heading text-lg font-bold min-w-[28px] text-center text-neutral-900"
-            >
-              {MIN_BOX}
-            </span>
-            <button
-              type="button"
-              id="builder-box-plus"
-              class="size-8 rounded-full bg-accent text-bg font-bold hover:bg-accent-700 transition-colors flex items-center justify-center cursor-pointer text-base"
-              aria-label="Tambah jumlah box"
-            >
-              +
-            </button>
-          </div>
-          <span class="text-[11px] text-neutral-500">(Min. {MIN_BOX})</span>
-        </div>
-      </div>
-
-      <!-- Categories & Checkbox Grid -->
-      <div class="flex flex-col gap-8">
-        {snackKategori.map((kategori) => (
-          <div>
-            <div class="flex items-center gap-2.5 mb-4">
-              <span class="size-2 rounded-full bg-accent"></span>
-              <h4 class="font-heading text-lg font-semibold text-neutral-900">
-                {kategori.label}
-              </h4>
-              <span class="text-xs text-neutral-500 font-mono">({kategori.items.length} pilihan)</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {kategori.items.map((item) => (
-                <label class="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl border border-divider bg-surface/50 hover:bg-surface hover:border-accent/40 cursor-pointer transition-all has-[:checked]:border-accent has-[:checked]:bg-accent-200/25">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <input
-                      type="checkbox"
-                      name="snack-choice"
-                      value={item.nama}
-                      data-nama={item.nama}
-                      data-price={item.harga}
-                      class="size-4.5 rounded border-neutral-400 text-accent focus:ring-accent accent-accent cursor-pointer"
-                    />
-                    <span class="text-sm font-medium text-neutral-900 truncate">
-                      {item.nama}
-                    </span>
-                  </div>
-                  <span class="text-xs font-semibold text-accent-700 whitespace-nowrap">
-                    {formatRupiah(item.harga)}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <!-- Sticky / Bottom Summary Bar -->
-      <div class="mt-10 pt-6 border-t border-divider flex flex-col md:flex-row items-center justify-between gap-6 bg-surface/80 rounded-2xl p-6">
-        <div class="flex flex-wrap items-center gap-6 text-center md:text-left">
-          <div>
-            <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Item Terpilih</span>
-            <span id="summary-item-count" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-neutral-900">0 macam</span>
-          </div>
-          <div class="h-8 w-px bg-divider hidden sm:block"></div>
-          <div>
-            <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Harga per Box</span>
-            <span id="summary-subtotal" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-accent-700">Rp0</span>
-          </div>
-          <div class="h-8 w-px bg-divider hidden sm:block"></div>
-          <div>
-            <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Estimasi Total</span>
-            <span id="summary-total" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-neutral-900">Rp0</span>
-          </div>
-        </div>
-
+      <!-- Mode Switcher Tabs -->
+      <div class="mt-8 inline-flex p-1.5 rounded-full bg-surface border border-divider shadow-xs gap-1.5" role="tablist" aria-label="Mode Pemesanan Snack Box">
         <button
           type="button"
-          id="builder-order-btn"
-          class="btn btn-primary min-h-[50px] px-8 text-base font-semibold w-full md:w-auto shadow-md hover:shadow-lg transition-shadow cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled
+          id="tab-btn-template"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-template"
+          class="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer bg-accent text-bg shadow-sm"
         >
-          Pesan Paket Rakitan Ini &rarr;
+          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          <span>Pilih Paket Template</span>
         </button>
+        <button
+          type="button"
+          id="tab-btn-custom"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-custom"
+          class="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100"
+        >
+          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          <span>Rakit Custom Sendiri</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= PANEL 1: PAKET TEMPLATE & KUSTOMISASI KOLOM ================= -->
+    <div id="panel-template" role="tabpanel" aria-labelledby="tab-btn-template" class="space-y-8">
+      <div class="rounded-3xl border border-divider bg-bg p-6 lg:p-8 shadow-sm">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-divider pb-4">
+          <div>
+            <h2 class="font-heading text-2xl text-neutral-900">Paket Template Siap Saji</h2>
+            <p class="text-sm text-neutral-600">Pesan langsung paket template rekomendasi chef atau sesuaikan isian per kolom.</p>
+          </div>
+          <span class="text-xs bg-accent-100/60 text-accent-700 font-semibold px-3 py-1.5 rounded-full border border-accent/20">
+            {snackTemplates.length} Paket Tersedia
+          </span>
+        </div>
+
+        <!-- Grid Paket Template -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {snackTemplates.map((pkg, pIdx) => {
+            const slots = pkg.custom_slots && pkg.custom_slots.length > 0
+              ? pkg.custom_slots
+              : pkg.items.map((it, i) => ({ name: `Kolom ${i + 1}`, default_item: it, options: it }));
+
+            return (
+              <div
+                class="snack-template-card flex flex-col justify-between rounded-2xl border border-divider bg-surface/40 hover:bg-surface hover:shadow-md transition-all p-5"
+                data-package-id={pkg.id}
+                data-package-name={pkg.name}
+                data-price={pkg.price_per_pax}
+                data-min-pax={pkg.min_pax}
+                data-slots-json={JSON.stringify(slots)}
+              >
+                <div>
+                  <!-- Image & Badge -->
+                  <div class="relative aspect-video w-full rounded-xl overflow-hidden mb-4 bg-neutral-100">
+                    <img
+                      src={pkg.image || pkg.foto || '/images/menu/snack-puding-buah.webp'}
+                      alt={pkg.name}
+                      loading="lazy"
+                      class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                    {pkg.badge && (
+                      <span class="absolute top-2.5 left-2.5 bg-accent text-bg text-[11px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                        {pkg.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  <!-- Name & Description -->
+                  <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
+                    {pkg.name}
+                  </h3>
+                  <p class="text-xs text-neutral-600 mb-3 leading-relaxed">
+                    {pkg.description || 'Kombinasi jajanan pilihan higienis dan lezat untuk berbagai acara.'}
+                  </p>
+
+                  <!-- Price & Min Pax -->
+                  <div class="flex items-baseline justify-between mb-4 border-b border-divider pb-3">
+                    <div>
+                      <span class="text-xs text-neutral-500">Harga: </span>
+                      <span class="font-heading text-xl font-bold text-accent-700">
+                        {formatRupiah(pkg.price_per_pax)}
+                      </span>
+                      <span class="text-xs text-neutral-500">/box</span>
+                    </div>
+                    <span class="text-xs text-neutral-500 font-medium">
+                      Min. {pkg.min_pax} box
+                    </span>
+                  </div>
+
+                  <!-- Kolom / Isian Template Preview -->
+                  <div class="space-y-2 mb-4">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500 block">
+                      Kolom &amp; Isian Default:
+                    </span>
+                    <div class="space-y-1.5">
+                      {slots.map((slot, sIdx) => (
+                        <div class="flex items-start gap-2 text-xs text-neutral-800 bg-white/70 p-2 rounded-lg border border-divider/60">
+                          <span class="size-4.5 rounded-full bg-accent/10 text-accent font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                            {sIdx + 1}
+                          </span>
+                          <div class="min-w-0 flex-1">
+                            <span class="font-semibold text-neutral-900 block truncate">{slot.name}:</span>
+                            <span class="text-accent-700 font-medium truncate block">{slot.default_item || '-'}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action Buttons: Pesan Langsung OR Kustomisasi Isi -->
+                <div class="pt-2 border-t border-divider flex flex-col gap-2">
+                  <button
+                    type="button"
+                    class="btn-customize-package w-full py-2.5 px-4 rounded-xl bg-accent text-bg text-xs font-semibold hover:bg-accent-700 transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                    data-package-id={pkg.id}
+                  >
+                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    <span>Kustomisasi Isi Paket Ini</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-order-template-direct w-full py-2.5 px-4 rounded-xl border border-accent text-accent hover:bg-accent/10 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    data-package-name={pkg.name}
+                    data-price={pkg.price_per_pax}
+                    data-min-pax={pkg.min_pax}
+                    data-default-items={slots.map((s) => `${s.name}: ${s.default_item}`).join('\n')}
+                  >
+                    <span>Pesan Sesuai Template (Tanpa Ubah)</span>
+                  </button>
+                </div>
+
+                <!-- ================= INLINE CUSTOMIZER ACCORDION ================= -->
+                <div class="customizer-drawer hidden mt-4 pt-4 border-t border-accent/20 bg-accent-50/40 rounded-xl p-3.5 space-y-4">
+                  <div class="flex items-center justify-between border-b border-accent/20 pb-2">
+                    <span class="text-xs font-bold text-accent-800 flex items-center gap-1">
+                      <span>Sesuaikan Pilihan Per Kolom</span>
+                    </span>
+                    <button type="button" class="btn-close-customizer text-xs text-neutral-500 hover:text-neutral-900 font-semibold cursor-pointer">
+                      Tutup
+                    </button>
+                  </div>
+
+                  <!-- Slot Selectors -->
+                  <div class="space-y-3 customizer-slots-container">
+                    {slots.map((slot, sIdx) => {
+                      const rawOptions = (slot.options || slot.default_item || '')
+                        .split(/[\n,]+/)
+                        .map((o) => o.trim())
+                        .filter(Boolean);
+                      const optionsList = Array.from(new Set([slot.default_item, ...rawOptions].filter(Boolean)));
+
+                      return (
+                        <div class="space-y-1 bg-white p-2.5 rounded-lg border border-divider shadow-xs">
+                          <label class="text-[11px] font-bold text-neutral-700 block truncate">
+                            Kolom {sIdx + 1}: {slot.name}
+                          </label>
+                          <select
+                            class="slot-selector w-full bg-surface text-xs rounded-md border border-neutral-300 p-2 text-neutral-900 focus:outline-none focus:ring-1 focus:ring-accent"
+                            data-slot-name={slot.name}
+                          >
+                            {optionsList.map((opt) => (
+                              <option value={opt} selected={opt === slot.default_item}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <!-- Quantity Adjuster for Custom Package -->
+                  <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-divider">
+                    <span class="text-xs font-semibold text-neutral-800">Jumlah Box:</span>
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        class="btn-custom-pax-minus size-7 rounded-full border border-accent text-accent font-bold hover:bg-accent hover:text-bg transition flex items-center justify-center cursor-pointer text-sm"
+                        aria-label="Kurangi porsi"
+                      >
+                        −
+                      </button>
+                      <span class="custom-pax-display font-heading text-sm font-bold min-w-[28px] text-center text-neutral-900">
+                        {pkg.min_pax}
+                      </span>
+                      <button
+                        type="button"
+                        class="btn-custom-pax-plus size-7 rounded-full bg-accent text-bg font-bold hover:bg-accent-700 transition flex items-center justify-center cursor-pointer text-sm"
+                        aria-label="Tambah porsi"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Total Price Display & Order CTA -->
+                  <div class="pt-2">
+                    <div class="flex items-baseline justify-between text-xs mb-2">
+                      <span class="text-neutral-600">Estimasi Total ({pkg.min_pax} box):</span>
+                      <span class="custom-total-display font-heading text-base font-bold text-accent-700">
+                        {formatRupiah(pkg.price_per_pax * pkg.min_pax)}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn-submit-customized-package w-full py-2.5 px-4 rounded-xl bg-accent text-bg text-xs font-bold uppercase tracking-wider hover:bg-accent-700 transition shadow-sm cursor-pointer"
+                    >
+                      Pesan Hasil Kustomisasi Ini &rarr;
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PANEL 2: BUILDER CUSTOM DARI NOL ================= -->
+    <div id="panel-custom" role="tabpanel" aria-labelledby="tab-btn-custom" class="hidden">
+      <div id="snack-builder" class="rounded-[32px] border border-divider bg-bg p-6 lg:p-10 shadow-[var(--shadow-lg)]">
+        <!-- Portion & Box Settings Bar -->
+        <div class="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-divider pb-6">
+          <div>
+            <h2 class="font-heading text-2xl text-neutral-900">Rakit Custom Sendiri dari Nol</h2>
+            <p class="text-xs text-neutral-600">Centang jajanan yang ingin dimasukkan ke dalam setiap box secara bebas.</p>
+          </div>
+          <div class="flex items-center gap-3 bg-surface px-4 py-2 rounded-full border border-divider">
+            <span class="text-xs font-semibold text-neutral-800">Jumlah Box:</span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="builder-box-minus"
+                class="size-8 rounded-full border border-accent text-accent font-bold hover:bg-accent hover:text-bg transition-colors flex items-center justify-center cursor-pointer text-base"
+                aria-label="Kurangi jumlah box"
+              >
+                −
+              </button>
+              <span
+                id="builder-box-count"
+                role="spinbutton"
+                aria-valuemin="20"
+                aria-valuenow={MIN_BOX}
+                aria-label="Jumlah box"
+                class="font-heading text-lg font-bold min-w-[28px] text-center text-neutral-900"
+              >
+                {MIN_BOX}
+              </span>
+              <button
+                type="button"
+                id="builder-box-plus"
+                class="size-8 rounded-full bg-accent text-bg font-bold hover:bg-accent-700 transition-colors flex items-center justify-center cursor-pointer text-base"
+                aria-label="Tambah jumlah box"
+              >
+                +
+              </button>
+            </div>
+            <span class="text-[11px] text-neutral-500">(Min. {MIN_BOX})</span>
+          </div>
+        </div>
+
+        <!-- Categories & Checkbox Grid -->
+        <div class="flex flex-col gap-8">
+          {snackKategori.map((kategori) => (
+            <div>
+              <div class="flex items-center gap-2.5 mb-4">
+                <span class="size-2 rounded-full bg-accent"></span>
+                <h3 class="font-heading text-lg font-semibold text-neutral-900">
+                  {kategori.label}
+                </h3>
+                <span class="text-xs text-neutral-500 font-mono">({kategori.items.length} pilihan)</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {kategori.items.map((item) => (
+                  <label class="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl border border-divider bg-surface/50 hover:bg-surface hover:border-accent/40 cursor-pointer transition-all has-[:checked]:border-accent has-[:checked]:bg-accent-200/25">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <input
+                        type="checkbox"
+                        name="snack-choice"
+                        value={item.nama}
+                        data-nama={item.nama}
+                        data-price={item.harga}
+                        class="size-4.5 rounded border-neutral-400 text-accent focus:ring-accent accent-accent cursor-pointer"
+                      />
+                      <span class="text-sm font-medium text-neutral-900 truncate">
+                        {item.nama}
+                      </span>
+                    </div>
+                    <span class="text-xs font-semibold text-accent-700 whitespace-nowrap">
+                      {formatRupiah(item.harga)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Sticky / Bottom Summary Bar -->
+        <div class="mt-10 pt-6 border-t border-divider flex flex-col md:flex-row items-center justify-between gap-6 bg-surface/80 rounded-2xl p-6">
+          <div class="flex flex-wrap items-center gap-6 text-center md:text-left">
+            <div>
+              <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Item Terpilih</span>
+              <span id="summary-item-count" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-neutral-900">0 macam</span>
+            </div>
+            <div class="h-8 w-px bg-divider hidden sm:block"></div>
+            <div>
+              <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Harga per Box</span>
+              <span id="summary-subtotal" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-accent-700">Rp0</span>
+            </div>
+            <div class="h-8 w-px bg-divider hidden sm:block"></div>
+            <div>
+              <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Estimasi Total</span>
+              <span id="summary-total" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-neutral-900">Rp0</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            id="builder-order-btn"
+            class="btn btn-primary min-h-[50px] px-8 text-base font-semibold w-full md:w-auto shadow-md hover:shadow-lg transition-shadow cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled
+          >
+            Pesan Paket Rakitan Ini &rarr;
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <script>
-  function initSnackBuilder() {
-    const root = document.getElementById('snack-builder');
-    if (!root) return;
+  function initSnackBoxPage() {
+    // 1. Tab Switching Logic
+    const tabBtnTemplate = document.getElementById('tab-btn-template');
+    const tabBtnCustom = document.getElementById('tab-btn-custom');
+    const panelTemplate = document.getElementById('panel-template');
+    const panelCustom = document.getElementById('panel-custom');
 
-    let boxCount = 20;
-    const minBoxes = 20;
-    const stepBoxes = 5;
-
-    const checkboxes = root.querySelectorAll<HTMLInputElement>('input[name="snack-choice"]');
-    const boxCountDisplay = document.getElementById('builder-box-count');
-    const boxMinusBtn = document.getElementById('builder-box-minus');
-    const boxPlusBtn = document.getElementById('builder-box-plus');
-
-    const itemCountDisplay = document.getElementById('summary-item-count');
-    const subtotalDisplay = document.getElementById('summary-subtotal');
-    const totalDisplay = document.getElementById('summary-total');
-    const orderBtn = document.getElementById('builder-order-btn') as HTMLButtonElement | null;
-
-    function formatRp(num: number): string {
-      return 'Rp' + num.toLocaleString('id-ID');
+    function switchTab(mode: 'template' | 'custom') {
+      if (mode === 'template') {
+        tabBtnTemplate?.setAttribute('aria-selected', 'true');
+        tabBtnCustom?.setAttribute('aria-selected', 'false');
+        tabBtnTemplate?.classList.add('bg-accent', 'text-bg', 'shadow-sm');
+        tabBtnTemplate?.classList.remove('text-neutral-700', 'hover:bg-neutral-100');
+        tabBtnCustom?.classList.remove('bg-accent', 'text-bg', 'shadow-sm');
+        tabBtnCustom?.classList.add('text-neutral-700', 'hover:bg-neutral-100');
+        panelTemplate?.classList.remove('hidden');
+        panelCustom?.classList.add('hidden');
+      } else {
+        tabBtnCustom?.setAttribute('aria-selected', 'true');
+        tabBtnTemplate?.setAttribute('aria-selected', 'false');
+        tabBtnCustom?.classList.add('bg-accent', 'text-bg', 'shadow-sm');
+        tabBtnCustom?.classList.remove('text-neutral-700', 'hover:bg-neutral-100');
+        tabBtnTemplate?.classList.remove('bg-accent', 'text-bg', 'shadow-sm');
+        tabBtnTemplate?.classList.add('text-neutral-700', 'hover:bg-neutral-100');
+        panelCustom?.classList.remove('hidden');
+        panelTemplate?.classList.add('hidden');
+      }
     }
 
-    function recalculate() {
-      let subtotal = 0;
-      const selectedItems: string[] = [];
+    tabBtnTemplate?.addEventListener('click', () => switchTab('template'));
+    tabBtnCustom?.addEventListener('click', () => switchTab('custom'));
 
-      checkboxes.forEach((cb) => {
-        if (cb.checked) {
-          const price = Number(cb.dataset.price || 0);
-          subtotal += price;
-          selectedItems.push(cb.dataset.nama || cb.value);
+    // Check URL Hash on load
+    if (window.location.hash === '#custom') {
+      switchTab('custom');
+    } else {
+      switchTab('template');
+    }
+
+    // 2. Template Package Card Interactions
+    const cards = document.querySelectorAll<HTMLElement>('.snack-template-card');
+    cards.forEach((card) => {
+      const pkgName = card.dataset.packageName || 'Paket Snack Box';
+      const pricePerPax = Number(card.dataset.price || 0);
+      const minPax = Number(card.dataset.minPax || 20);
+      let currentPax = minPax;
+
+      const customizeBtn = card.querySelector<HTMLButtonElement>('.btn-customize-package');
+      const drawer = card.querySelector<HTMLElement>('.customizer-drawer');
+      const closeDrawerBtn = card.querySelector<HTMLButtonElement>('.btn-close-customizer');
+      const orderDirectBtn = card.querySelector<HTMLButtonElement>('.btn-order-template-direct');
+      const submitCustomBtn = card.querySelector<HTMLButtonElement>('.btn-submit-customized-package');
+
+      const minusBtn = card.querySelector<HTMLButtonElement>('.btn-custom-pax-minus');
+      const plusBtn = card.querySelector<HTMLButtonElement>('.btn-custom-pax-plus');
+      const paxDisplay = card.querySelector<HTMLElement>('.custom-pax-display');
+      const totalDisplay = card.querySelector<HTMLElement>('.custom-total-display');
+
+      function updateCustomSummary() {
+        if (paxDisplay) paxDisplay.textContent = String(currentPax);
+        if (totalDisplay) {
+          totalDisplay.textContent = 'Rp' + (pricePerPax * currentPax).toLocaleString('id-ID');
+        }
+      }
+
+      customizeBtn?.addEventListener('click', () => {
+        drawer?.classList.toggle('hidden');
+      });
+
+      closeDrawerBtn?.addEventListener('click', () => {
+        drawer?.classList.add('hidden');
+      });
+
+      minusBtn?.addEventListener('click', () => {
+        if (currentPax > minPax) {
+          currentPax -= 5;
+          if (currentPax < minPax) currentPax = minPax;
+          updateCustomSummary();
         }
       });
 
-      const total = subtotal * boxCount;
+      plusBtn?.addEventListener('click', () => {
+        currentPax += 5;
+        updateCustomSummary();
+      });
 
-      if (itemCountDisplay) {
-        itemCountDisplay.textContent = `${selectedItems.length} macam`;
-      }
-      if (subtotalDisplay) {
-        subtotalDisplay.textContent = formatRp(subtotal);
-      }
-      if (totalDisplay) {
-        totalDisplay.textContent = formatRp(total);
+      // Direct template order
+      orderDirectBtn?.addEventListener('click', () => {
+        const defaultItems = orderDirectBtn.dataset.defaultItems || '';
+        window.dispatchEvent(
+          new CustomEvent('open-order-modal', {
+            detail: {
+              packageName: `${pkgName} (Sesuai Template)`,
+              portionCount: minPax,
+              customDetails: defaultItems
+            }
+          })
+        );
+      });
+
+      // Customized template order
+      submitCustomBtn?.addEventListener('click', () => {
+        const selects = card.querySelectorAll<HTMLSelectElement>('.slot-selector');
+        const customLines: string[] = [];
+        selects.forEach((sel) => {
+          const slotName = sel.dataset.slotName || 'Kolom';
+          customLines.push(`• ${slotName}: ${sel.value}`);
+        });
+
+        window.dispatchEvent(
+          new CustomEvent('open-order-modal', {
+            detail: {
+              packageName: `${pkgName} (Kustomisasi)`,
+              portionCount: currentPax,
+              customDetails: customLines.join('\n')
+            }
+          })
+        );
+      });
+    });
+
+    // 3. Full Custom Builder from Scratch
+    const root = document.getElementById('snack-builder');
+    if (root) {
+      let boxCount = 20;
+      const minBoxes = 20;
+      const stepBoxes = 5;
+
+      const checkboxes = root.querySelectorAll<HTMLInputElement>('input[name="snack-choice"]');
+      const boxCountDisplay = document.getElementById('builder-box-count');
+      const boxMinusBtn = document.getElementById('builder-box-minus');
+      const boxPlusBtn = document.getElementById('builder-box-plus');
+
+      const itemCountDisplay = document.getElementById('summary-item-count');
+      const subtotalDisplay = document.getElementById('summary-subtotal');
+      const totalDisplay = document.getElementById('summary-total');
+      const orderBtn = document.getElementById('builder-order-btn') as HTMLButtonElement | null;
+
+      function formatRp(num: number): string {
+        return 'Rp' + num.toLocaleString('id-ID');
       }
 
-      if (orderBtn) {
-        orderBtn.disabled = selectedItems.length === 0;
+      function recalculate() {
+        let subtotal = 0;
+        const selectedItems: string[] = [];
+
+        checkboxes.forEach((cb) => {
+          if (cb.checked) {
+            const price = Number(cb.dataset.price || 0);
+            subtotal += price;
+            selectedItems.push(cb.dataset.nama || cb.value);
+          }
+        });
+
+        const total = subtotal * boxCount;
+
+        if (itemCountDisplay) itemCountDisplay.textContent = `${selectedItems.length} macam`;
+        if (subtotalDisplay) subtotalDisplay.textContent = formatRp(subtotal);
+        if (totalDisplay) totalDisplay.textContent = formatRp(total);
+        if (orderBtn) orderBtn.disabled = selectedItems.length === 0;
+
+        return { selectedItems, subtotal, total };
       }
 
-      return { selectedItems, subtotal, total };
-    }
+      boxMinusBtn?.addEventListener('click', () => {
+        if (boxCount > minBoxes) {
+          boxCount -= stepBoxes;
+          if (boxCountDisplay) {
+            boxCountDisplay.textContent = String(boxCount);
+            boxCountDisplay.setAttribute('aria-valuenow', String(boxCount));
+          }
+          recalculate();
+        }
+      });
 
-    boxMinusBtn?.addEventListener('click', () => {
-      if (boxCount > minBoxes) {
-        boxCount -= stepBoxes;
+      boxPlusBtn?.addEventListener('click', () => {
+        boxCount += stepBoxes;
         if (boxCountDisplay) {
           boxCountDisplay.textContent = String(boxCount);
           boxCountDisplay.setAttribute('aria-valuenow', String(boxCount));
         }
         recalculate();
-      }
-    });
+      });
 
-    boxPlusBtn?.addEventListener('click', () => {
-      boxCount += stepBoxes;
-      if (boxCountDisplay) {
-        boxCountDisplay.textContent = String(boxCount);
-        boxCountDisplay.setAttribute('aria-valuenow', String(boxCount));
-      }
+      checkboxes.forEach((cb) => {
+        cb.addEventListener('change', recalculate);
+      });
+
+      orderBtn?.addEventListener('click', () => {
+        const { selectedItems, subtotal, total } = recalculate();
+        if (selectedItems.length === 0) return;
+
+        const packageName = `Custom Snack Box (${selectedItems.length} item)`;
+        const customDetails = selectedItems.map((it, idx) => `• Item ${idx + 1}: ${it}`).join('\n');
+
+        window.dispatchEvent(
+          new CustomEvent('open-order-modal', {
+            detail: {
+              packageName,
+              portionCount: boxCount,
+              customDetails
+            }
+          })
+        );
+      });
+
       recalculate();
-    });
-
-    checkboxes.forEach((cb) => {
-      cb.addEventListener('change', recalculate);
-    });
-
-    orderBtn?.addEventListener('click', () => {
-      const { selectedItems, subtotal, total } = recalculate();
-      if (selectedItems.length === 0) return;
-
-      const packageName = `Custom Snack Box (${selectedItems.length} item: ${selectedItems.join(', ')})`;
-      const priceText = `${formatRp(subtotal)}/box (Total: ${formatRp(total)} untuk ${boxCount} box)`;
-
-      window.dispatchEvent(
-        new CustomEvent('open-order-modal', {
-          detail: {
-            packageName,
-            price: priceText,
-          },
-        })
-      );
-    });
-
-    // Jalankan kalkulasi awal
-    recalculate();
+    }
   }
 
-  initSnackBuilder();
+  initSnackBoxPage();
+  document.addEventListener('astro:page-load', initSnackBoxPage);
 </script>

@@ -63,11 +63,21 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
         >
           Snack Box Dzanis
         </div>
+        <div
+          id="display-custom-details"
+          class="mt-2 text-xs text-neutral-700 bg-white/80 p-2.5 rounded-lg border border-neutral-200 hidden whitespace-pre-line leading-relaxed font-sans"
+        ></div>
         <input
           type="hidden"
           name="packageName"
           id="input-package-name"
           value="Snack Box Dzanis"
+        />
+        <input
+          type="hidden"
+          name="customDetails"
+          id="input-custom-details"
+          value=""
         />
       </div>
 
@@ -173,8 +183,12 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
       "order-form",
     ) as HTMLFormElement | null;
     const displayPackage = document.getElementById("display-package-name");
+    const displayCustomDetails = document.getElementById("display-custom-details");
     const inputPackage = document.getElementById(
       "input-package-name",
+    ) as HTMLInputElement | null;
+    const inputCustomDetails = document.getElementById(
+      "input-custom-details",
     ) as HTMLInputElement | null;
     const eventDateInput = document.getElementById(
       "event-date",
@@ -187,11 +201,27 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
     }
 
     window.addEventListener("open-order-modal", ((
-      e: CustomEvent<{ packageName?: string }>,
+      e: CustomEvent<{ packageName?: string; customDetails?: string; portionCount?: number }>,
     ) => {
       const pkg = e.detail?.packageName || "Snack Box Dzanis";
+      const details = e.detail?.customDetails || "";
+      const portions = e.detail?.portionCount;
       if (displayPackage) displayPackage.textContent = pkg;
       if (inputPackage) inputPackage.value = pkg;
+      if (inputCustomDetails) inputCustomDetails.value = details;
+      if (displayCustomDetails) {
+        if (details) {
+          displayCustomDetails.textContent = details;
+          displayCustomDetails.classList.remove("hidden");
+        } else {
+          displayCustomDetails.textContent = "";
+          displayCustomDetails.classList.add("hidden");
+        }
+      }
+      if (portions) {
+        const pInput = document.getElementById("portion-count") as HTMLInputElement | null;
+        if (pInput) pInput.value = String(portions);
+      }
       if (!dialog.open) dialog.showModal();
     }) as EventListener);
 
@@ -236,19 +266,27 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
 
       const data = new FormData(form);
       const pkg = String(data.get("packageName") || "Snack Box Dzanis");
+      const details = String(data.get("customDetails") || "").trim();
       const name = String(data.get("customerName") || "").trim();
       const date = String(data.get("eventDate") || "");
       const count = Number(data.get("portionCount")) || 20;
       const notes = String(data.get("notes") || "").trim();
 
-      const text = [
+      const lines = [
         "Halo Dzanis Catering, saya ingin memesan:",
         `- Paket: ${pkg}`,
+      ];
+      if (details) {
+        lines.push(`- Pilihan Item / Kustomisasi:\n${details}`);
+      }
+      lines.push(
         `- Jumlah: ${count} box`,
         `- Tanggal Acara: ${date}`,
         `- Nama Pemesan: ${name}`,
         `- Catatan: ${notes || "-"}`,
-      ].join("\n");
+      );
+
+      const text = lines.join("\n");
 
       let phone = (dialog.dataset.phone || "6285726331579").replace(/\D/g, "");
       if (phone.startsWith("0")) phone = "62" + phone.slice(1);
@@ -261,7 +299,12 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
 
       form.reset();
       if (inputPackage) inputPackage.value = pkg;
+      if (inputCustomDetails) inputCustomDetails.value = "";
       if (displayPackage) displayPackage.textContent = pkg;
+      if (displayCustomDetails) {
+        displayCustomDetails.textContent = "";
+        displayCustomDetails.classList.add("hidden");
+      }
       const portionInput = document.getElementById(
         "portion-count",
       ) as HTMLInputElement | null;

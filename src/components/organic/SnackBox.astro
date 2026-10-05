@@ -37,10 +37,8 @@ const angka = [
         </h2>
 
         <p class="m-0 max-w-[380px] text-[16px] leading-[1.6] text-neutral-800 lg:text-[17px] lg:leading-[1.65]">
-          {snackRingkasan.totalPilihan} pilihan jajanan mulai{" "}
-          {formatRupiah(snackRingkasan.hargaTermurah)} — puff &amp; pastry,
-          aneka cake, kue basah, puding, menu asin, dan pelengkap. Harga box
-          mengikuti isi yang dipilih.
+          Pilih paket template siap saji dengan kolom isian fleksibel, atau susun sendiri dari {snackRingkasan.totalPilihan} pilihan jajanan mulai{" "}
+          {formatRupiah(snackRingkasan.hargaTermurah)}. Harga box transparan dan langsung terhitung.
         </p>
       </div>
 
@@ -55,13 +53,20 @@ const angka = [
         ))}
       </div>
 
-      <a
-        class="btn btn-primary btn-block order-1 min-h-[52px] text-[16px] lg:order-none lg:min-h-12 lg:w-auto lg:self-start lg:px-[26px] lg:text-[14px] lg:tracking-[0.06em] lg:uppercase"
-        href="/rakit-snack-box"
-      >
-        <span class="lg:hidden">Rakit snack box sendiri</span>
-        <span class="hidden lg:inline">Rakit snack box</span>
-      </a>
+      <div class="flex flex-col sm:flex-row gap-2.5 order-1 lg:order-none">
+        <a
+          class="btn btn-primary min-h-[50px] text-[15px] lg:min-h-12 lg:px-[22px] lg:text-[14px] lg:tracking-[0.06em] lg:uppercase text-center"
+          href="/rakit-snack-box#template"
+        >
+          Pilih Paket Template
+        </a>
+        <a
+          class="btn btn-secondary min-h-[50px] text-[15px] lg:min-h-12 lg:px-[22px] lg:text-[14px] lg:tracking-[0.06em] lg:uppercase text-center"
+          href="/rakit-snack-box#custom"
+        >
+          Rakit Custom Sendiri
+        </a>
+      </div>
     </div>
 
     <!-- Grid foto 3x2: bulat di mobile, rounded-sm di desktop -->
