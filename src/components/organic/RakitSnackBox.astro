@@ -8,6 +8,8 @@ import {
   type SnackSlot
 } from '../../data/snack';
 
+const totalSnackItems = snackKategori.reduce((sum, cat) => sum + cat.items.length, 0);
+
 let snackTemplates: SnackTemplatePackage[] = defaultSnackTemplates;
 
 try {
@@ -72,12 +74,12 @@ try {
         Pemesanan Snack Box
       </h1>
       <p class="mt-3 max-w-2xl text-[16px] leading-relaxed text-neutral-800">
-        Pilih paket template favorit dengan kolom isian fleksibel, atau rancang sendiri snack box impian dari 51 pilihan jajanan higienis.
+        Pilih paket template favorit dengan kolom isian fleksibel, atau rancang sendiri snack box impian dari {totalSnackItems} pilihan jajanan higienis.
       </p>
     </div>
 
     <!-- ================= PANEL 1: PAKET TEMPLATE & KUSTOMISASI KOLOM ================= -->
-    <div id="panel-template" role="tabpanel" aria-labelledby="tab-btn-template" class="space-y-8">
+    <div id="panel-template" class="space-y-8">
       <div class="rounded-3xl border border-divider bg-bg p-6 lg:p-8 shadow-sm">
         <div class="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-divider pb-4">
           <div>
@@ -89,100 +91,142 @@ try {
           </span>
         </div>
 
-        <!-- Grid Paket Template -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {snackTemplates.map((pkg, pIdx) => {
-            const slots = pkg.custom_slots && pkg.custom_slots.length > 0
-              ? pkg.custom_slots
-              : pkg.items.map((it, i) => ({ name: `Kolom ${i + 1}`, default_item: it, options: it }));
+        <!-- PERINGATAN: jangan beri overflow-hidden pada panel induk; panah menjorok 22px ke padding panel -->
+        <div id="snack-carousel" class="group/carousel" data-scrollable="false">
+          <!-- (a) Bingkai posisi panah: hanya berisi panah + grid, supaya top-1/2 tidak dipengaruhi tinggi dots -->
+          <div class="relative">
+            <button
+              id="snack-prev"
+              type="button"
+              aria-label="Paket sebelumnya"
+              class="hidden md:group-data-[scrollable=true]/carousel:flex absolute left-0 top-[calc(50%-0.5rem)] -translate-x-1/2 -translate-y-1/2 z-20 size-11 items-center justify-center rounded-full bg-white/95 backdrop-blur border border-divider shadow-md hover:shadow-xl aria-disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer transition-all"
+            >
+              <svg class="size-5 text-neutral-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
 
-            return (
-              <div
-                class="snack-template-card flex flex-col justify-between rounded-2xl border border-divider bg-surface/40 hover:bg-surface hover:shadow-md transition-all p-5"
-                data-package-id={pkg.id}
-                data-package-name={pkg.name}
-                data-price={pkg.price_per_pax}
-                data-min-pax={pkg.min_pax}
-                data-slots-json={JSON.stringify(slots)}
-              >
-                <div>
-                  <!-- Image & Badge -->
-                  <div class="relative aspect-video w-full rounded-xl overflow-hidden mb-4 bg-neutral-100">
-                    <img
-                      src={pkg.image || pkg.foto || '/images/menu/snack-puding-buah.webp'}
-                      alt={pkg.name}
-                      loading="lazy"
-                      class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                    {pkg.badge && (
-                      <span class="absolute top-2.5 left-2.5 bg-accent text-bg text-[11px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
-                        {pkg.badge}
-                      </span>
-                    )}
-                  </div>
+            <div
+              id="snack-grid"
+              tabindex="0"
+              role="region"
+              aria-roledescription="carousel"
+              aria-label="Katalog paket template snack box"
+              data-dragging="false"
+              class="[--carousel-gap:1.25rem] flex gap-[var(--carousel-gap)] overflow-x-auto overscroll-x-contain no-scrollbar snap-x snap-mandatory motion-safe:scroll-smooth px-1 sm:px-2 scroll-px-1 sm:scroll-px-2 pt-2 pb-6 md:cursor-grab data-[dragging=true]:cursor-grabbing md:data-[dragging=true]:cursor-grabbing rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              {snackTemplates.map((pkg, pIdx) => {
+                const slots = pkg.custom_slots && pkg.custom_slots.length > 0
+                  ? pkg.custom_slots
+                  : pkg.items.map((it, i) => ({ name: `Kolom ${i + 1}`, default_item: it, options: it }));
 
-                  <!-- Name & Description -->
-                  <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
-                    {pkg.name}
-                  </h3>
-                  <p class="text-xs text-neutral-600 mb-3 leading-relaxed">
-                    {pkg.description || 'Kombinasi jajanan pilihan higienis dan lezat untuk berbagai acara.'}
-                  </p>
-
-                  <!-- Price & Min Pax -->
-                  <div class="flex items-baseline justify-between mb-4 border-b border-divider pb-3">
-                    <div>
-                      <span class="text-xs text-neutral-500">Harga: </span>
-                      <span class="font-heading text-xl font-bold text-accent-700">
-                        {formatRupiah(pkg.price_per_pax)}
-                      </span>
-                      <span class="text-xs text-neutral-500">/box</span>
-                    </div>
-                    <span class="text-xs text-neutral-500 font-medium">
-                      Min. {pkg.min_pax} box
-                    </span>
-                  </div>
-
-                  <!-- Kolom / Isian Template Preview -->
-                  <div class="space-y-2 mb-4">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500 block">
-                      Kolom &amp; Isian Default:
-                    </span>
-                    <div class="space-y-1.5">
-                      {slots.map((slot, sIdx) => (
-                        <div class="flex items-start gap-2 text-xs text-neutral-800 bg-white/70 p-2 rounded-lg border border-divider/60">
-                          <span class="size-4.5 rounded-full bg-accent/10 text-accent font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
-                            {sIdx + 1}
-                          </span>
-                          <div class="min-w-0 flex-1">
-                            <span class="font-semibold text-neutral-900 block truncate">{slot.name}:</span>
-                            <span class="slot-display-item text-accent-700 font-medium truncate block">{slot.default_item || '-'}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Action Button: Pesan Paket Ini -->
-                <div class="pt-2 border-t border-divider">
-                  <button
-                    type="button"
-                    class="btn-order-template-direct w-full py-2.5 px-4 rounded-xl bg-accent text-bg text-xs font-semibold hover:bg-accent-700 transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                return (
+                  <div
+                    class="snack-template-card shrink-0 snap-start w-full md:w-[calc((100%-var(--carousel-gap))/2)] lg:w-[calc((100%-2*var(--carousel-gap))/3)] flex flex-col justify-between rounded-2xl border border-divider bg-surface/40 hover:bg-surface hover:shadow-md transition-all p-5"
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${pkg.name} (${pIdx + 1} dari ${snackTemplates.length})`}
+                    data-package-id={pkg.id}
                     data-package-name={pkg.name}
                     data-price={pkg.price_per_pax}
                     data-min-pax={pkg.min_pax}
-                    data-default-items={slots.map((s) => `• ${s.name}: ${s.default_item}`).join('\n')}
+                    data-slots-json={JSON.stringify(slots)}
                   >
-                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <span>Pesan Paket Ini</span>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                    <div>
+                      <!-- Image & Badge -->
+                      <div class="relative aspect-video w-full rounded-xl overflow-hidden mb-4 bg-neutral-100">
+                        <img
+                          src={pkg.image || pkg.foto || '/images/menu/snack-puding-buah.webp'}
+                          alt={pkg.name}
+                          loading="lazy"
+                          draggable="false"
+                          class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        />
+                        {pkg.badge && (
+                          <span class="absolute top-2.5 left-2.5 bg-accent text-bg text-[11px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                            {pkg.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      <!-- Name & Description -->
+                      <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
+                        {pkg.name}
+                      </h3>
+                      <p class="text-xs text-neutral-600 mb-3 leading-relaxed">
+                        {pkg.description || 'Kombinasi jajanan pilihan higienis dan lezat untuk berbagai acara.'}
+                      </p>
+
+                      <!-- Price & Min Pax -->
+                      <div class="flex items-baseline justify-between mb-4 border-b border-divider pb-3">
+                        <div>
+                          <span class="text-xs text-neutral-500">Harga: </span>
+                          <span class="font-heading text-xl font-bold text-accent-700">
+                            {formatRupiah(pkg.price_per_pax)}
+                          </span>
+                          <span class="text-xs text-neutral-500">/box</span>
+                        </div>
+                        <span class="text-xs text-neutral-500 font-medium">
+                          Min. {pkg.min_pax} box
+                        </span>
+                      </div>
+
+                      <!-- Kolom / Isian Template Preview -->
+                      <div class="space-y-2 mb-4">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500 block">
+                          Kolom &amp; Isian Default:
+                        </span>
+                        <div class="space-y-1.5">
+                          {slots.map((slot, sIdx) => (
+                            <div class="flex items-start gap-2 text-xs text-neutral-800 bg-white/70 p-2 rounded-lg border border-divider/60">
+                              <span class="size-4.5 rounded-full bg-accent/10 text-accent font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                                {sIdx + 1}
+                              </span>
+                              <div class="min-w-0 flex-1">
+                                <span class="font-semibold text-neutral-900 block truncate">{slot.name}:</span>
+                                <span class="slot-display-item text-accent-700 font-medium truncate block">{slot.default_item || '-'}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Action Button: Pesan Paket Ini -->
+                    <div class="pt-2 border-t border-divider">
+                      <button
+                        type="button"
+                        class="btn-order-template-direct w-full py-2.5 px-4 rounded-xl bg-accent text-bg text-xs font-semibold hover:bg-accent-700 transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                        data-package-name={pkg.name}
+                        data-price={pkg.price_per_pax}
+                        data-min-pax={pkg.min_pax}
+                        data-default-items={slots.map((s) => `• ${s.name}: ${s.default_item}`).join('\n')}
+                      >
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span>Pesan Paket Ini</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              id="snack-next"
+              type="button"
+              aria-label="Paket berikutnya"
+              class="hidden md:group-data-[scrollable=true]/carousel:flex absolute right-0 top-[calc(50%-0.5rem)] translate-x-1/2 -translate-y-1/2 z-20 size-11 items-center justify-center rounded-full bg-white/95 backdrop-blur border border-divider shadow-md hover:shadow-xl aria-disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer transition-all"
+            >
+              <svg class="size-5 text-neutral-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- (b) Dots: sibling di bawah bingkai, masih di dalam root agar variant group-data berlaku -->
+          <div id="snack-dots" class="mt-2 flex items-center justify-center group-data-[scrollable=false]/carousel:hidden"></div>
         </div>
 
         <!-- Banner Transisi ke Rakit Custom Sendiri -->
@@ -195,7 +239,7 @@ try {
             </div>
             <div>
               <h3 class="font-heading text-base font-bold text-neutral-900">Ingin Kombinasi Jajanan Sendiri?</h3>
-              <p class="text-xs text-neutral-600">Pilih bebas dari 51 aneka jajanan di bawah ini sesuai selera dan anggaran acara Anda.</p>
+              <p class="text-xs text-neutral-600">Pilih bebas dari {totalSnackItems} aneka jajanan di bawah ini sesuai selera dan anggaran acara Anda.</p>
             </div>
           </div>
           <a
@@ -255,46 +299,124 @@ try {
           </div>
         </div>
 
-        <!-- Categories & Checkbox Grid -->
-        <div class="flex flex-col gap-8">
-          {snackKategori.map((kategori) => (
-            <div>
-              <div class="flex items-center gap-2.5 mb-4">
-                <span class="size-2 rounded-full bg-accent"></span>
-                <h3 class="font-heading text-lg font-semibold text-neutral-900">
-                  {kategori.label}
-                </h3>
-                <span class="text-xs text-neutral-500 font-mono">({kategori.items.length} pilihan)</span>
-              </div>
+        <!-- Filter Kategori Pill Buttons -->
+        <div
+          class="category-filter-bar mb-6 flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 -mx-2 px-2"
+          role="group"
+          aria-label="Filter kategori jajanan"
+        >
+          <!-- Tombol Semua Kategori -->
+          <button
+            type="button"
+            aria-pressed="false"
+            data-category-target="all"
+            data-item-count={totalSnackItems}
+            class="category-filter-btn group/catbtn shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5"
+            aria-label={`Semua (${totalSnackItems} pilihan)`}
+          >
+            <span class="category-name">Semua</span>
+            <span class="text-[10px] opacity-70">({totalSnackItems})</span>
+            <span
+              data-selected-count="all"
+              data-count="0"
+              hidden
+              class="ml-0.5 data-[count='0']:hidden inline-flex size-4.5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
+              aria-hidden="true"
+            >0</span>
+            <span class="sr-only category-sr-count"></span>
+          </button>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {kategori.items.map((item) => (
-                  <label class="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl border border-divider bg-surface/50 hover:bg-surface hover:border-accent/40 cursor-pointer transition-all has-[:checked]:border-accent has-[:checked]:bg-accent-200/25">
-                    <div class="flex items-center gap-3 min-w-0">
-                      <input
-                        type="checkbox"
-                        name="snack-choice"
-                        value={item.nama}
-                        data-nama={item.nama}
-                        data-price={item.harga}
-                        class="size-4.5 rounded border-neutral-400 text-accent focus:ring-accent accent-accent cursor-pointer"
-                      />
-                      <span class="text-sm font-medium text-neutral-900 truncate">
-                        {item.nama}
+          <!-- Tombol Tiap Kategori -->
+          {snackKategori.map((kategori, kIdx) => {
+            const isFirst = kIdx === 0;
+            return (
+              <button
+                type="button"
+                aria-pressed={isFirst ? "true" : "false"}
+                data-category-target={kategori.label}
+                data-item-count={kategori.items.length}
+                class="category-filter-btn group/catbtn shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5"
+                aria-label={`${kategori.label} (${kategori.items.length} pilihan)`}
+              >
+                <span class="category-name">{kategori.label}</span>
+                <span class="text-[10px] opacity-70">({kategori.items.length})</span>
+                <span
+                  data-selected-count={kategori.label}
+                  data-count="0"
+                  hidden
+                  class="ml-0.5 data-[count='0']:hidden inline-flex size-4.5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
+                  aria-hidden="true"
+                >0</span>
+                <span class="sr-only category-sr-count"></span>
+              </button>
+            );
+          })}
+        </div>
+
+        <!-- Categories & Checkbox Grid -->
+        <div id="snack-categories-wrapper" class="flex flex-col gap-8">
+          {snackKategori.map((kategori, kIdx) => {
+            const isFirst = kIdx === 0;
+            return (
+              <div
+                data-category-block={kategori.label}
+                class={isFirst ? "category-block" : "category-block hidden"}
+              >
+                <div class="flex items-center gap-2.5 mb-4">
+                  <span class="size-2 rounded-full bg-accent"></span>
+                  <h3 class="font-heading text-lg font-semibold text-neutral-900">
+                    {kategori.label}
+                  </h3>
+                  <span class="text-xs text-neutral-500 font-mono">({kategori.items.length} pilihan)</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {kategori.items.map((item) => (
+                    <label class="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl border border-divider bg-surface/50 hover:bg-surface hover:border-accent/40 cursor-pointer transition-all has-[:checked]:border-accent has-[:checked]:bg-accent-200/25">
+                      <div class="flex items-center gap-3 min-w-0">
+                        <input
+                          type="checkbox"
+                          name="snack-choice"
+                          value={item.nama}
+                          data-nama={item.nama}
+                          data-price={item.harga}
+                          data-kategori={kategori.label}
+                          class="size-4.5 rounded border-neutral-400 text-accent focus:ring-accent accent-accent cursor-pointer"
+                        />
+                        <span class="text-sm font-medium text-neutral-900 truncate">
+                          {item.nama}
+                        </span>
+                      </div>
+                      <span class="text-xs font-semibold text-accent-700 whitespace-nowrap">
+                        {formatRupiah(item.harga)}
                       </span>
-                    </div>
-                    <span class="text-xs font-semibold text-accent-700 whitespace-nowrap">
-                      {formatRupiah(item.harga)}
-                    </span>
-                  </label>
-                ))}
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+
+        <!-- Tombol Alur Navigasi Kategori Selanjutnya -->
+        <div
+          id="category-flow-nav"
+          class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 border-t border-divider/60"
+        >
+          <span id="category-flow-hint" class="text-xs text-neutral-500 font-medium">
+            Selesai memilih di kategori ini?
+          </span>
+          <button
+            type="button"
+            id="category-next-btn"
+            class="btn btn-secondary text-xs font-semibold py-2.5 px-5 rounded-full flex items-center gap-1.5 cursor-pointer hover:border-accent transition-colors shadow-xs"
+          >
+            <span id="category-next-label">Kategori Selanjutnya: Aneka Cake &rarr;</span>
+          </button>
         </div>
 
         <!-- Sticky / Bottom Summary Bar -->
-        <div class="mt-10 pt-6 border-t border-divider flex flex-col md:flex-row items-center justify-between gap-6 bg-surface/80 rounded-2xl p-6">
+        <div id="builder-summary-bar" class="mt-8 pt-6 border-t border-divider flex flex-col md:flex-row items-center justify-between gap-6 bg-surface/80 rounded-2xl p-6">
           <div class="flex flex-wrap items-center gap-6 text-center md:text-left">
             <div>
               <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Item Terpilih</span>
@@ -327,7 +449,16 @@ try {
 </section>
 
 <script>
-  function initSnackBoxPage() {
+  import { createCarousel } from '../../scripts/carousel';
+
+  let teardowns: Array<() => void> = [];
+
+  function initSnackBoxPage(): (() => void) | null {
+    if (!document.getElementById('rakit')) return null;
+
+    const ac = new AbortController();
+    const { signal } = ac;
+
     // 1. Hash Scroll Navigation (untuk link #custom atau #template)
     function handleHashScroll() {
       const hash = window.location.hash;
@@ -343,7 +474,7 @@ try {
     if (window.location.hash) {
       setTimeout(handleHashScroll, 120);
     }
-    window.addEventListener('hashchange', handleHashScroll);
+    window.addEventListener('hashchange', handleHashScroll, { signal });
 
     // 2. Template Package Card Interactions
     const cards = document.querySelectorAll<HTMLElement>('.snack-template-card');
@@ -353,18 +484,22 @@ try {
       const orderDirectBtn = card.querySelector<HTMLButtonElement>('.btn-order-template-direct');
 
       // Direct template order
-      orderDirectBtn?.addEventListener('click', () => {
-        const defaultItems = orderDirectBtn.dataset.defaultItems || '';
-        window.dispatchEvent(
-          new CustomEvent('open-order-modal', {
-            detail: {
-              packageName: pkgName,
-              portionCount: minPax,
-              customDetails: defaultItems
-            }
-          })
-        );
-      });
+      orderDirectBtn?.addEventListener(
+        'click',
+        () => {
+          const defaultItems = orderDirectBtn.dataset.defaultItems || '';
+          window.dispatchEvent(
+            new CustomEvent('open-order-modal', {
+              detail: {
+                packageName: pkgName,
+                portionCount: minPax,
+                customDetails: defaultItems,
+              },
+            })
+          );
+        },
+        { signal }
+      );
     });
 
     // 3. Full Custom Builder from Scratch
@@ -384,6 +519,108 @@ try {
       const totalDisplay = document.getElementById('summary-total');
       const orderBtn = document.getElementById('builder-order-btn') as HTMLButtonElement | null;
 
+      // Category Switching Elements
+      const categoryButtons = root.querySelectorAll<HTMLButtonElement>('.category-filter-btn');
+      const categoryBlocks = root.querySelectorAll<HTMLElement>('.category-block');
+      const categoriesWrapper = document.getElementById('snack-categories-wrapper');
+      const flowNav = document.getElementById('category-flow-nav');
+      const nextBtn = document.getElementById('category-next-btn');
+      const nextLabel = document.getElementById('category-next-label');
+      const flowHint = document.getElementById('category-flow-hint');
+      const summaryBar = document.getElementById('builder-summary-bar');
+
+      const categoryOrder = Array.from(categoryButtons)
+        .map((btn) => btn.dataset.categoryTarget || '')
+        .filter((t) => t && t !== 'all');
+      let activeCategory = categoryOrder[0] || 'all'; // Default: Kategori Pertama (Puff & Pastry)
+
+      function setActiveCategory(target: string, shouldScroll = true) {
+        activeCategory = target;
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const behavior: ScrollBehavior = prefersReduced ? 'auto' : 'smooth';
+
+        // 1. Update status tombol filter
+        let activeBtn: HTMLButtonElement | null = null;
+        for (const btn of categoryButtons) {
+          const isMatch = btn.dataset.categoryTarget === target;
+          btn.setAttribute('aria-pressed', isMatch ? 'true' : 'false');
+          if (isMatch) activeBtn = btn;
+        }
+
+        // 2. Scroll tab aktif ke tengah tab bar secara horizontal
+        activeBtn?.scrollIntoView({ inline: 'center', block: 'nearest', behavior });
+
+        // 3. Tampilkan/sembunyikan blok kategori
+        if (target === 'all') {
+          categoryBlocks.forEach((b) => b.classList.remove('hidden'));
+          flowNav?.classList.add('hidden');
+        } else {
+          categoryBlocks.forEach((b) => {
+            if (b.dataset.categoryBlock === target) {
+              b.classList.remove('hidden');
+            } else {
+              b.classList.add('hidden');
+            }
+          });
+
+          // 4. Update tombol "Kategori Selanjutnya"
+          if (flowNav && nextBtn && nextLabel && flowHint) {
+            flowNav.classList.remove('hidden');
+            const currentIdx = categoryOrder.indexOf(target);
+            const isLast = currentIdx === categoryOrder.length - 1;
+
+            if (isLast) {
+              flowHint.textContent = 'Sudah selesai memilih semua jajanan?';
+              nextLabel.textContent = 'Lihat Ringkasan Pilihan ↓';
+            } else {
+              const nextCat = categoryOrder[currentIdx + 1];
+              flowHint.textContent = 'Selesai memilih di kategori ini?';
+              nextLabel.textContent = `Kategori Selanjutnya: ${nextCat} →`;
+            }
+          }
+        }
+
+        // 5. Scroll vertikal jika bagian atas blok kategori berada di atas viewport
+        if (shouldScroll && categoriesWrapper) {
+          const rect = categoriesWrapper.getBoundingClientRect();
+          const headerOffset = 90;
+          if (rect.top < headerOffset) {
+            const targetY = window.scrollY + rect.top - headerOffset;
+            window.scrollTo({ top: targetY, behavior });
+          }
+        }
+      }
+
+      // Event listener tombol filter kategori
+      categoryButtons.forEach((btn) => {
+        btn.addEventListener(
+          'click',
+          () => {
+            const target = btn.dataset.categoryTarget;
+            if (target) setActiveCategory(target, true);
+          },
+          { signal }
+        );
+      });
+
+      // Event listener tombol "Kategori Selanjutnya" / "Lihat Ringkasan"
+      nextBtn?.addEventListener(
+        'click',
+        () => {
+          const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const behavior: ScrollBehavior = prefersReduced ? 'auto' : 'smooth';
+          const currentIdx = categoryOrder.indexOf(activeCategory);
+
+          if (currentIdx === -1 || currentIdx >= categoryOrder.length - 1) {
+            summaryBar?.scrollIntoView({ behavior, block: 'nearest' });
+          } else {
+            const nextCat = categoryOrder[currentIdx + 1];
+            setActiveCategory(nextCat, true);
+          }
+        },
+        { signal }
+      );
+
       function formatRp(num: number): string {
         return 'Rp' + num.toLocaleString('id-ID');
       }
@@ -391,13 +628,46 @@ try {
       function recalculate() {
         let subtotal = 0;
         const selectedItems: string[] = [];
+        const categoryCounts: Record<string, number> = {};
 
         checkboxes.forEach((cb) => {
           if (cb.checked) {
             const price = Number(cb.dataset.price || 0);
             subtotal += price;
             selectedItems.push(cb.dataset.nama || cb.value);
+
+            const cat = cb.dataset.kategori || '';
+            if (cat) {
+              categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+            }
           }
+        });
+
+        // Update badge counter dan accessible label untuk semua tombol filter
+        categoryButtons.forEach((btn) => {
+          const target = btn.dataset.categoryTarget || '';
+          const count = target === 'all' ? selectedItems.length : categoryCounts[target] || 0;
+          const badge = btn.querySelector<HTMLElement>('[data-selected-count]');
+          const srCount = btn.querySelector<HTMLElement>('.category-sr-count');
+          const itemCount = btn.dataset.itemCount || '';
+
+          if (badge) {
+            badge.dataset.count = String(count);
+            badge.textContent = String(count);
+            badge.hidden = count === 0;
+          }
+
+          if (srCount) {
+            srCount.textContent = count > 0 ? `, ${count} dipilih` : '';
+          }
+
+          const label = target === 'all' ? 'Semua' : target;
+          btn.setAttribute(
+            'aria-label',
+            count > 0
+              ? `${label} (${itemCount} pilihan, ${count} dipilih)`
+              : `${label} (${itemCount} pilihan)`
+          );
         });
 
         const total = subtotal * boxCount;
@@ -410,52 +680,91 @@ try {
         return { selectedItems, subtotal, total };
       }
 
-      boxMinusBtn?.addEventListener('click', () => {
-        if (boxCount > minBoxes) {
-          boxCount -= stepBoxes;
+      boxMinusBtn?.addEventListener(
+        'click',
+        () => {
+          if (boxCount > minBoxes) {
+            boxCount -= stepBoxes;
+            if (boxCountDisplay) {
+              boxCountDisplay.textContent = String(boxCount);
+              boxCountDisplay.setAttribute('aria-valuenow', String(boxCount));
+            }
+            recalculate();
+          }
+        },
+        { signal }
+      );
+
+      boxPlusBtn?.addEventListener(
+        'click',
+        () => {
+          boxCount += stepBoxes;
           if (boxCountDisplay) {
             boxCountDisplay.textContent = String(boxCount);
             boxCountDisplay.setAttribute('aria-valuenow', String(boxCount));
           }
           recalculate();
-        }
-      });
-
-      boxPlusBtn?.addEventListener('click', () => {
-        boxCount += stepBoxes;
-        if (boxCountDisplay) {
-          boxCountDisplay.textContent = String(boxCount);
-          boxCountDisplay.setAttribute('aria-valuenow', String(boxCount));
-        }
-        recalculate();
-      });
+        },
+        { signal }
+      );
 
       checkboxes.forEach((cb) => {
-        cb.addEventListener('change', recalculate);
+        cb.addEventListener('change', recalculate, { signal });
       });
 
-      orderBtn?.addEventListener('click', () => {
-        const { selectedItems, subtotal, total } = recalculate();
-        if (selectedItems.length === 0) return;
+      orderBtn?.addEventListener(
+        'click',
+        () => {
+          const { selectedItems } = recalculate();
+          if (selectedItems.length === 0) return;
 
-        const packageName = `Custom Snack Box (${selectedItems.length} item)`;
-        const customDetails = selectedItems.map((it, idx) => `• Item ${idx + 1}: ${it}`).join('\n');
+          const packageName = `Custom Snack Box (${selectedItems.length} item)`;
+          const customDetails = selectedItems.map((it, idx) => `• Item ${idx + 1}: ${it}`).join('\n');
 
-        window.dispatchEvent(
-          new CustomEvent('open-order-modal', {
-            detail: {
-              packageName,
-              portionCount: boxCount,
-              customDetails
-            }
-          })
-        );
-      });
+          window.dispatchEvent(
+            new CustomEvent('open-order-modal', {
+              detail: {
+                packageName,
+                portionCount: boxCount,
+                customDetails,
+              },
+            })
+          );
+        },
+        { signal }
+      );
 
+      // Inisialisasi awal kategori & kalkulasi
+      setActiveCategory(activeCategory, false);
       recalculate();
     }
+
+    return () => ac.abort();
   }
 
-  initSnackBoxPage();
-  document.addEventListener('astro:page-load', initSnackBoxPage);
+  function initSnackCarousel(): (() => void) | null {
+    const root = document.getElementById('snack-carousel');
+    const grid = document.getElementById('snack-grid');
+    if (!root || !grid) return null;
+    return createCarousel({
+      root,
+      grid,
+      cardSelector: '.snack-template-card',
+      prevBtn: document.getElementById('snack-prev') as HTMLButtonElement | null,
+      nextBtn: document.getElementById('snack-next') as HTMLButtonElement | null,
+      dotsContainer: document.getElementById('snack-dots'),
+      itemLabel: 'paket',
+    });
+  }
+
+  function teardownAll() {
+    teardowns.forEach((fn) => fn());
+    teardowns = [];
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    teardownAll();
+    teardowns = [initSnackBoxPage(), initSnackCarousel()].filter((fn): fn is () => void => fn !== null);
+  });
+  document.addEventListener('astro:before-swap', teardownAll);
 </script>
