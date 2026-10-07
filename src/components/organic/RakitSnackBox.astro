@@ -194,110 +194,21 @@ try {
                   </div>
                 </div>
 
-                <!-- Action Buttons: Pesan Langsung OR Kustomisasi Isi -->
-                <div class="pt-2 border-t border-divider flex flex-col gap-2">
+                <!-- Action Button: Pesan Paket Ini -->
+                <div class="pt-2 border-t border-divider">
                   <button
                     type="button"
-                    class="btn-customize-package w-full py-2.5 px-4 rounded-xl bg-accent text-bg text-xs font-semibold hover:bg-accent-700 transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
-                    data-package-id={pkg.id}
-                  >
-                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                    </svg>
-                    <span>Kustomisasi Isi Paket Ini</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    class="btn-order-template-direct w-full py-2.5 px-4 rounded-xl border border-accent text-accent hover:bg-accent/10 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    class="btn-order-template-direct w-full py-2.5 px-4 rounded-xl bg-accent text-bg text-xs font-semibold hover:bg-accent-700 transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                     data-package-name={pkg.name}
                     data-price={pkg.price_per_pax}
                     data-min-pax={pkg.min_pax}
                     data-default-items={slots.map((s) => `• ${s.name}: ${s.default_item}`).join('\n')}
                   >
-                    <span>Pesan Sesuai Template (Tanpa Ubah)</span>
+                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span>Pesan Paket Ini</span>
                   </button>
-                </div>
-
-                <!-- ================= INLINE CUSTOMIZER ACCORDION ================= -->
-                <div class="customizer-drawer hidden mt-4 pt-4 border-t border-accent/20 bg-accent-50/40 rounded-xl p-3.5 space-y-4">
-                  <div class="flex items-center justify-between border-b border-accent/20 pb-2">
-                    <span class="text-xs font-bold text-accent-800 flex items-center gap-1">
-                      <span>Sesuaikan Pilihan Per Kolom</span>
-                    </span>
-                    <button type="button" class="btn-close-customizer text-xs text-neutral-500 hover:text-neutral-900 font-semibold cursor-pointer">
-                      Tutup
-                    </button>
-                  </div>
-
-                  <!-- Slot Selectors -->
-                  <div class="space-y-3 customizer-slots-container">
-                    {slots.map((slot, sIdx) => {
-                      const rawOptions = (slot.options || slot.default_item || '')
-                        .split(/[\n,]+/)
-                        .map((o) => o.trim())
-                        .filter(Boolean);
-                      const optionsList = Array.from(new Set([slot.default_item, ...rawOptions].filter(Boolean)));
-
-                      return (
-                        <div class="space-y-1 bg-white p-2.5 rounded-lg border border-divider shadow-xs">
-                          <label class="text-[11px] font-bold text-neutral-700 block truncate">
-                            Kolom {sIdx + 1}: {slot.name}
-                          </label>
-                          <select
-                            class="slot-selector w-full bg-surface text-xs rounded-md border border-neutral-300 p-2 text-neutral-900 focus:outline-none focus:ring-1 focus:ring-accent"
-                            data-slot-name={slot.name}
-                          >
-                            {optionsList.map((opt) => (
-                              <option value={opt} selected={opt === slot.default_item}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <!-- Quantity Adjuster for Custom Package -->
-                  <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-divider">
-                    <span class="text-xs font-semibold text-neutral-800">Jumlah Box:</span>
-                    <div class="flex items-center gap-2">
-                      <button
-                        type="button"
-                        class="btn-custom-pax-minus size-7 rounded-full border border-accent text-accent font-bold hover:bg-accent hover:text-bg transition flex items-center justify-center cursor-pointer text-sm"
-                        aria-label="Kurangi porsi"
-                      >
-                        −
-                      </button>
-                      <span class="custom-pax-display font-heading text-sm font-bold min-w-[28px] text-center text-neutral-900">
-                        {pkg.min_pax}
-                      </span>
-                      <button
-                        type="button"
-                        class="btn-custom-pax-plus size-7 rounded-full bg-accent text-bg font-bold hover:bg-accent-700 transition flex items-center justify-center cursor-pointer text-sm"
-                        aria-label="Tambah porsi"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Total Price Display & Order CTA -->
-                  <div class="pt-2">
-                    <div class="flex items-baseline justify-between text-xs mb-2">
-                      <span class="text-neutral-600">Estimasi Total ({pkg.min_pax} box):</span>
-                      <span class="custom-total-display font-heading text-base font-bold text-accent-700">
-                        {formatRupiah(pkg.price_per_pax * pkg.min_pax)}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      class="btn-submit-customized-package w-full py-2.5 px-4 rounded-xl bg-accent text-bg text-xs font-bold uppercase tracking-wider hover:bg-accent-700 transition shadow-sm cursor-pointer"
-                    >
-                      Pesan Hasil Kustomisasi Ini &rarr;
-                    </button>
-                  </div>
                 </div>
               </div>
             );
@@ -482,60 +393,8 @@ try {
     const cards = document.querySelectorAll<HTMLElement>('.snack-template-card');
     cards.forEach((card) => {
       const pkgName = card.dataset.packageName || 'Paket Snack Box';
-      const pricePerPax = Number(card.dataset.price || 0);
       const minPax = Number(card.dataset.minPax || 20);
-      let currentPax = minPax;
-
-      const customizeBtn = card.querySelector<HTMLButtonElement>('.btn-customize-package');
-      const drawer = card.querySelector<HTMLElement>('.customizer-drawer');
-      const closeDrawerBtn = card.querySelector<HTMLButtonElement>('.btn-close-customizer');
       const orderDirectBtn = card.querySelector<HTMLButtonElement>('.btn-order-template-direct');
-      const submitCustomBtn = card.querySelector<HTMLButtonElement>('.btn-submit-customized-package');
-
-      const minusBtn = card.querySelector<HTMLButtonElement>('.btn-custom-pax-minus');
-      const plusBtn = card.querySelector<HTMLButtonElement>('.btn-custom-pax-plus');
-      const paxDisplay = card.querySelector<HTMLElement>('.custom-pax-display');
-      const totalDisplay = card.querySelector<HTMLElement>('.custom-total-display');
-
-      const selects = card.querySelectorAll<HTMLSelectElement>('.slot-selector');
-      const displays = card.querySelectorAll<HTMLElement>('.slot-display-item');
-
-      // Live sync: saat pilihan kolom di dropdown diubah, perbarui label tampilan di atas kartu
-      selects.forEach((sel, sIdx) => {
-        sel.addEventListener('change', () => {
-          if (displays[sIdx]) {
-            displays[sIdx].textContent = sel.value;
-          }
-        });
-      });
-
-      function updateCustomSummary() {
-        if (paxDisplay) paxDisplay.textContent = String(currentPax);
-        if (totalDisplay) {
-          totalDisplay.textContent = 'Rp' + (pricePerPax * currentPax).toLocaleString('id-ID');
-        }
-      }
-
-      customizeBtn?.addEventListener('click', () => {
-        drawer?.classList.toggle('hidden');
-      });
-
-      closeDrawerBtn?.addEventListener('click', () => {
-        drawer?.classList.add('hidden');
-      });
-
-      minusBtn?.addEventListener('click', () => {
-        if (currentPax > minPax) {
-          currentPax -= 5;
-          if (currentPax < minPax) currentPax = minPax;
-          updateCustomSummary();
-        }
-      });
-
-      plusBtn?.addEventListener('click', () => {
-        currentPax += 5;
-        updateCustomSummary();
-      });
 
       // Direct template order
       orderDirectBtn?.addEventListener('click', () => {
@@ -543,28 +402,9 @@ try {
         window.dispatchEvent(
           new CustomEvent('open-order-modal', {
             detail: {
-              packageName: `${pkgName} (Sesuai Template)`,
-              portionCount: currentPax,
+              packageName: pkgName,
+              portionCount: minPax,
               customDetails: defaultItems
-            }
-          })
-        );
-      });
-
-      // Customized template order
-      submitCustomBtn?.addEventListener('click', () => {
-        const customLines: string[] = [];
-        selects.forEach((sel) => {
-          const slotName = sel.dataset.slotName || 'Kolom';
-          customLines.push(`• ${slotName}: ${sel.value}`);
-        });
-
-        window.dispatchEvent(
-          new CustomEvent('open-order-modal', {
-            detail: {
-              packageName: `${pkgName} (Kustomisasi)`,
-              portionCount: currentPax,
-              customDetails: customLines.join('\n')
             }
           })
         );
