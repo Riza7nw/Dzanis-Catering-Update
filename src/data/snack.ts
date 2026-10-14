@@ -112,10 +112,16 @@ export function formatRupiah(n: number) {
   return "Rp" + n.toLocaleString("id-ID");
 }
 
+export type SnackSlotItem = {
+  name: string;
+  type?: string;
+};
+
 export type SnackSlot = {
   name: string;
   default_item: string;
   options: string;
+  items?: SnackSlotItem[];
 };
 
 export type SnackTemplatePackage = {
