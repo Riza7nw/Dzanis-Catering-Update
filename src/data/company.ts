@@ -72,7 +72,7 @@ export const company: Company = {
     whatsapp: "085726331579",
     whatsappDisplay: "0857 2633 1579",
     whatsappLink: waLink(
-      "Halo Dzanis Catering, saya mau tanya-tanya soal pesanan catering.",
+      "Halo Dzanis Catering, saya mau tanya paket yang ada di Dzanis Catering.",
     ),
     phoneHref: "tel:085726331579",
     address: "Majalengka, Jawa Barat",
