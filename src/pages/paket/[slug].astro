@@ -581,18 +581,16 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
             </div>
 
             <div class="mt-5">
-              <a
+              <button
+                type="button"
                 id="wa-checkout-btn"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex w-full items-center justify-center gap-2.5 rounded-full bg-accent py-3.5 px-6 text-sm font-bold uppercase tracking-wider text-white shadow-md hover:bg-accent-700 transition duration-200"
+                class="flex w-full items-center justify-center gap-2.5 rounded-full bg-accent py-3.5 px-6 text-sm font-bold uppercase tracking-wider text-white shadow-md hover:bg-accent-700 transition duration-200 cursor-pointer"
               >
                 <svg class="size-5 flex-none" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 016.988 2.896 9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                 </svg>
                 <span>Pesan Sekarang via WhatsApp</span>
-              </a>
+              </button>
               {paket.canSelectMainMenu && (
                 <p class="mt-2 text-center text-sm text-neutral-500" id="validation-message" role="alert" aria-live="assertive">
                   Pastikan Anda telah memilih menu dan lauk pendamping sebelum memesan.
@@ -600,7 +598,7 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
               )}
               {!paket.canSelectMainMenu && (
                 <p class="mt-2 text-center text-sm text-neutral-500">
-                  Format pesan WhatsApp akan otomatis terisi dengan rincian paket dan jumlah porsi.
+                  Lengkapi data pemesan & titik peta pengantaran pada form pemesanan.
                 </p>
               )}
             </div>
@@ -964,17 +962,18 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
     }
 
     checkoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+
       if (hasMenuSelection) {
         const validation = validateMenuSelection();
         if (!validation.valid) {
-          e.preventDefault();
           return;
         }
       }
 
       if (eventDateInput && !eventDateInput.value) {
-        e.preventDefault();
         alert('Mohon pilih tanggal acara minimal hari berikutnya.');
+        eventDateInput.focus();
         return;
       }
 
@@ -983,16 +982,34 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
         const minSelectableDate = minEventDateString ? new Date(`${minEventDateString}T00:00:00`) : null;
 
         if (minSelectableDate && selectedDate < minSelectableDate) {
-          e.preventDefault();
           alert('Tanggal acara tidak bisa dipilih hari ini atau hari sebelumnya. Minimal pilih tanggal besok.');
+          eventDateInput.focus();
           return;
         }
       }
 
-      const waMessage = checkoutBtn.dataset.waMessage;
-      if (waMessage) {
-        checkoutBtn.href = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`;
+      const qty = calculateClampedQty();
+      let customMenuDetails = '';
+      if (hasMenuSelection) {
+        if (orderMode === 'default') {
+          customMenuDetails = `• Pilihan Paket: Menu Standar (Default)\n• Menu Utama: ${defaultMainMenu}\n• Lauk Pendamping: ${Array.isArray(defaultSideDishes) ? defaultSideDishes.join(', ') : defaultSideDishes}`;
+        } else {
+          customMenuDetails = `• Pilihan Paket: Racik Sendiri\n• Menu Utama: ${selectedMainMenu}\n• Lauk Pendamping: ${selectedSideDishes.join(', ')}`;
+        }
       }
+
+      // Dispatch event untuk membuka OrderModal dengan seluruh data ter-prefill
+      window.dispatchEvent(
+        new CustomEvent('open-order-modal', {
+          detail: {
+            packageName,
+            customDetails: customMenuDetails,
+            portionCount: qty,
+            eventDate: eventDateInput?.value || '',
+            minOrder,
+          },
+        })
+      );
     }, { signal });
 
     portionInput.addEventListener('input', updateCheckout, { signal });

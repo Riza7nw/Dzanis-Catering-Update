@@ -1,0 +1,836 @@
+---
+import "leaflet/dist/leaflet.css";
+
+interface Props {
+  targetTextareaId?: string;
+  latInputId?: string;
+  lngInputId?: string;
+  modalId?: string;
+}
+
+const {
+  targetTextareaId = "customer-address",
+  latInputId = "delivery-lat",
+  lngInputId = "delivery-lng",
+  modalId = "order-modal",
+} = Astro.props;
+---
+
+<div
+  class="peta-picker-wrapper mt-1.5 flex flex-col gap-2 rounded-2xl border border-neutral-200 bg-[var(--color-surface)]/60 p-3 sm:p-3.5"
+  data-target-textarea={targetTextareaId}
+  data-lat-input={latInputId}
+  data-lng-input={lngInputId}
+  data-modal-id={modalId}
+>
+  <!-- Bar Atas: Judul & Tombol Lokasi Saya -->
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-1.5 text-xs font-semibold text-neutral-800">
+      <svg class="size-4 text-accent flex-none" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+      <span>Tandai Titik Pengantaran di Peta</span>
+    </div>
+
+    <button
+      type="button"
+      id="btn-geolocate"
+      class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-800 shadow-2xs hover:border-accent hover:text-accent focus:outline-none focus:ring-1 focus:ring-accent transition cursor-pointer"
+      title="Gunakan titik GPS perangkat saat ini"
+    >
+      <svg class="size-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="7"/>
+        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      </svg>
+      <span>Gunakan Lokasi Saya</span>
+    </button>
+  </div>
+
+  <!-- Kolom Pencarian Lokasi / Nama Jalan (Nominatim Search API) -->
+  <div class="relative">
+    <div class="flex items-center gap-1.5">
+      <div class="relative flex-1">
+        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <input
+          type="text"
+          id="peta-search-input"
+          placeholder="Cari nama jalan, desa, atau kecamatan..."
+          autocomplete="off"
+          class="w-full rounded-xl border border-neutral-300 bg-white py-2 pl-9 pr-8 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none shadow-2xs"
+        />
+        <!-- Tombol Clear Search -->
+        <button
+          type="button"
+          id="peta-search-clear"
+          class="absolute inset-y-0 right-0 hidden items-center pr-2.5 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+          aria-label="Bersihkan pencarian"
+        >
+          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="btn-peta-search"
+        class="inline-flex items-center gap-1 rounded-xl bg-accent px-3 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-accent-700 focus:outline-none focus:ring-1 focus:ring-accent transition cursor-pointer flex-none"
+      >
+        <span id="btn-search-label">Cari</span>
+      </button>
+    </div>
+
+    <!-- Dropdown Menu Hasil Pencarian -->
+    <div
+      id="peta-search-results"
+      class="absolute left-0 right-0 top-full mt-1.5 hidden max-h-56 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1.5 shadow-xl z-[1000] dz-scroll"
+      role="listbox"
+      aria-label="Daftar hasil pencarian lokasi"
+    ></div>
+  </div>
+
+  <!-- Banner Peringatan Akurasi Jaringan ISP -->
+  <div
+    id="peta-accuracy-warning"
+    class="hidden rounded-xl border border-amber-300 bg-amber-50 p-2.5 text-xs text-amber-900 shadow-2xs transition-all"
+    role="alert"
+  >
+    <div class="flex items-start gap-2">
+      <span class="text-sm flex-none">⚠️</span>
+      <div class="flex-1">
+        <p class="font-medium leading-relaxed">
+          Deteksi lokasi otomatis di perangkat/browser ini kurang akurat (mengikuti server jaringan ISP). Silakan gunakan kolom pencarian lokasi di atas atau geser pin langsung di area Majalengka/Ciayumajakuning.
+        </p>
+      </div>
+      <button
+        type="button"
+        id="btn-close-accuracy-warning"
+        class="text-amber-700 hover:text-amber-900 cursor-pointer flex-none p-0.5 rounded hover:bg-amber-100"
+        aria-label="Tutup pesan peringatan"
+      >
+        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Container Peta Leaflet -->
+  <div class="relative">
+    <div
+      id="peta-picker-canvas"
+      class="h-56 sm:h-60 w-full rounded-xl border border-neutral-300 bg-neutral-100 shadow-inner overflow-hidden z-0"
+      style="min-height: 220px;"
+      role="application"
+      aria-label="Peta interaktif penentuan lokasi pengantaran"
+    ></div>
+
+    <!-- Overlay Helper Hint -->
+    <div
+      id="peta-helper-hint"
+      class="pointer-events-none absolute bottom-2 left-2 right-2 flex justify-center z-[500]"
+    >
+      <span class="rounded-full bg-neutral-900/80 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-xs shadow-md">
+        Geser pin merah atau klik peta ke lokasi acara
+      </span>
+    </div>
+  </div>
+
+  <!-- Status Bar & Feedback Geocoding -->
+  <div class="flex flex-col gap-1">
+    <div
+      id="peta-geocoding-status"
+      class="flex items-center gap-1.5 text-xs text-neutral-600 transition-colors"
+      role="status"
+      aria-live="polite"
+    >
+      <span id="peta-status-icon" class="flex-none">📍</span>
+      <span id="peta-status-text" class="leading-tight">
+        Geser pin merah atau cari alamat untuk menentukan titik antar.
+      </span>
+    </div>
+
+    <!-- Link Pratinjau Google Maps -->
+    <div id="peta-preview-link-wrap" class="hidden text-[11px] text-accent">
+      <a
+        id="peta-preview-link"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1 font-semibold hover:underline"
+      >
+        <span>Lihat titik di Google Maps</span>
+        <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Hidden Coordinates Inputs -->
+  <input type="hidden" id={latInputId} name="deliveryLat" value="" />
+  <input type="hidden" id={lngInputId} name="deliveryLng" value="" />
+</div>
+
+<style is:global>
+  /* Menjaga z-index Leaflet tetap di dalam modal dialog */
+  .peta-picker-wrapper .leaflet-pane {
+    z-index: 10;
+  }
+  .peta-picker-wrapper .leaflet-top,
+  .peta-picker-wrapper .leaflet-bottom {
+    z-index: 20;
+  }
+  .peta-picker-wrapper .leaflet-control-zoom {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  .peta-picker-wrapper .leaflet-control-zoom a {
+    color: #171717 !important;
+    background-color: #ffffff !important;
+  }
+  .peta-picker-wrapper .leaflet-control-zoom a:hover {
+    background-color: #f6f0e4 !important;
+    color: #b04a22 !important;
+  }
+
+  /* Custom Terracotta Pin Marker */
+  .dz-custom-marker {
+    background: transparent;
+    border: none;
+  }
+  .dz-pin-container {
+    position: relative;
+    width: 34px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    transform-origin: bottom center;
+    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .dz-pin-container:active {
+    cursor: grabbing;
+    transform: scale(1.12);
+  }
+  .dz-pin-pulse {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 7px;
+    background: rgba(176, 74, 34, 0.35);
+    border-radius: 50%;
+    animation: dz-pin-shadow-pulse 2s infinite ease-in-out;
+  }
+  @keyframes dz-pin-shadow-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.6; }
+    50% { transform: translateX(-50%) scale(1.4); opacity: 0.2; }
+  }
+</style>
+
+<script>
+  import L from "leaflet";
+
+  interface MapInstanceState {
+    map: L.Map | null;
+    marker: L.Marker | null;
+    abortController: AbortController | null;
+    searchAbortController: AbortController | null;
+    debounceTimer: ReturnType<typeof setTimeout> | null;
+    observer: MutationObserver | null;
+    isInitialized: boolean;
+  }
+
+  let state: MapInstanceState = {
+    map: null,
+    marker: null,
+    abortController: null,
+    searchAbortController: null,
+    debounceTimer: null,
+    observer: null,
+    isInitialized: false,
+  };
+
+  // Koordinat operasional default: Majalengka / Ciayumajakuning
+  const DEFAULT_LAT = -6.836;
+  const DEFAULT_LNG = 108.227;
+  const DEFAULT_ZOOM = 13;
+
+  /**
+   * Cek apakah koordinat berada di dalam batas wajar area layanan Ciayumajakuning & Jawa Barat sekitarnya.
+   * Koordinat di luar batas ini (misal: Semarang ~110.4, Jakarta ~106.8, Surabaya ~112.7)
+   * mengindikasikan IP routing ISP desktop yang tidak akurat.
+   */
+  function isWithinOperationalArea(lat: number, lng: number): boolean {
+    return lat >= -7.45 && lat <= -6.20 && lng >= 107.75 && lng <= 109.05;
+  }
+
+  function createCustomIcon() {
+    const html = `
+      <div class="dz-pin-container">
+        <div class="dz-pin-pulse"></div>
+        <svg viewBox="0 0 32 42" width="34" height="44" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 3px 5px rgba(42,39,31,0.35));">
+          <path d="M16 0C7.163 0 0 7.163 0 16c0 11.5 16 26 16 26s16-14.5 16-26c0-8.837-7.163-16-16-16z" fill="#b04a22"/>
+          <path d="M16 2C8.268 2 2 8.268 2 16c0 10.2 14 23.3 14 23.3S30 26.2 30 16C30 8.268 23.732 2 16 2z" fill="#8a3a1a" opacity="0.35"/>
+          <circle cx="16" cy="15" r="6" fill="#fffcf6"/>
+          <circle cx="16" cy="15" r="3" fill="#b04a22"/>
+        </svg>
+      </div>
+    `;
+    return L.divIcon({
+      html,
+      className: "dz-custom-marker",
+      iconSize: [34, 44],
+      iconAnchor: [17, 44],
+      popupAnchor: [0, -44],
+    });
+  }
+
+  function updateStatus(
+    type: "idle" | "loading" | "success" | "warning",
+    message: string,
+  ) {
+    const statusText = document.getElementById("peta-status-text");
+    const statusIcon = document.getElementById("peta-status-icon");
+    const statusContainer = document.getElementById("peta-geocoding-status");
+    if (!statusText || !statusIcon || !statusContainer) return;
+
+    statusText.textContent = message;
+
+    if (type === "loading") {
+      statusIcon.innerHTML = `
+        <svg class="size-3.5 animate-spin text-accent" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+      `;
+      statusContainer.className = "flex items-center gap-1.5 text-xs text-accent font-medium transition-colors";
+    } else if (type === "success") {
+      statusIcon.textContent = "✓";
+      statusContainer.className = "flex items-center gap-1.5 text-xs text-emerald-700 font-medium transition-colors";
+    } else if (type === "warning") {
+      statusIcon.textContent = "⚠️";
+      statusContainer.className = "flex items-center gap-1.5 text-xs text-amber-700 font-medium transition-colors";
+    } else {
+      statusIcon.textContent = "📍";
+      statusContainer.className = "flex items-center gap-1.5 text-xs text-neutral-600 transition-colors";
+    }
+  }
+
+  function showAccuracyWarning(show: boolean) {
+    const warning = document.getElementById("peta-accuracy-warning");
+    if (!warning) return;
+    if (show) {
+      warning.classList.remove("hidden");
+    } else {
+      warning.classList.add("hidden");
+    }
+  }
+
+  function updateCoordinatesDisplay(lat: number, lng: number) {
+    const wrapper = document.querySelector(".peta-picker-wrapper") as HTMLElement | null;
+    const latInputId = wrapper?.dataset.latInput || "delivery-lat";
+    const lngInputId = wrapper?.dataset.lngInput || "delivery-lng";
+
+    const latInput = document.getElementById(latInputId) as HTMLInputElement | null;
+    const lngInput = document.getElementById(lngInputId) as HTMLInputElement | null;
+
+    if (latInput) latInput.value = lat.toFixed(6);
+    if (lngInput) lngInput.value = lng.toFixed(6);
+
+    // Update preview link
+    const previewWrap = document.getElementById("peta-preview-link-wrap");
+    const previewLink = document.getElementById("peta-preview-link") as HTMLAnchorElement | null;
+    if (previewWrap && previewLink) {
+      previewLink.href = `https://www.google.com/maps?q=${lat.toFixed(6)},${lng.toFixed(6)}`;
+      previewWrap.classList.remove("hidden");
+    }
+  }
+
+  function clearCoordinatesDisplay() {
+    const wrapper = document.querySelector(".peta-picker-wrapper") as HTMLElement | null;
+    const latInputId = wrapper?.dataset.latInput || "delivery-lat";
+    const lngInputId = wrapper?.dataset.lngInput || "delivery-lng";
+
+    const latInput = document.getElementById(latInputId) as HTMLInputElement | null;
+    const lngInput = document.getElementById(lngInputId) as HTMLInputElement | null;
+
+    if (latInput) latInput.value = "";
+    if (lngInput) lngInput.value = "";
+
+    const previewWrap = document.getElementById("peta-preview-link-wrap");
+    const previewLink = document.getElementById("peta-preview-link") as HTMLAnchorElement | null;
+    if (previewWrap) previewWrap.classList.add("hidden");
+    if (previewLink) previewLink.href = "#";
+  }
+
+  async function performReverseGeocoding(lat: number, lng: number) {
+    const wrapper = document.querySelector(".peta-picker-wrapper") as HTMLElement | null;
+    const targetTextareaId = wrapper?.dataset.targetTextarea || "customer-address";
+    const textarea = document.getElementById(targetTextareaId) as HTMLTextAreaElement | null;
+
+    if (state.abortController) {
+      state.abortController.abort();
+    }
+    state.abortController = new AbortController();
+
+    updateStatus("loading", "Mencari alamat dari titik peta...");
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat.toFixed(6)}&lon=${lng.toFixed(6)}&accept-language=id`;
+      const response = await fetch(url, {
+        signal: state.abortController.signal,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Nominatim HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const address = (data.display_name || "").trim();
+
+      if (address && textarea) {
+        textarea.value = address;
+        // Trigger event input dan change agar form validation langsung mendeteksi nilainya
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        textarea.dispatchEvent(new Event("change", { bubbles: true }));
+        updateStatus("success", "Alamat terisi dari titik peta (silakan lengkapi jika ada patokan).");
+      } else {
+        updateStatus("warning", "Titik tersimpan. Silakan ketik nama jalan / blok secara manual.");
+      }
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
+      console.warn("Reverse geocode warning:", err);
+      updateStatus(
+        "warning",
+        "Gagal memuat nama jalan otomatis. Titik koordinat tetap tersimpan, silakan ketik alamat manual.",
+      );
+    }
+  }
+
+  function handlePointSelection(lat: number, lng: number, shouldGeocode = true) {
+    updateCoordinatesDisplay(lat, lng);
+
+    if (!shouldGeocode) return;
+
+    // Terapkan debounce 650ms untuk menghormati batasan rate-limiting Nominatim
+    if (state.debounceTimer) clearTimeout(state.debounceTimer);
+    state.debounceTimer = setTimeout(() => {
+      performReverseGeocoding(lat, lng);
+    }, 650);
+  }
+
+  /**
+   * Fitur Pencarian Lokasi menggunakan Nominatim Search API
+   */
+  async function performSearch(query: string) {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    const resultsContainer = document.getElementById("peta-search-results");
+    const btnSearchLabel = document.getElementById("btn-search-label");
+    if (!resultsContainer) return;
+
+    if (state.searchAbortController) {
+      state.searchAbortController.abort();
+    }
+    state.searchAbortController = new AbortController();
+
+    if (btnSearchLabel) btnSearchLabel.textContent = "...";
+    updateStatus("loading", `Mencari lokasi: "${trimmed}"...`);
+
+    resultsContainer.innerHTML = `
+      <div class="px-3 py-2 text-xs text-neutral-500 flex items-center gap-2">
+        <svg class="size-3.5 animate-spin text-accent" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <span>Mencari lokasi di peta...</span>
+      </div>
+    `;
+    resultsContainer.classList.remove("hidden");
+
+    try {
+      // Prioritaskan area Ciayumajakuning & Jawa Barat dengan batas viewbox (left, top, right, bottom)
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(trimmed)}&countrycodes=id&viewbox=107.75,-6.20,109.05,-7.45&limit=5&accept-language=id`;
+      const res = await fetch(url, {
+        signal: state.searchAbortController.signal,
+        headers: { Accept: "application/json" },
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const items = await res.json();
+
+      if (!Array.isArray(items) || items.length === 0) {
+        resultsContainer.innerHTML = `
+          <div class="px-3 py-2.5 text-xs text-neutral-600">
+            Lokasi tidak ditemukan. Coba ketik nama desa, jalan, atau kecamatan yang lebih spesifik.
+          </div>
+        `;
+        updateStatus("warning", "Lokasi tidak ditemukan. Coba kata kunci lain.");
+        return;
+      }
+
+      resultsContainer.innerHTML = "";
+      items.forEach((item: any) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className =
+          "w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--color-surface)] text-xs text-neutral-800 transition flex flex-col gap-0.5 cursor-pointer border-b border-neutral-100 last:border-b-0";
+
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "font-semibold text-neutral-900";
+        titleSpan.textContent = item.name || item.display_name.split(",")[0];
+
+        const descSpan = document.createElement("span");
+        descSpan.className = "text-[11px] text-neutral-500 truncate w-full";
+        descSpan.textContent = item.display_name;
+
+        btn.appendChild(titleSpan);
+        btn.appendChild(descSpan);
+
+        btn.addEventListener("click", () => {
+          const lat = parseFloat(item.lat);
+          const lng = parseFloat(item.lon);
+          resultsContainer.classList.add("hidden");
+
+          const searchInput = document.getElementById("peta-search-input") as HTMLInputElement | null;
+          if (searchInput) searchInput.value = titleSpan.textContent || "";
+
+          // Pindahkan peta & marker
+          if (state.map && state.marker) {
+            state.map.setView([lat, lng], 16, { animate: true });
+            state.marker.setLatLng([lat, lng]);
+          }
+
+          // Update hidden inputs dan textarea form
+          updateCoordinatesDisplay(lat, lng);
+
+          const wrapper = document.querySelector(".peta-picker-wrapper") as HTMLElement | null;
+          const targetTextareaId = wrapper?.dataset.targetTextarea || "customer-address";
+          const textarea = document.getElementById(targetTextareaId) as HTMLTextAreaElement | null;
+          if (textarea) {
+            textarea.value = item.display_name;
+            textarea.dispatchEvent(new Event("input", { bubbles: true }));
+            textarea.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+
+          showAccuracyWarning(false);
+          updateStatus("success", `✓ Titik peta dipindahkan ke: ${titleSpan.textContent}`);
+        });
+
+        resultsContainer.appendChild(btn);
+      });
+
+      updateStatus("idle", `Ditemukan ${items.length} hasil pencarian. Klik salah satu untuk memilih.`);
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
+      console.warn("Search error:", err);
+      resultsContainer.innerHTML = `
+        <div class="px-3 py-2 text-xs text-amber-800">
+          Gagal mencari lokasi. Periksa koneksi internet Anda atau geser pin langsung pada peta.
+        </div>
+      `;
+      updateStatus("warning", "Gagal memuat hasil pencarian.");
+    } finally {
+      if (btnSearchLabel) btnSearchLabel.textContent = "Cari";
+    }
+  }
+
+  function setupSearchFeature() {
+    const searchInput = document.getElementById("peta-search-input") as HTMLInputElement | null;
+    const btnSearch = document.getElementById("btn-peta-search") as HTMLButtonElement | null;
+    const clearBtn = document.getElementById("peta-search-clear") as HTMLButtonElement | null;
+    const resultsContainer = document.getElementById("peta-search-results");
+
+    if (!searchInput || !btnSearch) return;
+
+    const execute = () => {
+      if (searchInput.value.trim()) {
+        performSearch(searchInput.value);
+      }
+    };
+
+    // KRUSIAL: Cegah submit form utama saat menekan tombol Enter pada search input
+    searchInput.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        execute();
+      } else if (e.key === "Escape") {
+        resultsContainer?.classList.add("hidden");
+      }
+    });
+
+    searchInput.addEventListener("input", () => {
+      if (clearBtn) {
+        if (searchInput.value.length > 0) {
+          clearBtn.classList.remove("hidden");
+          clearBtn.classList.add("flex");
+        } else {
+          clearBtn.classList.add("hidden");
+          clearBtn.classList.remove("flex");
+          resultsContainer?.classList.add("hidden");
+        }
+      }
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        clearBtn.classList.add("hidden");
+        clearBtn.classList.remove("flex");
+        resultsContainer?.classList.add("hidden");
+        searchInput.focus();
+      });
+    }
+
+    btnSearch.addEventListener("click", (e) => {
+      e.preventDefault();
+      execute();
+    });
+
+    // Sembunyikan dropdown hasil pencarian bila klik di luar
+    document.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("#peta-search-results") && !target.closest("#peta-search-input") && !target.closest("#btn-peta-search")) {
+        resultsContainer?.classList.add("hidden");
+      }
+    });
+  }
+
+  function setupGeolocation() {
+    const btnGeolocate = document.getElementById("btn-geolocate");
+    if (!btnGeolocate) return;
+
+    btnGeolocate.addEventListener("click", () => {
+      if (!("geolocation" in navigator)) {
+        alert("Browser Anda tidak mendukung deteksi lokasi otomatis.");
+        return;
+      }
+
+      showAccuracyWarning(false);
+      updateStatus("loading", "Mendeteksi posisi perangkat...");
+
+      // Wajib gunakan opsi ketat: enableHighAccuracy, timeout 10s, maximumAge 0
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+
+          // VALIDASI AREA & AKURASI:
+          // Jika accuracy > 10.000 meter (meleset > 10 km) ATAU koordinat di luar wilayah operasional
+          // Ciayumajakuning / Jawa Barat (misal: IP routing desktop melompat ke Semarang / Jakarta),
+          // tampilkan peringatan ramah dan kembalikan fokus ke Majalengka.
+          const isAccurate = accuracy <= 10000;
+          const isInArea = isWithinOperationalArea(latitude, longitude);
+
+          if (!isAccurate || !isInArea) {
+            console.warn(`Geolocation rejected due to inaccurate desktop IP routing: Lat ${latitude}, Lng ${longitude}, Accuracy: ${accuracy}m`);
+            showAccuracyWarning(true);
+
+            // Kembalikan fokus peta dan marker ke titik tengah default Majalengka
+            if (state.map && state.marker) {
+              state.map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM, { animate: true });
+              state.marker.setLatLng([DEFAULT_LAT, DEFAULT_LNG]);
+            }
+            // Kosongkan koordinat agar titik default Majalengka tidak terkirim sebagai lokasi pengantaran
+            clearCoordinatesDisplay();
+            updateStatus(
+              "warning",
+              "Deteksi ISP meleset ke luar kota. Peta dikembalikan ke area Majalengka.",
+            );
+            return;
+          }
+
+          // Lokasi valid & akurat dalam wilayah operasional
+          showAccuracyWarning(false);
+          if (state.map && state.marker) {
+            state.map.setView([latitude, longitude], 16, { animate: true });
+            state.marker.setLatLng([latitude, longitude]);
+          }
+          handlePointSelection(latitude, longitude, true);
+        },
+        (error) => {
+          console.warn("Geolocation error:", error);
+          let msg = "Tidak dapat mengakses lokasi. Pastikan izin lokasi telah diizinkan.";
+          if (error.code === error.PERMISSION_DENIED) {
+            msg = "Izin lokasi ditolak. Anda dapat menggunakan kolom pencarian lokasi di atas.";
+          }
+          updateStatus("warning", msg);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        },
+      );
+    });
+
+    const btnCloseWarning = document.getElementById("btn-close-accuracy-warning");
+    if (btnCloseWarning) {
+      btnCloseWarning.addEventListener("click", () => {
+        showAccuracyWarning(false);
+      });
+    }
+  }
+
+  function initMap() {
+    const container = document.getElementById("peta-picker-canvas");
+    if (!container || state.isInitialized) return;
+
+    // Inisialisasi Map Leaflet
+    const map = L.map(container, {
+      center: [DEFAULT_LAT, DEFAULT_LNG],
+      zoom: DEFAULT_ZOOM,
+      zoomControl: true,
+      attributionControl: true,
+    });
+
+    // Tile Layer: OpenStreetMap resmi
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Marker dengan pin terakota katering
+    const icon = createCustomIcon();
+    const marker = L.marker([DEFAULT_LAT, DEFAULT_LNG], {
+      icon,
+      draggable: true,
+      autoPan: true,
+    }).addTo(map);
+
+    // Event saat pin selesai digeser (dragend)
+    marker.on("dragend", () => {
+      const position = marker.getLatLng();
+      showAccuracyWarning(false);
+      handlePointSelection(position.lat, position.lng, true);
+    });
+
+    // Event saat user mengklik sembarang titik di peta
+    map.on("click", (e: L.LeafletMouseEvent) => {
+      marker.setLatLng(e.latlng);
+      showAccuracyWarning(false);
+      handlePointSelection(e.latlng.lat, e.latlng.lng, true);
+    });
+
+    state.map = map;
+    state.marker = marker;
+    state.isInitialized = true;
+
+    setupGeolocation();
+    setupSearchFeature();
+
+    // Biarkan koordinat kosong secara default (hanya terisi jika user berinteraksi)
+    clearCoordinatesDisplay();
+  }
+
+  function setupModalObserver() {
+    const wrapper = document.querySelector(".peta-picker-wrapper") as HTMLElement | null;
+    const modalId = wrapper?.dataset.modalId || "order-modal";
+    const dialog = document.getElementById(modalId) as HTMLDialogElement | null;
+
+    if (!dialog) return;
+
+    const onModalOpen = () => {
+      if (!state.isInitialized) {
+        initMap();
+      }
+      // PENTING: Panggil invalidateSize setelah layout dialog aktif dan ter-render
+      setTimeout(() => {
+        if (state.map) {
+          state.map.invalidateSize();
+        }
+      }, 150);
+    };
+
+    // Dengarkan custom event jika ada
+    window.addEventListener("order-modal-opened", onModalOpen);
+    window.addEventListener("open-order-modal", () => {
+      setTimeout(onModalOpen, 50);
+    });
+
+    // Reset peta saat modal ditutup atau form direset
+    window.addEventListener("reset-peta-picker", () => {
+      clearCoordinatesDisplay();
+      showAccuracyWarning(false);
+      if (state.map && state.marker) {
+        state.map.setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+        state.marker.setLatLng([DEFAULT_LAT, DEFAULT_LNG]);
+      }
+      const searchInput = document.getElementById("peta-search-input") as HTMLInputElement | null;
+      if (searchInput) searchInput.value = "";
+      const clearBtn = document.getElementById("peta-search-clear");
+      if (clearBtn) {
+        clearBtn.classList.add("hidden");
+        clearBtn.classList.remove("flex");
+      }
+      const resultsContainer = document.getElementById("peta-search-results");
+      if (resultsContainer) resultsContainer.classList.add("hidden");
+      updateStatus("idle", "Geser pin merah atau cari alamat untuk menentukan titik antar.");
+    });
+
+    // Observer atribut open pada <dialog>
+    if (state.observer) state.observer.disconnect();
+    state.observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "open" &&
+          dialog.open
+        ) {
+          onModalOpen();
+        }
+      }
+    });
+
+    state.observer.observe(dialog, { attributes: true });
+
+    // Jika dialog kebetulan sudah open saat script dijalankan
+    if (dialog.open) {
+      onModalOpen();
+    }
+  }
+
+  function cleanup() {
+    if (state.debounceTimer) clearTimeout(state.debounceTimer);
+    if (state.abortController) state.abortController.abort();
+    if (state.searchAbortController) state.searchAbortController.abort();
+    if (state.observer) state.observer.disconnect();
+    if (state.map) {
+      state.map.remove();
+      state.map = null;
+    }
+    state.marker = null;
+    state.isInitialized = false;
+  }
+
+  function setupPetaPicker() {
+    cleanup();
+    setupModalObserver();
+  }
+
+  // Dukung Astro View Transitions Lifecycle
+  document.addEventListener("astro:page-load", setupPetaPicker);
+  document.addEventListener("astro:before-swap", cleanup);
+
+  // Inisialisasi awal saat load
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupPetaPicker, { once: true });
+  } else {
+    setupPetaPicker();
+  }
+</script>

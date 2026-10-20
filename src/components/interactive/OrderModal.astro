@@ -1,5 +1,6 @@
 ---
 import { waPhoneNumber } from "../../data/company";
+import PetaPicker from "./PetaPicker.astro";
 
 interface Props {
   phoneNumber?: string;
@@ -11,9 +12,9 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
 <dialog
   id="order-modal"
   data-phone={phoneNumber}
-  class="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg rounded-[var(--radius-lg)] border border-[var(--color-divider)] bg-[var(--color-bg)] p-0 text-[var(--color-text)] shadow-[var(--shadow-lg)] backdrop:bg-black/50 backdrop:blur-sm focus:outline-none"
+  class="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg rounded-[var(--radius-lg)] border border-[var(--color-divider)] bg-[var(--color-bg)] p-0 text-[var(--color-text)] shadow-[var(--shadow-lg)] backdrop:bg-black/50 backdrop:blur-sm focus:outline-none max-h-[92vh] overflow-y-auto dz-scroll"
 >
-  <div class="relative flex flex-col p-6 sm:p-8">
+  <div class="relative flex flex-col p-5 sm:p-7">
     <!-- Header -->
     <div
       class="flex items-start justify-between border-b border-[var(--color-divider)] pb-4"
@@ -133,9 +134,36 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
             value="20"
             class="mt-1.5 w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none"
           />
-          <span class="mt-1 block text-xs text-neutral-900">Minimal 20 box</span
-          >
+          <span id="portion-min-hint" class="mt-1 block text-xs text-neutral-900">
+            Minimal 20 box
+          </span>
         </div>
+      </div>
+
+      <!-- Alamat Pengantaran & Peta Interaktif Leaflet -->
+      <div>
+        <label
+          for="customer-address"
+          class="block text-sm font-semibold text-neutral-900"
+        >
+          Alamat Pengantaran <span class="text-accent">*</span>
+        </label>
+        <textarea
+          id="customer-address"
+          name="customerAddress"
+          required
+          rows="2"
+          placeholder="Tentukan titik di peta di bawah atau ketik alamat lengkap..."
+          class="mt-1.5 w-full resize-none rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none"
+        ></textarea>
+
+        <!-- Komponen Leaflet Map Picker -->
+        <PetaPicker
+          targetTextareaId="customer-address"
+          latInputId="delivery-lat"
+          lngInputId="delivery-lng"
+          modalId="order-modal"
+        />
       </div>
 
       <!-- Catatan Tambahan -->
@@ -149,8 +177,8 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
         <textarea
           id="order-notes"
           name="notes"
-          rows="3"
-          placeholder="Contoh: Request tanpa pedas, dikirim jam 9 pagi"
+          rows="2"
+          placeholder="Contoh: Request tanpa pedas, dikirim jam 9 pagi, patokan pagar hitam"
           class="mt-1.5 w-full resize-none rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none"
         ></textarea>
       </div>
@@ -175,7 +203,15 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
 </dialog>
 
 <script>
+  let orderModalAbortController: AbortController | null = null;
+
   function setupOrderModal() {
+    if (orderModalAbortController) {
+      orderModalAbortController.abort();
+    }
+    orderModalAbortController = new AbortController();
+    const { signal } = orderModalAbortController;
+
     const dialog = document.getElementById(
       "order-modal",
     ) as HTMLDialogElement | null;
@@ -193,6 +229,15 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
     const eventDateInput = document.getElementById(
       "event-date",
     ) as HTMLInputElement | null;
+    const portionInput = document.getElementById(
+      "portion-count",
+    ) as HTMLInputElement | null;
+    const portionMinHint = document.getElementById("portion-min-hint");
+    const addressInput = document.getElementById(
+      "customer-address",
+    ) as HTMLTextAreaElement | null;
+    const latInput = document.getElementById("delivery-lat") as HTMLInputElement | null;
+    const lngInput = document.getElementById("delivery-lng") as HTMLInputElement | null;
 
     if (!dialog || !form) return;
 
@@ -201,14 +246,24 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
     }
 
     window.addEventListener("open-order-modal", ((
-      e: CustomEvent<{ packageName?: string; customDetails?: string; portionCount?: number }>,
+      e: CustomEvent<{
+        packageName?: string;
+        customDetails?: string;
+        portionCount?: number;
+        eventDate?: string;
+        minOrder?: number;
+      }>,
     ) => {
       const pkg = e.detail?.packageName || "Snack Box Dzanis";
       const details = e.detail?.customDetails || "";
       const portions = e.detail?.portionCount;
+      const eventDate = e.detail?.eventDate;
+      const minOrder = e.detail?.minOrder;
+
       if (displayPackage) displayPackage.textContent = pkg;
       if (inputPackage) inputPackage.value = pkg;
       if (inputCustomDetails) inputCustomDetails.value = details;
+
       if (displayCustomDetails) {
         if (details) {
           displayCustomDetails.textContent = details;
@@ -218,12 +273,36 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
           displayCustomDetails.classList.add("hidden");
         }
       }
-      if (portions) {
-        const pInput = document.getElementById("portion-count") as HTMLInputElement | null;
-        if (pInput) pInput.value = String(portions);
+
+      if (portionInput) {
+        if (minOrder) {
+          portionInput.min = String(minOrder);
+          if (portionMinHint) portionMinHint.textContent = `Minimal ${minOrder} box`;
+        } else {
+          portionInput.min = "20";
+          if (portionMinHint) portionMinHint.textContent = "Minimal 20 box";
+        }
+
+        if (portions) {
+          portionInput.value = String(portions);
+        } else if (!portionInput.value || Number(portionInput.value) < Number(portionInput.min)) {
+          portionInput.value = portionInput.min;
+        }
       }
-      if (!dialog.open) dialog.showModal();
-    }) as EventListener);
+
+      if (eventDate && eventDateInput) {
+        eventDateInput.value = eventDate;
+      }
+
+      if (!dialog.open) {
+        if (addressInput) addressInput.value = "";
+        if (latInput) latInput.value = "";
+        if (lngInput) lngInput.value = "";
+        window.dispatchEvent(new CustomEvent("reset-peta-picker"));
+        dialog.showModal();
+        window.dispatchEvent(new CustomEvent("order-modal-opened"));
+      }
+    }) as EventListener, { signal });
 
     document.addEventListener("click", (e) => {
       const trigger = (e.target as HTMLElement).closest("[data-order-trigger]");
@@ -235,15 +314,15 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
           new CustomEvent("open-order-modal", { detail: { packageName } }),
         );
       }
-    });
+    }, { signal });
 
     const closeModal = () => dialog.open && dialog.close();
     document
       .getElementById("modal-close-icon")
-      ?.addEventListener("click", closeModal);
+      ?.addEventListener("click", closeModal, { signal });
     document
       .getElementById("modal-cancel-btn")
-      ?.addEventListener("click", closeModal);
+      ?.addEventListener("click", closeModal, { signal });
 
     dialog.addEventListener("click", (e) => {
       const r = dialog.getBoundingClientRect();
@@ -255,7 +334,7 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
       ) {
         dialog.close();
       }
-    });
+    }, { signal });
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -270,6 +349,9 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
       const name = String(data.get("customerName") || "").trim();
       const date = String(data.get("eventDate") || "");
       const count = Number(data.get("portionCount")) || 20;
+      const address = String(data.get("customerAddress") || "").trim();
+      const lat = String(data.get("deliveryLat") || "").trim();
+      const lng = String(data.get("deliveryLng") || "").trim();
       const notes = String(data.get("notes") || "").trim();
 
       const lines = [
@@ -283,8 +365,14 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
         `- Jumlah: ${count} box`,
         `- Tanggal Acara: ${date}`,
         `- Nama Pemesan: ${name}`,
-        `- Catatan: ${notes || "-"}`,
+        `- Alamat Pengantaran: ${address || "-"}`,
       );
+
+      if (lat && lng) {
+        lines.push(`- Titik Peta: https://www.google.com/maps?q=${lat},${lng}`);
+      }
+
+      lines.push(`- Catatan: ${notes || "-"}`);
 
       const text = lines.join("\n");
 
@@ -305,13 +393,28 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
         displayCustomDetails.textContent = "";
         displayCustomDetails.classList.add("hidden");
       }
-      const portionInput = document.getElementById(
-        "portion-count",
-      ) as HTMLInputElement | null;
-      if (portionInput) portionInput.value = "20";
+      if (portionInput) {
+        portionInput.value = portionInput.min || "20";
+      }
+      if (addressInput) addressInput.value = "";
+      if (latInput) latInput.value = "";
+      if (lngInput) lngInput.value = "";
+      window.dispatchEvent(new CustomEvent("reset-peta-picker"));
       dialog.close();
-    });
+    }, { signal });
   }
 
-  setupOrderModal();
+  document.addEventListener("astro:page-load", setupOrderModal);
+  document.addEventListener("astro:before-swap", () => {
+    if (orderModalAbortController) {
+      orderModalAbortController.abort();
+      orderModalAbortController = null;
+    }
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupOrderModal, { once: true });
+  } else {
+    setupOrderModal();
+  }
 </script>
