@@ -1,0 +1,228 @@
+---
+import type { Paket } from '../../types/catalog';
+
+interface Props {
+  paket: Paket;
+  defaultMainMenu: string;
+  defaultSideDishes: string[];
+}
+
+const { paket, defaultMainMenu, defaultSideDishes } = Astro.props;
+---
+
+{paket.canSelectMainMenu && paket.selectableMainMenus && paket.selectableSideDishes && (
+  <div id="section-pilihan-menu">
+    <div class="mb-4">
+      <h3 class="font-heading text-lg sm:text-xl font-bold text-neutral-900">
+        Pilihan Menu Sajian
+      </h3>
+      <p class="text-[13px] sm:text-sm text-neutral-600 mt-1">
+        Pilih menu standar rekomendasi kami atau racik kombinasi lauk sesuai selera Anda.
+      </p>
+    </div>
+
+    <!-- 2 Tombol Pilihan Jalur Pemesanan -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+      <!-- Tombol 1: Pesan Paket Default -->
+      <button
+        type="button"
+        id="btn-order-default"
+        class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border-2 border-accent bg-accent/8 hover:bg-accent/12 transition-all duration-200 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent shadow-2xs group"
+        aria-pressed="true"
+      >
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="icon-order-default" class="size-9 rounded-xl bg-accent text-white flex items-center justify-center flex-none font-bold shadow-xs transition-colors">
+            <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <span class="block font-heading text-sm sm:text-base font-bold text-neutral-900 truncate">
+              Pesan Paket Default
+            </span>
+            <span class="block text-[13px] text-neutral-600 mt-0.5 truncate">
+              Menu bawaan standar (terfavorit)
+            </span>
+          </div>
+        </div>
+        <span id="badge-order-default" class="text-[13px] font-bold text-accent bg-white border border-accent/30 px-2.5 py-1 rounded-full flex-none shadow-2xs">
+          Aktif
+        </span>
+      </button>
+
+      <!-- Tombol 2: Racik Menu Sendiri -->
+      <button
+        type="button"
+        id="btn-order-custom"
+        aria-expanded="false"
+        aria-controls="custom-menu-collapsible"
+        class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border-2 border-neutral-200/90 bg-white hover:bg-surface/80 hover:border-neutral-300 transition-all duration-200 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent shadow-2xs group"
+        aria-pressed="false"
+      >
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="icon-order-custom" class="size-9 rounded-xl bg-surface border border-neutral-200 text-neutral-600 flex items-center justify-center flex-none group-hover:border-accent/40 group-hover:text-accent transition-colors">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <span class="block font-heading text-sm sm:text-base font-bold text-neutral-900 group-hover:text-accent-700 transition-colors truncate">
+              Racik Menu Sendiri
+            </span>
+            <span class="block text-[13px] text-neutral-600 mt-0.5 truncate">
+              Kustomisasi menu & lauk
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 flex-none">
+          <span id="badge-order-custom" class="hidden text-[13px] font-bold text-accent bg-white border border-accent/30 px-2.5 py-1 rounded-full shadow-2xs">
+            Aktif
+          </span>
+          <span class="size-7 rounded-lg bg-surface flex items-center justify-center text-neutral-500 group-hover:text-accent-700 transition-colors">
+            <svg
+              id="custom-menu-chevron"
+              class="size-4.5 transition-transform duration-300 ease-in-out"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Default Preset Information Box (Tampil saat default aktif) -->
+    <div
+      id="default-preset-box"
+      class="rounded-2xl border border-accent/20 bg-accent/5 p-4 sm:p-4.5 mb-4 transition-all duration-200"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="inline-flex items-center justify-center size-5 rounded-full bg-accent text-white text-xs font-bold" aria-hidden="true">✓</span>
+            <h4 class="font-heading text-sm sm:text-base font-bold text-neutral-900">
+              Menu Bawaan Rekomendasi Terpasang
+            </h4>
+          </div>
+          <p class="text-sm text-neutral-900">
+            <span class="font-semibold text-accent-700">Menu Utama:</span> {defaultMainMenu}
+          </p>
+          <p class="text-sm text-neutral-900 mt-0.5">
+            <span class="font-semibold text-neutral-800">Lauk Pendamping:</span> {defaultSideDishes.join(', ')}
+          </p>
+        </div>
+        <span class="text-[13px] font-semibold text-neutral-500 bg-white/90 border border-neutral-200/90 px-2.5 py-1 rounded-lg flex-none shadow-2xs hidden sm:inline-block">
+          Preset Bawaan
+        </span>
+      </div>
+    </div>
+
+    <!-- Collapsible Custom Menu Container (Akordeon CSS Grid Transition) -->
+    <div
+      id="custom-menu-collapsible"
+      class="akordeon-panel mb-2"
+      data-buka="false"
+    >
+      <div class="overflow-hidden">
+        <div class="pt-2 pb-4 space-y-6">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="block text-sm font-bold text-neutral-900">
+                🍗 Pilih Menu Utama
+              </span>
+              <span class="text-[13px] text-neutral-500">Pilih 1 menu</span>
+            </div>
+            <div class="space-y-2">
+              {paket.selectableMainMenus!.map((menu, idx) => {
+                const inputId = `main-menu-${idx}`;
+                return (
+                  <label
+                    for={inputId}
+                    class="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200 bg-white cursor-pointer hover:bg-accent/5 hover:border-accent/40 transition group has-[:checked]:border-accent has-[:checked]:bg-accent/5 shadow-2xs"
+                  >
+                    <input
+                      type="radio"
+                      id={inputId}
+                      name="main-menu"
+                      value={menu}
+                      class="w-4 h-4 cursor-pointer accent-accent"
+                      checked={idx === 0}
+                    />
+                    <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
+                      {menu}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="block text-sm font-bold text-neutral-900">
+                🥗 Pilih {paket.sideDishesSelectMin}-{paket.sideDishesSelectMax} Lauk Pendamping
+              </span>
+              <span class="text-sm font-medium text-neutral-500" id="side-count" aria-live="polite">
+                {defaultSideDishes.length} / {paket.sideDishesSelectMax} pilihan
+              </span>
+            </div>
+            <div class="space-y-2">
+              {paket.selectableSideDishes!.map((dish, idx) => {
+                const inputId = `side-dish-${idx}`;
+                return (
+                  <label
+                    for={inputId}
+                    class="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200 bg-white cursor-pointer hover:bg-accent/5 hover:border-accent/40 transition group has-[:checked]:bg-accent/10 has-[:checked]:border-accent/40 shadow-2xs"
+                  >
+                    <input
+                      type="checkbox"
+                      id={inputId}
+                      name="side-dishes"
+                      value={dish}
+                      class="w-4 h-4 cursor-pointer accent-accent"
+                      data-min={paket.sideDishesSelectMin}
+                      data-max={paket.sideDishesSelectMax}
+                      checked={idx < (paket.sideDishesSelectMin ?? 2)}
+                    />
+                    <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
+                      {dish}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            <p class="text-sm text-neutral-500 mt-3">
+              Pilih minimal {paket.sideDishesSelectMin} dan maksimal {paket.sideDishesSelectMax} lauk pendamping.
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-accent/20 bg-accent/5 p-4">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <h4 class="text-sm font-bold uppercase tracking-wider text-neutral-600">
+                Ringkasan Pilihan Anda:
+              </h4>
+              <span id="validation-indicator" class="text-xs font-semibold text-accent-700">
+                ✓ Pilihan Siap
+              </span>
+            </div>
+            <div class="text-sm text-neutral-800 space-y-1">
+              <p id="menu-summary-main" class="font-medium text-accent-700">
+                Menu: {defaultMainMenu}
+              </p>
+              <p id="menu-summary-sides" class="text-neutral-900 text-sm">
+                Lauk: {defaultSideDishes.join(', ')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}

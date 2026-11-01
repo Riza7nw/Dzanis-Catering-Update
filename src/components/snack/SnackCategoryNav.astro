@@ -1,0 +1,64 @@
+---
+import type { SnackKategori } from '../../types/catalog';
+
+interface Props {
+  snackKategori: SnackKategori[];
+  totalSnackItems: number;
+}
+
+const { snackKategori, totalSnackItems } = Astro.props;
+---
+
+<!-- Filter Kategori Pill Buttons -->
+<div
+  class="category-filter-bar mb-6 flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 -mx-2 px-2"
+  role="group"
+  aria-label="Filter kategori jajanan"
+>
+  <!-- Tombol Semua Kategori -->
+  <button
+    type="button"
+    aria-pressed="false"
+    data-category-target="all"
+    data-item-count={totalSnackItems}
+    class="category-filter-btn group/catbtn shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5"
+    aria-label={`Semua (${totalSnackItems} pilihan)`}
+  >
+    <span class="category-name">Semua</span>
+    <span class="text-[10px] opacity-70">({totalSnackItems})</span>
+    <span
+      data-selected-count="all"
+      data-count="0"
+      hidden
+      class="ml-0.5 data-[count='0']:hidden inline-flex size-4.5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
+      aria-hidden="true"
+    >0</span>
+    <span class="sr-only category-sr-count"></span>
+  </button>
+
+  <!-- Tombol Tiap Kategori -->
+  {snackKategori.map((kategori, kIdx) => {
+    const isFirst = kIdx === 0;
+    return (
+      <button
+        type="button"
+        aria-pressed={isFirst ? "true" : "false"}
+        data-category-target={kategori.label}
+        data-item-count={kategori.items.length}
+        class="category-filter-btn group/catbtn shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5"
+        aria-label={`${kategori.label} (${kategori.items.length} pilihan)`}
+      >
+        <span class="category-name">{kategori.label}</span>
+        <span class="text-[10px] opacity-70">({kategori.items.length})</span>
+        <span
+          data-selected-count={kategori.label}
+          data-count="0"
+          hidden
+          class="ml-0.5 data-[count='0']:hidden inline-flex size-4.5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
+          aria-hidden="true"
+        >0</span>
+        <span class="sr-only category-sr-count"></span>
+      </button>
+    );
+  })}
+</div>

@@ -1,0 +1,421 @@
+/**
+ * Client Controller: Snack Box Controller
+ * Mengelola interaktivitas halaman / komponen Rakit Snack Box:
+ * - Navigasi hash scroll (#template, #custom, #snack-builder)
+ * - Pemesanan langsung template snack box
+ * - Builder kustom snack box (counter box, tab filter kategori dengan horizontal scroll, badge counter)
+ * - Kalkulasi subtotal, harga per box, dan estimasi total
+ * - Inisialisasi carousel kartu template snack box
+ * - Dispatch event 'open-order-modal' dengan data racikan lengkap
+ */
+
+import { createCarousel } from './carousel';
+import {
+  buildSnackBoxCustomDetails,
+  buildSnackBoxPackageName,
+} from '../services/whatsapp/snackBoxMessage';
+import type { OrderModalPrefill } from '../types/order';
+
+let teardowns: Array<() => void> = [];
+let isSnackBoxLoaded = false;
+
+function formatRp(num: number): string {
+  return 'Rp' + (Number(num) || 0).toLocaleString('id-ID');
+}
+
+/**
+ * Inisialisasi logika builder snack box dan pemesanan template.
+ */
+export function initSnackBoxPage(): (() => void) | null {
+  if (!document.getElementById('rakit')) return null;
+
+  const ac = new AbortController();
+  const { signal } = ac;
+
+  // 1. Hash Scroll Navigation (untuk link #custom atau #template)
+  function handleHashScroll(): void {
+    const hash = window.location.hash;
+    if (hash === '#custom' || hash === '#snack-builder') {
+      const target = document.getElementById('panel-custom') || document.getElementById('snack-builder');
+      target?.scrollIntoView({ behavior: 'smooth' });
+    } else if (hash === '#template') {
+      const target = document.getElementById('panel-template');
+      target?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  if (window.location.hash) {
+    setTimeout(handleHashScroll, 120);
+  }
+  window.addEventListener('hashchange', handleHashScroll, { signal });
+
+  // 2. Template Package Card Interactions
+  const cards = document.querySelectorAll<HTMLElement>('.snack-template-card');
+  cards.forEach((card) => {
+    const pkgName = card.dataset.packageName || 'Paket Snack Box';
+    const minPax = Number(card.dataset.minPax || 20);
+    const orderDirectBtn = card.querySelector<HTMLButtonElement>('.btn-order-template-direct');
+
+    // Direct template order
+    orderDirectBtn?.addEventListener(
+      'click',
+      () => {
+        const defaultItems = orderDirectBtn.dataset.defaultItems || '';
+        const modalPayload: OrderModalPrefill = {
+          packageName: pkgName,
+          portionCount: minPax,
+          customDetails: defaultItems,
+        };
+        window.dispatchEvent(
+          new CustomEvent('open-order-modal', {
+            detail: modalPayload,
+          })
+        );
+      },
+      { signal }
+    );
+  });
+
+  // 3. Full Custom Builder from Scratch
+  const root = document.getElementById('snack-builder');
+  if (root) {
+    let boxCount = 20;
+    const minBoxes = 20;
+    const stepBoxes = 1;
+
+    const checkboxes = root.querySelectorAll<HTMLInputElement>('input[name="snack-choice"]');
+    const boxInput = document.getElementById('builder-box-count') as HTMLInputElement | null;
+    const boxMinusBtn = document.getElementById('builder-box-minus') as HTMLButtonElement | null;
+    const boxPlusBtn = document.getElementById('builder-box-plus') as HTMLButtonElement | null;
+
+    const itemCountDisplay = document.getElementById('summary-item-count');
+    const subtotalDisplay = document.getElementById('summary-subtotal');
+    const totalDisplay = document.getElementById('summary-total');
+    const orderBtn = document.getElementById('builder-order-btn') as HTMLButtonElement | null;
+
+    // Category Switching Elements
+    const categoryButtons = root.querySelectorAll<HTMLButtonElement>('.category-filter-btn');
+    const categoryBlocks = root.querySelectorAll<HTMLElement>('.category-block');
+    const categoriesWrapper = document.getElementById('snack-categories-wrapper');
+    const flowNav = document.getElementById('category-flow-nav');
+    const nextBtn = document.getElementById('category-next-btn');
+    const nextLabel = document.getElementById('category-next-label');
+    const flowHint = document.getElementById('category-flow-hint');
+    const summaryBar = document.getElementById('builder-summary-bar');
+
+    const categoryOrder = Array.from(categoryButtons)
+      .map((btn) => btn.dataset.categoryTarget || '')
+      .filter((t) => t && t !== 'all');
+    let activeCategory = categoryOrder[0] || 'all'; // Default: Kategori Pertama (Puff & Pastry)
+
+    function setActiveCategory(target: string, shouldScroll = true): void {
+      activeCategory = target;
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const behavior: ScrollBehavior = prefersReduced ? 'auto' : 'smooth';
+
+      // 1. Update status tombol filter
+      let activeBtn: HTMLButtonElement | null = null;
+      for (const btn of categoryButtons) {
+        const isMatch = btn.dataset.categoryTarget === target;
+        btn.setAttribute('aria-pressed', isMatch ? 'true' : 'false');
+        if (isMatch) activeBtn = btn;
+      }
+
+      // 2. Scroll tab aktif ke tengah tab bar secara horizontal
+      activeBtn?.scrollIntoView({ inline: 'center', block: 'nearest', behavior });
+
+      // 3. Tampilkan/sembunyikan blok kategori
+      if (target === 'all') {
+        categoryBlocks.forEach((b) => b.classList.remove('hidden'));
+        flowNav?.classList.add('hidden');
+      } else {
+        categoryBlocks.forEach((b) => {
+          if (b.dataset.categoryBlock === target) {
+            b.classList.remove('hidden');
+          } else {
+            b.classList.add('hidden');
+          }
+        });
+
+        // 4. Update tombol "Kategori Selanjutnya"
+        if (flowNav && nextBtn && nextLabel && flowHint) {
+          flowNav.classList.remove('hidden');
+          const currentIdx = categoryOrder.indexOf(target);
+          const isLast = currentIdx === categoryOrder.length - 1;
+
+          if (isLast) {
+            flowHint.textContent = 'Sudah selesai memilih semua jajanan?';
+            nextLabel.textContent = 'Lihat Ringkasan Pilihan ↓';
+          } else {
+            const nextCat = categoryOrder[currentIdx + 1];
+            flowHint.textContent = 'Selesai memilih di kategori ini?';
+            nextLabel.textContent = `Kategori Selanjutnya: ${nextCat} →`;
+          }
+        }
+      }
+
+      // 5. Scroll vertikal jika bagian atas blok kategori berada di atas viewport
+      if (shouldScroll && categoriesWrapper) {
+        const rect = categoriesWrapper.getBoundingClientRect();
+        const headerOffset = 90;
+        if (rect.top < headerOffset) {
+          const targetY = window.scrollY + rect.top - headerOffset;
+          window.scrollTo({ top: targetY, behavior });
+        }
+      }
+    }
+
+    // Event listener tombol filter kategori
+    categoryButtons.forEach((btn) => {
+      btn.addEventListener(
+        'click',
+        () => {
+          const target = btn.dataset.categoryTarget;
+          if (target) setActiveCategory(target, true);
+        },
+        { signal }
+      );
+    });
+
+    // Event listener tombol "Kategori Selanjutnya" / "Lihat Ringkasan"
+    nextBtn?.addEventListener(
+      'click',
+      () => {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const behavior: ScrollBehavior = prefersReduced ? 'auto' : 'smooth';
+        const currentIdx = categoryOrder.indexOf(activeCategory);
+
+        if (currentIdx === -1 || currentIdx >= categoryOrder.length - 1) {
+          summaryBar?.scrollIntoView({ behavior, block: 'nearest' });
+        } else {
+          const nextCat = categoryOrder[currentIdx + 1];
+          setActiveCategory(nextCat, true);
+        }
+      },
+      { signal }
+    );
+
+    function recalculate(): { selectedItems: string[]; subtotal: number; total: number } {
+      let subtotal = 0;
+      const selectedItems: string[] = [];
+      const categoryCounts: Record<string, number> = {};
+
+      checkboxes.forEach((cb) => {
+        if (cb.checked) {
+          const price = Number(cb.dataset.price || 0);
+          subtotal += price;
+          selectedItems.push(cb.dataset.nama || cb.value);
+
+          const cat = cb.dataset.kategori || '';
+          if (cat) {
+            categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+          }
+        }
+      });
+
+      // Update badge counter dan accessible label untuk semua tombol filter
+      categoryButtons.forEach((btn) => {
+        const target = btn.dataset.categoryTarget || '';
+        const count = target === 'all' ? selectedItems.length : categoryCounts[target] || 0;
+        const badge = btn.querySelector<HTMLElement>('[data-selected-count]');
+        const srCount = btn.querySelector<HTMLElement>('.category-sr-count');
+        const itemCount = btn.dataset.itemCount || '';
+
+        if (badge) {
+          badge.dataset.count = String(count);
+          badge.textContent = String(count);
+          badge.hidden = count === 0;
+        }
+
+        if (srCount) {
+          srCount.textContent = count > 0 ? `, ${count} dipilih` : '';
+        }
+
+        const label = target === 'all' ? 'Semua' : target;
+        btn.setAttribute(
+          'aria-label',
+          count > 0
+            ? `${label} (${itemCount} pilihan, ${count} dipilih)`
+            : `${label} (${itemCount} pilihan)`
+        );
+      });
+
+      const total = subtotal * boxCount;
+
+      if (itemCountDisplay) itemCountDisplay.textContent = `${selectedItems.length} macam`;
+      if (subtotalDisplay) subtotalDisplay.textContent = formatRp(subtotal);
+      if (totalDisplay) totalDisplay.textContent = formatRp(total);
+      if (orderBtn) orderBtn.disabled = selectedItems.length === 0;
+
+      return { selectedItems, subtotal, total };
+    }
+
+    function syncBoxUI(): void {
+      if (boxInput) {
+        boxInput.value = String(boxCount);
+      }
+      if (boxMinusBtn) {
+        boxMinusBtn.disabled = boxCount <= minBoxes;
+      }
+    }
+
+    boxMinusBtn?.addEventListener(
+      'click',
+      () => {
+        if (boxCount > minBoxes) {
+          boxCount -= stepBoxes;
+          syncBoxUI();
+          recalculate();
+        }
+      },
+      { signal }
+    );
+
+    boxPlusBtn?.addEventListener(
+      'click',
+      () => {
+        boxCount += stepBoxes;
+        syncBoxUI();
+        recalculate();
+      },
+      { signal }
+    );
+
+    boxInput?.addEventListener(
+      'input',
+      () => {
+        const val = parseInt(boxInput.value, 10);
+        if (!isNaN(val) && val >= minBoxes) {
+          boxCount = val;
+          if (boxMinusBtn) boxMinusBtn.disabled = boxCount <= minBoxes;
+          recalculate();
+        }
+      },
+      { signal }
+    );
+
+    function handleBoxInputBlurOrChange(): void {
+      if (!boxInput) return;
+      let val = parseInt(boxInput.value, 10);
+      if (isNaN(val) || val < minBoxes) {
+        val = minBoxes;
+      }
+      boxCount = val;
+      syncBoxUI();
+      recalculate();
+    }
+
+    boxInput?.addEventListener('blur', handleBoxInputBlurOrChange, { signal });
+    boxInput?.addEventListener('change', handleBoxInputBlurOrChange, { signal });
+    boxInput?.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          boxInput.blur();
+        }
+      },
+      { signal }
+    );
+
+    checkboxes.forEach((cb) => {
+      cb.addEventListener('change', recalculate, { signal });
+    });
+
+    orderBtn?.addEventListener(
+      'click',
+      () => {
+        const { selectedItems } = recalculate();
+        if (selectedItems.length === 0) return;
+
+        const packageName = buildSnackBoxPackageName(selectedItems.length);
+        const customDetails = buildSnackBoxCustomDetails(selectedItems);
+
+        const modalPayload: OrderModalPrefill = {
+          packageName,
+          portionCount: boxCount,
+          customDetails,
+        };
+
+        window.dispatchEvent(
+          new CustomEvent('open-order-modal', {
+            detail: modalPayload,
+          })
+        );
+      },
+      { signal }
+    );
+
+    // Inisialisasi awal kategori & kalkulasi
+    syncBoxUI();
+    setActiveCategory(activeCategory, false);
+    recalculate();
+  }
+
+  return () => ac.abort();
+}
+
+/**
+ * Inisialisasi carousel kartu template snack box.
+ */
+export function initSnackCarousel(): (() => void) | null {
+  const root = document.getElementById('snack-carousel');
+  const grid = document.getElementById('snack-grid');
+  if (!root || !grid) return null;
+  return createCarousel({
+    root,
+    grid,
+    cardSelector: '.snack-template-card',
+    prevBtn: document.getElementById('snack-prev') as HTMLButtonElement | null,
+    nextBtn: document.getElementById('snack-next') as HTMLButtonElement | null,
+    dotsContainer: document.getElementById('snack-dots'),
+    itemLabel: 'paket',
+  });
+}
+
+/**
+ * Teardown seluruh controller dan carousel snack box.
+ */
+export function teardownSnackBoxController(): void {
+  teardowns.forEach((fn) => fn());
+  teardowns = [];
+}
+
+/**
+ * Inisialisasi utama controller snack box.
+ */
+export function initSnackBoxController(): void {
+  teardownSnackBoxController();
+  const pageTeardown = initSnackBoxPage();
+  const carouselTeardown = initSnackCarousel();
+
+  teardowns = [pageTeardown, carouselTeardown].filter(
+    (fn): fn is () => void => typeof fn === 'function'
+  );
+}
+
+// Lifecycle listeners untuk Astro Transitions
+if (typeof window !== 'undefined') {
+  document.addEventListener('astro:page-load', () => {
+    isSnackBoxLoaded = true;
+    initSnackBoxController();
+  });
+
+  document.addEventListener('astro:before-swap', () => {
+    teardownSnackBoxController();
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      () => {
+        if (!isSnackBoxLoaded) {
+          initSnackBoxController();
+        }
+      },
+      { once: true }
+    );
+  } else if (!isSnackBoxLoaded) {
+    initSnackBoxController();
+  }
+}

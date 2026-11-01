@@ -1,35 +1,6 @@
 /**
- * Isi seksi "Layanan lain" dan "Cara pesan".
+ * Data Layer: Langkah Cara Pesan Dzanis Catering
  */
-
-export type Layanan = {
-  judul: string;
-  deskripsi: string;
-  foto: string;
-  fotoAlt: string;
-};
-
-export const layanan: Layanan[] = [
-  {
-    judul: "Catering acara & pernikahan",
-    deskripsi:
-      "Paket lengkap untuk resepsi, syukuran, dan acara keluarga besar.",
-    foto: "/images/menu/paket-23k.jpg",
-    fotoAlt: "Hidangan Dzanis Catering untuk resepsi",
-  },
-  {
-    judul: "Booth / food cart",
-    deskripsi: "Gerai makanan untuk bazar, ulang tahun, dan acara kantor.",
-    foto: "/images/menu/snack-jajan-pasar.jpg",
-    fotoAlt: "Aneka jajanan Dzanis Catering untuk booth",
-  },
-  {
-    judul: "Prasmanan kantor",
-    deskripsi: "Menu prasmanan untuk rapat, pelatihan, dan syukuran kantor.",
-    foto: "/images/menu/paket-20k.jpg",
-    fotoAlt: "Nasi kotak Dzanis Catering untuk acara kantor",
-  },
-];
 
 export type Langkah = {
   judul: string;

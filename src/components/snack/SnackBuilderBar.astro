@@ -1,0 +1,31 @@
+---
+---
+
+<!-- Sticky / Bottom Summary Bar -->
+<div id="builder-summary-bar" class="mt-8 pt-6 border-t border-divider flex flex-col md:flex-row items-center justify-between gap-6 bg-surface/80 rounded-2xl p-6">
+  <div class="flex flex-wrap items-center gap-6 text-center md:text-left">
+    <div>
+      <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Item Terpilih</span>
+      <span id="summary-item-count" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-neutral-900">0 macam</span>
+    </div>
+    <div class="h-8 w-px bg-divider hidden sm:block"></div>
+    <div>
+      <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Harga per Box</span>
+      <span id="summary-subtotal" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-accent-700">Rp0</span>
+    </div>
+    <div class="h-8 w-px bg-divider hidden sm:block"></div>
+    <div>
+      <span class="text-xs uppercase tracking-wider text-neutral-500 font-semibold block">Estimasi Total</span>
+      <span id="summary-total" aria-live="polite" role="status" class="font-heading text-2xl font-bold text-neutral-900">Rp0</span>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    id="builder-order-btn"
+    class="btn btn-primary min-h-[50px] px-8 text-base font-semibold w-full md:w-auto shadow-md hover:shadow-lg transition-shadow cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+    disabled
+  >
+    Pesan Paket Rakitan Ini &rarr;
+  </button>
+</div>

@@ -3,78 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/organic/Navbar.astro';
 import Footer from '../components/organic/Footer.astro';
 import ShowcaseSertifikat from '../components/organic/ShowcaseSertifikat.astro';
+import { getLegalDocuments } from '../services/api/certService';
 
 const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
-
-const legalCards = [
-  {
-    label: 'NIB / Izin Usaha',
-    detail: 'Legalitas usaha untuk menjalankan aktivitas usaha katering secara resmi.',
-    status: 'Legal',
-    document_url: '/images/brand/halal-cert.png',
-    file_type: 'image',
-  },
-  {
-    label: 'Uji Lab Mikrobiologi & Air Bersih',
-    detail: 'Hasil uji kualitas air dan sanitasi dapur sesuai standar keamanan pangan.',
-    status: 'Uji Lab',
-    document_url: '/images/brand/halal-cert.png',
-    file_type: 'image',
-  },
-  {
-    label: 'Pangan Sanitasi & Kesehatan',
-    detail: 'Sertifikat kesehatan untuk operasional dapur dan keamanan makanan.',
-    status: 'Sanitasi',
-    document_url: '/images/brand/halal-cert.png',
-    file_type: 'image',
-  },
-  {
-    label: 'Legalitas & Izin Lainnya',
-    detail: 'Dokumen pendukung terkait proses bisnis dan pengelolaan usaha.',
-    status: 'Dokumen',
-    document_url: '/images/brand/halal-cert.png',
-    file_type: 'image',
-  },
-];
-
-const sertifikat = [
-  {
-    label: 'Sertifikat Halal Indonesia',
-    meta: 'No. 123456789012345678',
-    date: '8 April 2024',
-    badge: 'HALAL',
-    issuer: 'BPJPH & Majelis Ulama Indonesia',
-    document_url: '/images/brand/halal-cert.png',
-    file_type: 'image',
-  },
-  {
-    label: 'Sertifikat Laik Higiene Sanitasi (SLHS)',
-    meta: 'No. 440/…/2023',
-    date: '14 Mei 2023',
-    badge: 'SLHS',
-    issuer: 'Dinas Kesehatan Kabupaten Majalengka',
-    document_url: '/images/brand/halal-cert.png',
-    file_type: 'image',
-  },
-  {
-    label: 'Sertifikat Penjemahan Makanan',
-    meta: 'No. 057/…/2024',
-    date: '26 Juni 2024',
-    badge: 'K3',
-    issuer: 'Higiene Sanitasi Makanan & K3',
-    document_url: '/images/brand/halal-cert.png',
-    file_type: 'image',
-  },
-  {
-    label: 'Sertifikat Pangan',
-    meta: 'No. 220/…/2024',
-    date: '2 Juli 2024',
-    badge: 'PANGAN',
-    issuer: 'Pengawasan Keamanan Pangan Olahan',
-    document_url: '/images/brand/halal-cert.png',
-    file_type: 'image',
-  },
-];
+const legalCards = await getLegalDocuments();
 
 const prosesVerifikasi = [
   {

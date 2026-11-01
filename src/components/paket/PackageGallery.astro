@@ -1,0 +1,31 @@
+---
+import { formatNamaPaket } from '../../data/paket';
+import type { Paket } from '../../types/catalog';
+
+interface Props {
+  paket: Paket;
+}
+
+const { paket } = Astro.props;
+---
+
+<!-- 2. Main Photo Card (Mobile: 2nd / Desktop: Left Column Row 1) -->
+<div class="lg:col-span-5 lg:col-start-1 lg:row-start-1">
+  <div class="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden rounded-3xl border border-neutral-200/80 bg-surface shadow-sm">
+    <img
+      src={paket.foto}
+      alt={formatNamaPaket(paket.fotoAlt || paket.nama)}
+      loading="eager"
+      fetchpriority="high"
+      width="600"
+      height="450"
+      decoding="async"
+      class="h-full w-full object-cover"
+    />
+    {paket.badge && (
+      <span class="absolute top-3.5 left-3.5 rounded-full bg-accent px-3 py-1 font-heading text-sm tracking-wider text-white font-bold uppercase shadow-md">
+        {paket.badge}
+      </span>
+    )}
+  </div>
+</div>

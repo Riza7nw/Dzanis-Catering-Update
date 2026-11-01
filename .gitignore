@@ -56,4 +56,9 @@ scratch/
 .vscode/
 
 #punya najib
-PROJECT_CONTEXT.md
+PROJECT_CONTEXT.md
+
+# Migration & internal audit docs
+MIGRATION_AUDIT_REPORT.md
+MIGRATION_BLUEPRINT.md
+REFACTORING_SUMMARY_AND_IMPACT.md

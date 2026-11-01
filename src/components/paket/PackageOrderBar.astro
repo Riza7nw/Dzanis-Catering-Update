@@ -1,0 +1,96 @@
+---
+import type { Paket } from '../../types/catalog';
+
+interface Props {
+  paket: Paket;
+  minEventDateString: string;
+}
+
+const { paket, minEventDateString } = Astro.props;
+---
+
+<!-- Interactive Portion Calculator -->
+<div class="rounded-3xl border border-neutral-200 bg-surface/50 p-6 sm:p-7 shadow-sm">
+  <div class="mb-5">
+    <h3 class="font-heading text-xl font-bold text-neutral-900">
+      Kalkulator Porsi & Pemesanan
+    </h3>
+    <p class="text-sm text-neutral-600 mt-1">
+      Tentukan jumlah porsi yang dibutuhkan untuk menghitung estimasi biaya dan membuat format pesan WhatsApp otomatis.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+    <div class="sm:col-span-5">
+      <label for="portion-input" class="block text-sm font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
+        Jumlah Porsi (Min. {paket.minOrder})
+      </label>
+      <div class="relative">
+        <input
+          type="number"
+          id="portion-input"
+          min={paket.minOrder}
+          step="1"
+          value={paket.minOrder}
+          class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-base sm:text-lg font-bold text-neutral-900 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition shadow-2xs"
+        />
+        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-neutral-500 pointer-events-none">
+          porsi
+        </span>
+      </div>
+    </div>
+
+    <div class="sm:col-span-7 rounded-2xl border border-neutral-200 bg-white p-3.5 sm:p-4 shadow-2xs flex flex-col justify-center">
+      <span class="text-[13px] font-bold uppercase tracking-wider text-neutral-500">
+        Estimasi Total Biaya:
+      </span>
+      <span
+        id="subtotal-display"
+        aria-live="polite"
+        role="status"
+        class="font-heading text-2xl sm:text-3xl font-bold text-accent-700 leading-none mt-1"
+      >
+        Rp {(paket.harga * paket.minOrder).toLocaleString("id-ID")}
+      </span>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <label for="event-date-input" class="block text-sm font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
+      Tanggal Acara
+    </label>
+    <input
+      type="date"
+      id="event-date-input"
+      min={minEventDateString}
+      required
+      class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-base font-medium text-neutral-900 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition shadow-2xs"
+    />
+    <p class="text-sm text-neutral-500 mt-2">
+      Pilih tanggal acara Anda untuk memudahkan proses pemesanan.
+    </p>
+  </div>
+
+  <div class="mt-5">
+    <button
+      type="button"
+      id="wa-checkout-btn"
+      class="flex w-full items-center justify-center gap-2.5 rounded-full bg-accent py-3.5 px-6 text-sm font-bold uppercase tracking-wider text-white shadow-md hover:bg-accent-700 transition duration-200 cursor-pointer"
+    >
+      <svg class="size-5 flex-none" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 016.988 2.896 9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+      </svg>
+      <span>Pesan Sekarang via WhatsApp</span>
+    </button>
+    {paket.canSelectMainMenu && (
+      <p class="mt-2 text-center text-sm text-neutral-500" id="validation-message" role="alert" aria-live="assertive">
+        Pastikan Anda telah memilih menu dan lauk pendamping sebelum memesan.
+      </p>
+    )}
+    {!paket.canSelectMainMenu && (
+      <p class="mt-2 text-center text-sm text-neutral-500">
+        Lengkapi data pemesan & titik peta pengantaran pada form pemesanan.
+      </p>
+    )}
+  </div>
+</div>

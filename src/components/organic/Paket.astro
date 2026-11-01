@@ -1,6 +1,6 @@
 ---
-import menuData from '../../data/menu.json';
-import { DAFTAR_PAKET, formatNamaPaket } from '../../data/paket';
+import { getMenuCatalog } from '../../services/api/menuService';
+import { formatNamaPaket } from '../../data/paket';
 import { company } from '../../data/company';
 
 const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
@@ -9,41 +9,8 @@ const waKonsultasiUrl = `https://wa.me/${company.waConsultationNumber}?text=${en
   'Halo Dzanis Catering, saya ingin melihat katalog menu nasi kotak lengkap'
 )}`;
 
-// Hybrid Resilience: Gunakan data statis lokal menu.json untuk SSG dengan fallback ke DAFTAR_PAKET
-let menuKatalog: any[] = (Array.isArray(menuData) && menuData.length > 0)
-  ? menuData
-  : DAFTAR_PAKET;
-
-// Pemanggilan fetch dinamis saat build untuk sinkronisasi dengan backend
-try {
-  const apiUrl = import.meta.env.PUBLIC_API_URL || 'https://alkalize-rewire-scruffy.ngrok-free.dev';
-  const res = await fetch(`${apiUrl}/api/menu`, {
-    headers: {
-      'ngrok-skip-browser-warning': 'true',
-      'Accept': 'application/json'
-    },
-    signal: AbortSignal.timeout(2000)
-  });
-  if (res.ok) {
-    const contentType = res.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      const data = await res.json();
-      const packages = Array.isArray(data)
-        ? data
-        : (Array.isArray(data?.packages) ? data.packages : (Array.isArray(data?.data) ? data.data : null));
-      if (packages && packages.length > 0) {
-        menuKatalog = packages;
-      }
-    } else {
-      console.warn(`[Dzanis Menu Build] Respons API bukan JSON (${contentType}), menggunakan fallback cadangan.`);
-    }
-  } else {
-    console.warn(`[Dzanis Menu Build] API menu merespon status ${res.status}, menggunakan fallback cadangan (menu.json / DAFTAR_PAKET).`);
-  }
-} catch (err) {
-  // Jika fetch gagal (karena tunnel ngrok mati/offline), jadikan DAFTAR_PAKET atau menu.json sebagai fallback cadangan agar build Astro tidak gagal/crash
-  console.warn('[Dzanis Menu Build] Menggunakan fallback cadangan (menu.json / DAFTAR_PAKET):', (err as Error)?.message || err);
-}
+// Ambil katalog paket melalui menuService dengan fallback otomatis ke DAFTAR_PAKET
+const menuKatalog = await getMenuCatalog();
 ---
 
 <section id="paket" class="py-14 md:py-20 bg-surface/40">

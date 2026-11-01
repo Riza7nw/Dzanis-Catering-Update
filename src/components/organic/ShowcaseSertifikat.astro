@@ -1,57 +1,8 @@
 ---
 // src/components/organic/ShowcaseSertifikat.astro
+import { getShowcaseCertificates } from '../../services/api/certService';
 
-// Data default sertifikat resmi (fallback jika API backend offline)
-const defaultCertificates = [
-  {
-    id: 1,
-    title: "Sertifikat Halal Indonesia",
-    no: "ID33110001234560723",
-    date: "8 APRIL 2024",
-    badge: "HALAL",
-    docUrl: "/images/brand/halal-cert.png"
-  },
-  {
-    id: 2,
-    title: "Sertifikat Laik Higiene Sanitasi (SLHS)",
-    no: "440/089/SLHS/2023",
-    date: "14 MEI 2023",
-    badge: "SLHS",
-    docUrl: "/images/brand/halal-cert.png"
-  },
-  {
-    id: 3,
-    title: "Sertifikat Penjamah Makanan",
-    no: "057/SK-PM/2024",
-    date: "26 JUNI 2024",
-    badge: "K3",
-    docUrl: "/images/brand/halal-cert.png"
-  },
-  {
-    id: 4,
-    title: "Sertifikat Pangan",
-    no: "220/KP/2024",
-    date: "2 JULI 2024",
-    badge: "PANGAN",
-    docUrl: "/images/brand/halal-cert.png"
-  },
-  {
-    id: 5,
-    title: "Nomor Induk Berusaha (NIB Resmi)",
-    no: "1209230045678",
-    date: "10 JANUARI 2023",
-    badge: "LEGAL",
-    docUrl: "/images/brand/halal-cert.png"
-  },
-  {
-    id: 6,
-    title: "Uji Lab Mikrobiologi Air Bersih",
-    no: "LAB/BMS/VIII/2024",
-    date: "15 AGUSTUS 2024",
-    badge: "LAB",
-    docUrl: "/images/brand/halal-cert.png"
-  }
-];
+const defaultCertificates = await getShowcaseCertificates();
 ---
 
 <section class="py-14 bg-[#fcfbf7] relative overflow-x-clip" id="showcase-sertifikat-section">

@@ -1,0 +1,72 @@
+---
+import type { SnackKategori } from '../../types/catalog';
+import { formatRupiah } from '../../data/snack';
+
+interface Props {
+  snackKategori: SnackKategori[];
+}
+
+const { snackKategori } = Astro.props;
+---
+
+<!-- Categories & Checkbox Grid -->
+<div id="snack-categories-wrapper" class="flex flex-col gap-8">
+  {snackKategori.map((kategori, kIdx) => {
+    const isFirst = kIdx === 0;
+    return (
+      <div
+        data-category-block={kategori.label}
+        class={isFirst ? "category-block" : "category-block hidden"}
+      >
+        <div class="flex items-center gap-2.5 mb-4">
+          <span class="size-2 rounded-full bg-accent"></span>
+          <h3 class="font-heading text-lg font-semibold text-neutral-900">
+            {kategori.label}
+          </h3>
+          <span class="text-xs text-neutral-500 font-mono">({kategori.items.length} pilihan)</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {kategori.items.map((item) => (
+            <label class="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl border border-divider bg-surface/50 hover:bg-surface hover:border-accent/40 cursor-pointer transition-all has-[:checked]:border-accent has-[:checked]:bg-accent-200/25">
+              <div class="flex items-center gap-3 min-w-0">
+                <input
+                  type="checkbox"
+                  name="snack-choice"
+                  value={item.nama}
+                  data-nama={item.nama}
+                  data-price={item.harga}
+                  data-kategori={kategori.label}
+                  class="size-4.5 rounded border-neutral-400 text-accent focus:ring-accent accent-accent cursor-pointer"
+                />
+                <span class="text-sm font-medium text-neutral-900 truncate">
+                  {item.nama}
+                </span>
+              </div>
+              <span class="text-xs font-semibold text-accent-700 whitespace-nowrap">
+                {formatRupiah(item.harga)}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+<!-- Tombol Alur Navigasi Kategori Selanjutnya -->
+<div
+  id="category-flow-nav"
+  class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 border-t border-divider/60"
+>
+  <span id="category-flow-hint" class="text-xs text-neutral-500 font-medium">
+    Selesai memilih di kategori ini?
+  </span>
+  <button
+    type="button"
+    id="category-next-btn"
+    class="btn btn-secondary text-xs font-semibold py-2.5 px-5 rounded-full flex items-center gap-1.5 cursor-pointer hover:border-accent transition-colors shadow-xs"
+  >
+    <span id="category-next-label">Kategori Selanjutnya: Aneka Cake &rarr;</span>
+  </button>
+</div>
