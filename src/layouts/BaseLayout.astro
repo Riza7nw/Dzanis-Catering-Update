@@ -3,6 +3,7 @@ import '@fontsource-variable/plus-jakarta-sans';
 import '../styles/global.css';
 import OrderModal from '../components/interactive/OrderModal.astro';
 import { ClientRouter } from 'astro:transitions';
+import { company } from '../data/company';
 
 interface Props {
   title: string;
@@ -13,7 +14,7 @@ interface Props {
 
 const {
   title,
-  description = "Katering rumahan dari Majalengka. Nasi kotak mulai Rp20.000 per box, snack box 51 pilihan, dan prasmanan untuk resepsi, syukuran, serta acara kantor. Mengantar ke Cirebon, Indramayu, Majalengka, dan Kuningan.",
+  description = company.description,
   schema,
   useTransitions = true,
 } = Astro.props;
@@ -24,7 +25,9 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />

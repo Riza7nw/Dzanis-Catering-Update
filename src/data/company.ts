@@ -60,7 +60,7 @@ export const company: Company = {
   mark: "/images/brand/dzanis-mark.png",
   tagline: "Katering rumahan Majalengka",
   description:
-    "Katering rumahan dari Majalengka. Nasi kotak mulai Rp20.000 per box, snack box 51 pilihan, dan prasmanan untuk resepsi, syukuran, serta acara kantor. Mengantar ke Cirebon, Indramayu, Majalengka, dan Kuningan.",
+    "Dzanis Catering melayani nasi kotak, snack box, dan prasmanan di Majalengka serta wilayah Ciayumajakuning. Cek pilihan menu lengkap dan pesan sekarang!",
 
   /**
    * Nomor kontak WhatsApp sekunder khusus untuk konsultasi menu dan porsi custom,
