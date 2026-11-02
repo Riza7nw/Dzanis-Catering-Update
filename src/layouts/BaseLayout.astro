@@ -4,6 +4,7 @@ import '../styles/global.css';
 import OrderModal from '../components/interactive/OrderModal.astro';
 import { ClientRouter } from 'astro:transitions';
 import { company } from '../data/company';
+import { generateWebSiteSchema } from '../data/schema';
 
 interface Props {
   title: string;
@@ -26,6 +27,12 @@ const {
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://dzanis-catering-update.vercel.app';
 const currentUrl = canonicalUrl || new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = image.startsWith('http') ? image : `${siteUrl}${image.startsWith('/') ? '' : '/'}${image}`;
+
+const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
+const hasWebSiteSchema = Array.isArray(schema)
+  ? schema.some((item) => (item as Record<string, unknown>)?.['@type'] === 'WebSite')
+  : (schema as Record<string, unknown> | undefined)?.['@type'] === 'WebSite';
+const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
 ---
 
 <!doctype html>
@@ -33,9 +40,18 @@ const ogImageUrl = image.startsWith('http') ? image : `${siteUrl}${image.startsW
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
+
+    <!-- Google Favicon & Touch Icons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <!-- Application / Branding Metadata -->
+    <meta name="application-name" content="Dzanis Catering" />
+    <meta name="apple-mobile-web-app-title" content="Dzanis Catering" />
+
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -57,6 +73,17 @@ const ogImageUrl = image.startsWith('http') ? image : `${siteUrl}${image.startsW
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
     {useTransitions && <ClientRouter />}
+
+    <!-- Google Site Name Structured Data (Schema.org WebSite) -->
+    {shouldRenderWebSiteSchema && (
+      <script
+        type="application/ld+json"
+        is:inline
+        set:html={JSON.stringify(generateWebSiteSchema(siteUrl), null, 2)}
+      />
+    )}
+
+    <!-- Page Specific Structured Data (FoodEstablishment / Product / etc) -->
     {schema && (
       <script
         type="application/ld+json"
@@ -64,6 +91,7 @@ const ogImageUrl = image.startsWith('http') ? image : `${siteUrl}${image.startsW
         set:html={JSON.stringify(schema, null, 2)}
       />
     )}
+
   </head>
   <body class="min-h-screen bg-bg text-text antialiased">
     <a

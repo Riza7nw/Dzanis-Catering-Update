@@ -11,6 +11,23 @@ import { snackRingkasan } from '../data/snack';
 export const DEFAULT_SITE_URL = "https://dzanis-catering-update.vercel.app";
 
 /**
+ * Menghasilkan JSON-LD schema WebSite sesuai standar Google Search Site Name.
+ * Memastikan Google menampilkan "Dzanis Catering" di baris nama situs pada SERP.
+ */
+export function generateWebSiteSchema(siteUrl: string = DEFAULT_SITE_URL) {
+  const site = siteUrl.replace(/\/$/, '');
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Dzanis Catering",
+    alternateName: ["Dzanis Catering Majalengka", "Dzanis"],
+    url: `${site}/`,
+  };
+}
+
+export const webSiteSchema = generateWebSiteSchema();
+
+/**
  * Menghasilkan JSON-LD schema FoodEstablishment dengan nested Menu (hasMenu)
  * untuk halaman utama (index.astro).
  */
