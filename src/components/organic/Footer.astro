@@ -6,17 +6,49 @@ const isHome = Astro.url.pathname === '/';
 const prefix = isHome ? '' : '/';
 
 const kolomMenu = [
-  { label: "Paket nasi kotak", href: `${prefix}#paket` },
-  { label: "Snack box", href: `${prefix}#snack` },
-  { label: "Prasmanan", href: `${prefix}#layanan` },
-  { label: "Booth / food cart", href: `${prefix}#layanan` },
+  {
+    label: "Paket Katering Nasi Kotak",
+    ariaLabel: "Daftar Paket Katering Nasi Kotak",
+    href: `${prefix}#paket`,
+  },
+  {
+    label: "Paket Snack Box",
+    ariaLabel: "Pilihan Paket Snack Box Acara",
+    href: `${prefix}#snack`,
+  },
+  {
+    label: "Layanan Katering Prasmanan",
+    ariaLabel: "Layanan Katering Prasmanan Acara",
+    href: `${prefix}#layanan`,
+  },
+  {
+    label: "Booth / Food Cart Acara",
+    ariaLabel: "Layanan Booth Food Cart Acara",
+    href: `${prefix}#layanan`,
+  },
 ];
 
 const kolomInformasi = [
-  { label: "Cara pesan", href: `${prefix}#cara` },
-  { label: "Sertifikat", href: "/sertifikat" },
-  { label: "Area pengantaran", href: `${prefix}#faq` },
-  { label: "Sering ditanya", href: `${prefix}#faq` },
+  {
+    label: "Cara Pemesanan",
+    ariaLabel: "Panduan Cara Pesan Katering",
+    href: `${prefix}#cara`,
+  },
+  {
+    label: "Sertifikat Resmi",
+    ariaLabel: "Legalitas dan Sertifikat Resmi Dzanis Catering",
+    href: "/sertifikat",
+  },
+  {
+    label: "Area Pengantaran",
+    ariaLabel: "Area Pengantaran Katering Ciayumajakuning",
+    href: `${prefix}#faq`,
+  },
+  {
+    label: "Tanya Jawab (FAQ)",
+    ariaLabel: "Tanya Jawab Seputar Layanan Katering",
+    href: `${prefix}#faq`,
+  },
 ];
 
 const judulKolom =
@@ -57,12 +89,12 @@ const tautanKolom =
 
       <!-- Kolom 2 — Menu -->
       <nav
-        aria-label="Menu"
+        aria-label="Menu Layanan Katering"
         class="hidden flex-col gap-[var(--space-3)] lg:flex"
       >
         <h2 class={judulKolom}>Menu</h2>
         {kolomMenu.map((t) => (
-          <a href={t.href} class={tautanKolom}>
+          <a href={t.href} aria-label={t.ariaLabel} class={tautanKolom}>
             {t.label}
           </a>
         ))}
@@ -70,12 +102,12 @@ const tautanKolom =
 
       <!-- Kolom 3 — Informasi -->
       <nav
-        aria-label="Informasi"
+        aria-label="Informasi Pemesanan"
         class="hidden flex-col gap-[var(--space-3)] lg:flex"
       >
         <h2 class={judulKolom}>Informasi</h2>
         {kolomInformasi.map((t) => (
-          <a href={t.href} class={tautanKolom}>
+          <a href={t.href} aria-label={t.ariaLabel} class={tautanKolom}>
             {t.label}
           </a>
         ))}

@@ -42,7 +42,7 @@ export const DAFTAR_LAYANAN_LAIN: LayananLain[] = [
       "Puding Cup & Buah Potong",
     ],
     foto: "/images/layanan/prasmanan-kantor.webp",
-    fotoAlt: "Layanan Prasmanan Kantor Dzanis Catering",
+    fotoAlt: "Layanan Prasmanan Kantor Dzanis Catering Majalengka",
   },
   {
     id: "booth-food-cart",
@@ -66,7 +66,7 @@ export const DAFTAR_LAYANAN_LAIN: LayananLain[] = [
       "Dimsum Kukus 4 Varian",
     ],
     foto: "/images/layanan/food-cart.webp",
-    fotoAlt: "Booth dan Food Cart Live Serving Dzanis Catering",
+    fotoAlt: "Booth dan Food Cart Live Serving Dzanis Catering Ciayumajakuning",
   },
   {
     id: "catering-acara-pernikahan",
@@ -92,6 +92,6 @@ export const DAFTAR_LAYANAN_LAIN: LayananLain[] = [
       "Dessert Bar & Es Tradisional",
     ],
     foto: "/images/layanan/wedding-catering.webp",
-    fotoAlt: "Catering Acara dan Resepsi Pernikahan Dzanis Catering",
+    fotoAlt: "Layanan Katering Acara dan Resepsi Pernikahan Dzanis Catering Majalengka",
   },
 ];

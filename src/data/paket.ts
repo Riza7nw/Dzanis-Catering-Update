@@ -75,7 +75,7 @@ export const DAFTAR_PAKET: Paket[] = [
       "Sendok & Tisu Steril",
     ],
     foto: "/images/menu/paket-20k.webp",
-    fotoAlt: "Paket Hemat 20K Dzanis Catering",
+    fotoAlt: "Paket hemat nasi kotak Dzanis Katering Majalengka",
     // Menu selection
     canSelectMainMenu: true,
     selectableMainMenus: [
@@ -129,7 +129,7 @@ export const DAFTAR_PAKET: Paket[] = [
       "Sendok & Tisu Steril",
     ],
     foto: "/images/menu/paket-23k.webp",
-    fotoAlt: "Paket Favorit 23K Dzanis Catering",
+    fotoAlt: "Layanan katering prasmanan dan nasi boks Dzanis Catering Ciayumajakuning",
     // Menu selection
     canSelectMainMenu: true,
     selectableMainMenus: [
@@ -184,7 +184,7 @@ export const DAFTAR_PAKET: Paket[] = [
       "Sendok, Tusuk Gigi & Tisu Steril",
     ],
     foto: "/images/menu/paket-25k.webp",
-    fotoAlt: "Paket Spesial 25K Dzanis Catering",
+    fotoAlt: "Paket katering prasmanan dan nasi kotak spesial Dzanis Catering Majalengka",
     // Menu selection
     canSelectMainMenu: true,
     selectableMainMenus: [
