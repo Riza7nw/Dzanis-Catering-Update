@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dzanis-catering-update.vercel.app/sitemap-index.xml

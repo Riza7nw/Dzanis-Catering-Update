@@ -64,13 +64,13 @@ const defaultCertificates = await getShowcaseCertificates();
     <div class="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
         <div>
-          <h4 id="cert-modal-title" class="font-bold text-slate-900 text-base">Pratinjau Dokumen Legalitas</h4>
+          <h3 id="cert-modal-title" class="font-bold text-slate-900 text-base">Pratinjau Dokumen Legalitas</h3>
           <p class="text-xs text-slate-400 mt-0.5">Dokumen Resmi Dzanis Catering Terverifikasi</p>
         </div>
-        <button id="cert-modal-close-btn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold transition cursor-pointer">✕</button>
+        <button id="cert-modal-close-btn" type="button" aria-label="Tutup pratinjau sertifikat" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold transition cursor-pointer">✕</button>
       </div>
       <div class="flex-1 overflow-auto rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-4 min-h-[350px]">
-        <img id="cert-modal-img" src="" alt="Dokumen Sertifikat" class="max-h-[65vh] object-contain rounded-lg shadow-sm" />
+        <img id="cert-modal-img" src="/images/brand/halal-cert.png" width="800" height="1130" alt="Dokumen Sertifikat Resmi Dzanis Catering" class="max-h-[65vh] object-contain rounded-lg shadow-sm" />
         <iframe id="cert-modal-iframe" src="" class="w-full h-[65vh] rounded-lg border border-slate-100 hidden" title="Dokumen PDF Asli"></iframe>
       </div>
     </div>

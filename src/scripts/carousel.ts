@@ -39,7 +39,7 @@ export function createCarousel(opts: CarouselOptions): () => void {
 
   // Settle & idle detection
   let settleToken = 0;
-  let idleTimer: ReturnType<typeof setTimeout> | 0 = 0;
+  let idleTimer: number | ReturnType<typeof setTimeout> | 0 = 0;
   let settleAbort: AbortController | null = null;
 
   // Pointer & drag state

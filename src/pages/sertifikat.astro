@@ -56,9 +56,9 @@ const prosesVerifikasi = [
                 <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-900">
                   Dokumen resmi
                 </p>
-                <h2 class="mt-1 font-heading text-xl font-bold text-text">
+                <p class="mt-1 font-heading text-xl font-bold text-text">
                   Dzanis Catering
-                </h2>
+                </p>
               </div>
               <span class="rounded-full bg-accent-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-accent-900">
                 Legal
@@ -265,8 +265,10 @@ const prosesVerifikasi = [
         <div id="modal-img-container" class="w-full flex flex-col items-center justify-center">
           <img 
             id="modal-doc-img" 
-            src="" 
-            alt="Scan Dokumen Asli" 
+            src="/images/brand/halal-cert.png" 
+            width="800"
+            height="1130"
+            alt="Scan Dokumen Asli Legalitas Dzanis Catering" 
             class="max-h-[64vh] w-auto max-w-full object-contain rounded-xl shadow-lg border border-divider bg-white"
           />
           <p class="mt-3 text-[11px] text-neutral-600 font-body">
@@ -302,13 +304,14 @@ const prosesVerifikasi = [
         <div class="flex items-center space-x-2.5 self-end sm:self-auto">
           <a 
             id="modal-doc-download" 
-            href="#" 
+            href="/images/brand/halal-cert.png" 
             target="_blank" 
             rel="noopener noreferrer"
+            aria-label="Buka berkas dokumen resmi di tab baru"
             class="px-4 py-2 rounded-xl bg-surface border border-divider text-text hover:bg-neutral-100 transition font-heading font-semibold text-xs tracking-wider inline-flex items-center gap-1.5"
           >
             <span>Buka Berkas</span>
-            <span>&nearr;</span>
+            <span aria-hidden="true">&nearr;</span>
           </a>
           <button 
             id="btn-close-doc-modal-footer" 

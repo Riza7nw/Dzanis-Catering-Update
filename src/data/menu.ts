@@ -9,10 +9,10 @@ export interface SnackTeaserPhoto {
 }
 
 export const snackTeaserPhotos: SnackTeaserPhoto[] = [
-  { src: "/images/menu/snack-kue-sus.jpg", alt: "Kue sus" },
-  { src: "/images/menu/snack-bolu.jpg", alt: "Bolu" },
-  { src: "/images/menu/snack-putu-ayu.jpg", alt: "Putu ayu" },
-  { src: "/images/menu/snack-jajan-pasar.jpg", alt: "Jajan pasar" },
-  { src: "/images/menu/snack-puding.jpg", alt: "Puding" },
-  { src: "/images/menu/snack-puding-buah.jpg", alt: "Puding buah" },
+  { src: "/images/menu/snack-kue-sus.webp", alt: "Kue sus vanila lembut Dzanis Catering" },
+  { src: "/images/menu/snack-bolu.webp", alt: "Bolu kukus gulung mini Dzanis Catering" },
+  { src: "/images/menu/snack-putu-ayu.webp", alt: "Kue putu ayu pandan kelapa Dzanis Catering" },
+  { src: "/images/menu/snack-jajan-pasar.webp", alt: "Aneka jajan pasar tradisional Dzanis Catering" },
+  { src: "/images/menu/snack-puding.webp", alt: "Puding manis segar Dzanis Catering" },
+  { src: "/images/menu/snack-puding-buah.webp", alt: "Puding buah potong higienis Dzanis Catering" },
 ];

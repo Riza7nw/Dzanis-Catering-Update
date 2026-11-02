@@ -10,6 +10,8 @@ interface Props {
   description?: string;
   schema?: Record<string, unknown> | Record<string, unknown>[];
   useTransitions?: boolean;
+  image?: string;
+  canonicalUrl?: string;
 }
 
 const {
@@ -17,7 +19,13 @@ const {
   description = company.description,
   schema,
   useTransitions = true,
+  image = '/images/menu/hero-nasi-kotak.jpg',
+  canonicalUrl,
 } = Astro.props;
+
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://dzanis-catering-update.vercel.app';
+const currentUrl = canonicalUrl || new URL(Astro.url.pathname, siteUrl).toString();
+const ogImageUrl = image.startsWith('http') ? image : `${siteUrl}${image.startsWith('/') ? '' : '/'}${image}`;
 ---
 
 <!doctype html>
@@ -31,6 +39,23 @@ const {
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={currentUrl} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:url" content={currentUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={currentUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
     {useTransitions && <ClientRouter />}
     {schema && (
       <script
