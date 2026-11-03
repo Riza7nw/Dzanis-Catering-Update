@@ -4,18 +4,7 @@
  * dengan normalisasi nomor telepon format Indonesia.
  */
 
-/**
- * Menormalkan nomor telepon ke format internasional standar tanpa karakter non-digit.
- * Contoh: "0813-2438-3858" -> "6281324383858", "+62 813..." -> "62813..."
- */
-export function normalizePhoneNumber(rawPhone: string, fallbackPhone = "6281324383858"): string {
-  if (!rawPhone) return fallbackPhone;
-  let digits = String(rawPhone).replace(/\D/g, "");
-  if (digits.startsWith("0")) {
-    digits = "62" + digits.slice(1);
-  }
-  return digits || fallbackPhone;
-}
+import { normalizePhoneNumber } from '../../utils/whatsappFormatter';
 
 /**
  * Membangun URL tautan WhatsApp resmi lengkap dengan pesan URL-encoded.
@@ -28,3 +17,13 @@ export function buildWhatsAppUrl(rawPhone: string, messageText?: string): string
   }
   return `${base}?text=${encodeURIComponent(messageText.trim())}`;
 }
+
+export {
+  normalizePhoneNumber,
+  buildServiceInquiryUrl,
+  buildSnackTemplateWaUrl,
+  type SnackTemplateItem,
+  type SnackTemplateData,
+} from '../../utils/whatsappFormatter';
+
+

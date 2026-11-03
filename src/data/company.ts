@@ -70,11 +70,11 @@ export const company: Company = {
 
   contact: {
     whatsapp: "081324383858",
-    whatsappDisplay: "+62 813-2438-3858",
+    whatsappDisplay: "0813-2438-3858",
     whatsappLink: waLink(
       "Halo Dzanis Catering, saya mau tanya paket yang ada di Dzanis Catering.",
     ),
-    phoneHref: "tel:+6281324383858",
+    phoneHref: "https://wa.me/6281324383858?text=Halo%20Dzanis%20Catering%2C%20saya%20ingin%20bertanya%20mengenai%20layanan%20katering.",
     address: "Majalengka, Jawa Barat",
     operatingHours: "Menerima pesanan setiap hari, pengantaran mulai pukul 06.00.",
   },

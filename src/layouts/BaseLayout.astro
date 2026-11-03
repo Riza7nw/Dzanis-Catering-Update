@@ -36,7 +36,7 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
 ---
 
 <!doctype html>
-<html lang="id" class="scroll-smooth">
+<html lang="id" class="scroll-smooth w-full max-w-full overflow-x-clip relative m-0 p-0">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -93,14 +93,16 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
     )}
 
   </head>
-  <body class="min-h-screen bg-bg text-text antialiased">
+  <body class="w-full max-w-full overflow-x-clip relative m-0 p-0 min-h-screen bg-bg text-text antialiased">
     <a
       href="#konten"
       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[400] focus:rounded-full focus:bg-accent focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-bg"
     >
       Lompat ke konten utama
     </a>
-    <slot />
+    <div class="w-full max-w-full min-w-0 overflow-x-clip flex flex-col min-h-screen">
+      <slot />
+    </div>
     <OrderModal />
   </body>
 </html>

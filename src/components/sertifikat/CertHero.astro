@@ -14,87 +14,113 @@ const { className = '' } = Astro.props;
   <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/5 blur-3xl" aria-hidden="true"></div>
   <div class="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-accent-400/10 blur-2xl" aria-hidden="true"></div>
 
-  <div class="relative mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-14 lg:py-12">
+  <div class="relative mx-auto max-w-[1280px] py-5 px-4 sm:py-12 sm:px-6 lg:px-14 lg:py-16">
     <!-- Breadcrumb / Pre-header tag -->
-    <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-300">
+    <div class="flex items-center gap-2 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-300">
       <span class="inline-flex h-2 w-2 rounded-full bg-accent-300 animate-pulse" aria-hidden="true"></span>
       <span>Akuntabilitas &amp; Legalitas Jasaboga Resmi</span>
     </div>
 
-    <div class="mt-6 grid gap-8 lg:grid-cols-[1.3fr_0.9fr] lg:items-center lg:gap-12">
+    <div class="mt-3.5 sm:mt-6 grid gap-4 sm:gap-8 lg:grid-cols-[1.3fr_0.9fr] lg:items-center lg:gap-12">
       <!-- Main Headline & Value Statement -->
       <div>
-        <h1 class="max-w-[580px] font-heading text-3xl font-bold leading-[1.1] tracking-[-0.03em] text-bg sm:text-4xl lg:text-5xl">
+        <h1 class="max-w-[580px] font-heading text-2xl font-bold leading-[1.15] tracking-[-0.02em] text-bg sm:text-4xl lg:text-5xl">
           Sertifikasi Resmi, Sanitasi Higienis &amp; Jaminan Halal Terbuka
         </h1>
-        <p class="mt-4 max-w-[620px] text-sm leading-relaxed text-accent-200/90 sm:text-base">
+        <p class="mt-2 sm:mt-4 max-w-[620px] text-xs sm:text-base leading-relaxed text-accent-200/90 line-clamp-2 sm:line-clamp-none">
           Dzanis Catering menjaga standar tertinggi keamanan pangan di Majalengka dan Ciayumajakuning. Seluruh operasional dapur, uji mikrobiologi, sanitasi penjamah makanan, hingga izin berusaha telah terverifikasi secara resmi oleh otoritas pemerintah.
         </p>
 
-        <!-- Fast Badges -->
-        <div class="mt-6 flex flex-wrap items-center gap-3">
-          <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-bg backdrop-blur-sm">
-            <span class="text-accent-300">✓</span> 100% Halal BPJPH Kemenag
+        <!-- Trust Metric Bar (Solusi Anti-Stacking Vertikal: 3 Kolom Ringkas) -->
+        <div class="mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-3" aria-label="Ringkasan legalitas dan mutu terverifikasi">
+          <!-- Item 1: Halal BPJPH -->
+          <div class="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-1.5 py-2 sm:px-3 sm:py-2.5 text-center backdrop-blur-sm transition hover:bg-white/15">
+            <div class="flex items-center gap-1 sm:gap-1.5 max-w-full">
+              <span class="text-xs sm:text-sm text-accent-300 font-bold shrink-0" aria-hidden="true">✓</span>
+              <span class="text-[10px] sm:text-xs font-bold text-bg truncate">Halal BPJPH</span>
+            </div>
+            <span class="mt-0.5 inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold text-emerald-300">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
+              Terverifikasi
+            </span>
           </div>
-          <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-bg backdrop-blur-sm">
-            <span class="text-accent-300">✓</span> SLHS Dinkes Kab. Majalengka
+
+          <!-- Item 2: SLHS Dinkes -->
+          <div class="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-1.5 py-2 sm:px-3 sm:py-2.5 text-center backdrop-blur-sm transition hover:bg-white/15">
+            <div class="flex items-center gap-1 sm:gap-1.5 max-w-full">
+              <span class="text-xs sm:text-sm text-accent-300 font-bold shrink-0" aria-hidden="true">🛡️</span>
+              <span class="text-[10px] sm:text-xs font-bold text-bg truncate">SLHS Dinkes</span>
+            </div>
+            <span class="mt-0.5 inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold text-emerald-300">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
+              Terverifikasi
+            </span>
           </div>
-          <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-bg backdrop-blur-sm">
-            <span class="text-accent-300">✓</span> Legalitas NIB OSS-RBA (KBLI 56210)
+
+          <!-- Item 3: NIB OSS -->
+          <div class="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-1.5 py-2 sm:px-3 sm:py-2.5 text-center backdrop-blur-sm transition hover:bg-white/15">
+            <div class="flex items-center gap-1 sm:gap-1.5 max-w-full">
+              <span class="text-xs sm:text-sm text-accent-300 font-bold shrink-0" aria-hidden="true">⚖️</span>
+              <span class="text-[10px] sm:text-xs font-bold text-bg truncate">NIB OSS</span>
+            </div>
+            <span class="mt-0.5 inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold text-emerald-300">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
+              Terverifikasi
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- Trust Credential Card (Anti-Slop ID Matrix) -->
-      <div class="rounded-[28px] border border-white/20 bg-surface p-5 text-text shadow-[var(--shadow-lg)] sm:p-6 backdrop-blur-sm">
-        <div class="flex items-center justify-between border-b border-divider pb-4">
-          <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-900 text-bg font-heading font-black text-sm">
+      <!-- Trust Credential Card (Anti-Slop ID Matrix - Desktop Only to prevent vertical stacking on mobile) -->
+      <div class="hidden lg:block rounded-3xl sm:rounded-[28px] border border-white/20 bg-surface p-4 sm:p-6 text-text shadow-[var(--shadow-lg)] backdrop-blur-sm">
+        <div class="flex items-center justify-between border-b border-divider pb-3.5 sm:pb-4">
+          <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-accent-900 text-bg font-heading font-black text-xs sm:text-sm shrink-0">
               DZ
             </div>
-            <div>
-              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-700">
+            <div class="min-w-0">
+              <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-700 truncate">
                 Identitas Legal Usaha
               </p>
-              <p class="font-heading text-lg font-bold text-text">
+              <p class="font-heading text-base sm:text-lg font-bold text-text truncate">
                 {company.brandName}
               </p>
             </div>
           </div>
-          <span class="rounded-full bg-accent-2-200 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-accent-2-900">
+          <span class="rounded-full bg-accent-2-200 px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] text-accent-2-900 shrink-0">
             Terverifikasi Aktif
           </span>
         </div>
 
-        <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
-          <div class="rounded-2xl border border-divider bg-bg/80 p-3">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-700">NIB OSS-RBA</p>
-            <p class="mt-1 font-mono font-bold text-text">1209230045678</p>
-            <p class="text-[9px] text-neutral-600 mt-0.5">KBLI 56210 (Jasa Boga)</p>
+        <div class="mt-3.5 sm:mt-4 grid grid-cols-2 gap-2 sm:gap-3 text-xs">
+          <div class="rounded-xl sm:rounded-2xl border border-divider bg-bg/80 p-2.5 sm:p-3">
+            <p class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-700">NIB OSS-RBA</p>
+            <p class="mt-0.5 sm:mt-1 font-mono font-bold text-[11px] sm:text-xs text-text truncate">1209230045678</p>
+            <p class="text-[9px] text-neutral-600 mt-0.5 truncate">KBLI 56210 (Jasa Boga)</p>
           </div>
-          <div class="rounded-2xl border border-divider bg-bg/80 p-3">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-700">ID Halal BPJPH</p>
-            <p class="mt-1 font-mono font-bold text-text">ID3211000123456</p>
-            <p class="text-[9px] text-neutral-600 mt-0.5">MUI &amp; Kemenag RI</p>
+          <div class="rounded-xl sm:rounded-2xl border border-divider bg-bg/80 p-2.5 sm:p-3">
+            <p class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-700">ID Halal BPJPH</p>
+            <p class="mt-0.5 sm:mt-1 font-mono font-bold text-[11px] sm:text-xs text-text truncate">ID3211000123456</p>
+            <p class="text-[9px] text-neutral-600 mt-0.5 truncate">MUI &amp; Kemenag RI</p>
           </div>
-          <div class="rounded-2xl border border-divider bg-bg/80 p-3">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-700">No. WhatsApp Resmi</p>
-            <p class="mt-1 font-bold text-text">{company.contact.whatsappDisplay}</p>
-            <p class="text-[9px] text-neutral-600 mt-0.5">Layanan Pengadaan &amp; Order</p>
+          <div class="rounded-xl sm:rounded-2xl border border-divider bg-bg/80 p-2.5 sm:p-3">
+            <p class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-700">No. WhatsApp</p>
+            <p class="mt-0.5 sm:mt-1 font-bold text-[11px] sm:text-xs text-text whitespace-nowrap truncate">{company.contact.whatsappDisplay}</p>
+            <p class="text-[9px] text-neutral-600 mt-0.5 truncate">Pengadaan &amp; Order</p>
           </div>
-          <div class="rounded-2xl border border-divider bg-bg/80 p-3">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-700">Wilayah Layanan</p>
-            <p class="mt-1 font-bold text-text">{company.ketentuan.areaAntarRingkas}</p>
-            <p class="text-[9px] text-neutral-600 mt-0.5">{company.contact.address}</p>
+          <div class="rounded-xl sm:rounded-2xl border border-divider bg-bg/80 p-2.5 sm:p-3">
+            <p class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-700">Wilayah Layanan</p>
+            <p class="mt-0.5 sm:mt-1 font-bold text-[11px] sm:text-xs text-text truncate">{company.ketentuan.areaAntarRingkas}</p>
+            <p class="text-[9px] text-neutral-600 mt-0.5 truncate">{company.contact.address}</p>
           </div>
         </div>
 
-        <div class="mt-4 flex items-center justify-between rounded-xl bg-accent-200/50 px-3.5 py-2.5 text-[11px] text-accent-900 border border-accent-300/40">
+        <div class="mt-3.5 sm:mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 rounded-xl bg-accent-200/50 p-2.5 sm:px-3.5 sm:py-2.5 text-[11px] text-accent-900 border border-accent-300/40">
           <div class="flex items-center gap-2">
-            <span class="text-sm">🛡️</span>
-            <span class="font-semibold">Standar Laik Higiene Sanitasi (SLHS) Aktif</span>
+            <span class="text-xs sm:text-sm shrink-0">🛡️</span>
+            <span class="font-semibold text-[10px] sm:text-[11px]">Standar Laik Higiene Sanitasi (SLHS)</span>
           </div>
-          <span class="font-mono text-[10px] font-bold text-neutral-800">DINKES KAB. MAJALENGKA</span>
+          <span class="font-mono text-[9px] sm:text-[10px] font-bold text-neutral-800 shrink-0">DINKES KAB. MAJALENGKA</span>
         </div>
       </div>
     </div>

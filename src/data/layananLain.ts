@@ -7,7 +7,9 @@ export interface LayananLain {
   id: string;
   slug: string;
   nama: string;
+  title?: string;
   badge?: string | null;
+
   headlineHarga: string;
   satuanHarga: string;
   minOrder: string;

@@ -10,18 +10,19 @@ const { snackKategori, totalSnackItems } = Astro.props;
 ---
 
 <!-- Filter Kategori Pill Buttons -->
-<div
-  class="category-filter-bar mb-6 flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 -mx-2 px-2"
-  role="group"
-  aria-label="Filter kategori jajanan"
->
+<div class="relative w-full max-w-full min-w-0 overflow-hidden mb-6">
+  <div
+    class="category-filter-bar relative flex items-center gap-2 overflow-x-auto no-scrollbar w-full max-w-full min-w-0 py-2 overscroll-x-contain"
+    role="group"
+    aria-label="Filter kategori jajanan"
+  >
   <!-- Tombol Semua Kategori -->
   <button
     type="button"
     aria-pressed="false"
     data-category-target="all"
     data-item-count={totalSnackItems}
-    class="category-filter-btn group/catbtn shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5"
+    class="category-filter-btn group/catbtn relative shrink-0 rounded-full px-4 sm:px-5 py-2.5 min-h-[44px] text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5 touch-manipulation"
     aria-label={`Semua (${totalSnackItems} pilihan)`}
   >
     <span class="category-name">Semua</span>
@@ -30,7 +31,7 @@ const { snackKategori, totalSnackItems } = Astro.props;
       data-selected-count="all"
       data-count="0"
       hidden
-      class="ml-0.5 data-[count='0']:hidden inline-flex size-4.5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
+      class="ml-0.5 data-[count='0']:hidden inline-flex size-5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
       aria-hidden="true"
     >0</span>
     <span class="sr-only category-sr-count"></span>
@@ -45,7 +46,7 @@ const { snackKategori, totalSnackItems } = Astro.props;
         aria-pressed={isFirst ? "true" : "false"}
         data-category-target={kategori.label}
         data-item-count={kategori.items.length}
-        class="category-filter-btn group/catbtn shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5"
+        class="category-filter-btn group/catbtn relative shrink-0 rounded-full px-4 sm:px-5 py-2.5 min-h-[44px] text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5 touch-manipulation"
         aria-label={`${kategori.label} (${kategori.items.length} pilihan)`}
       >
         <span class="category-name">{kategori.label}</span>
@@ -54,11 +55,12 @@ const { snackKategori, totalSnackItems } = Astro.props;
           data-selected-count={kategori.label}
           data-count="0"
           hidden
-          class="ml-0.5 data-[count='0']:hidden inline-flex size-4.5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
+          class="ml-0.5 data-[count='0']:hidden inline-flex size-5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
           aria-hidden="true"
         >0</span>
         <span class="sr-only category-sr-count"></span>
       </button>
     );
   })}
+  </div>
 </div>

@@ -28,7 +28,7 @@ const { snackKategori } = Astro.props;
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {kategori.items.map((item) => (
-            <label class="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl border border-divider bg-surface/50 hover:bg-surface hover:border-accent/40 cursor-pointer transition-all has-[:checked]:border-accent has-[:checked]:bg-accent-200/25">
+            <label class="group relative flex items-center justify-between gap-3 p-3.5 min-h-[48px] rounded-2xl border border-divider bg-surface/50 hover:bg-surface hover:border-accent/40 cursor-pointer transition-all touch-manipulation has-[:checked]:border-accent has-[:checked]:bg-accent-200/25">
               <div class="flex items-center gap-3 min-w-0">
                 <input
                   type="checkbox"
@@ -37,7 +37,7 @@ const { snackKategori } = Astro.props;
                   data-nama={item.nama}
                   data-price={item.harga}
                   data-kategori={kategori.label}
-                  class="size-4.5 rounded border-neutral-400 text-accent focus:ring-accent accent-accent cursor-pointer"
+                  class="size-5 rounded border-neutral-400 text-accent focus:ring-accent accent-accent cursor-pointer touch-manipulation"
                 />
                 <span class="text-sm font-medium text-neutral-900 truncate">
                   {item.nama}
@@ -65,7 +65,7 @@ const { snackKategori } = Astro.props;
   <button
     type="button"
     id="category-next-btn"
-    class="btn btn-secondary text-xs font-semibold py-2.5 px-5 rounded-full flex items-center gap-1.5 cursor-pointer hover:border-accent transition-colors shadow-xs"
+    class="btn btn-secondary text-xs font-semibold py-2.5 px-5 min-h-[44px] rounded-full flex items-center gap-1.5 cursor-pointer hover:border-accent transition-colors shadow-xs touch-manipulation"
   >
     <span id="category-next-label">Kategori Selanjutnya: Aneka Cake &rarr;</span>
   </button>

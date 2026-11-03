@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
     "build": "astro build",
+    "test": "node --test test/*.test.ts",
     "preview": "astro preview --host 0.0.0.0",
     "start": "astro preview --host 0.0.0.0",
     "astro": "astro"
