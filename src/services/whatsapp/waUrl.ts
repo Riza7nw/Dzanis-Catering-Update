@@ -6,9 +6,9 @@
 
 /**
  * Menormalkan nomor telepon ke format internasional standar tanpa karakter non-digit.
- * Contoh: "0857-2633-1579" -> "6285726331579", "+62 813..." -> "62813..."
+ * Contoh: "0813-2438-3858" -> "6281324383858", "+62 813..." -> "62813..."
  */
-export function normalizePhoneNumber(rawPhone: string, fallbackPhone = "6285726331579"): string {
+export function normalizePhoneNumber(rawPhone: string, fallbackPhone = "6281324383858"): string {
   if (!rawPhone) return fallbackPhone;
   let digits = String(rawPhone).replace(/\D/g, "");
   if (digits.startsWith("0")) {

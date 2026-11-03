@@ -215,7 +215,7 @@ export function initOrderModalController(): void {
       const notes = String(data.get('notes') || '').trim();
 
       // Bangun URL WhatsApp resmi dan alihkan pelanggan langsung dari trusted user gesture
-      const phone = dialog.dataset.phone || '6285726331579';
+      const phone = dialog.dataset.phone || '6281324383858';
       const waUrl = buildOrderModalWhatsAppUrl(phone, {
         packageName: pkg,
         customDetails: details,
