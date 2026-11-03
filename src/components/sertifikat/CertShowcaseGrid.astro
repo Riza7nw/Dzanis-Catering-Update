@@ -1,0 +1,226 @@
+---
+// src/components/sertifikat/CertShowcaseGrid.astro
+import type { ShowcaseCertificateItem, LegalCardItem } from '../../services/api/certService';
+
+interface Props {
+  certificates: ShowcaseCertificateItem[];
+  legalDocuments: LegalCardItem[];
+  publicApiUrl?: string;
+}
+
+const { certificates = [], legalDocuments = [], publicApiUrl = '' } = Astro.props;
+
+// Combine into unified list with clear categories
+const allDocuments = [
+  ...certificates.map(item => ({
+    id: String(item.id),
+    title: item.title,
+    issuer: item.issuer,
+    certNumber: item.certNumber || item.no,
+    validUntil: item.validUntil || item.date,
+    badge: item.badge || 'RESMI',
+    category: 'sertifikat',
+    categoryLabel: 'Sertifikasi Mutu & Halal',
+    documentUrl: item.documentUrl || item.docUrl || '/images/brand/halal-cert.png',
+    fileType: item.fileType || 'image',
+    detail: `Dokumen sah diterbitkan oleh ${item.issuer}. Keaslian dapat diverifikasi langsung melalui nomor registrasi resmi.`
+  })),
+  ...legalDocuments.map(item => ({
+    id: String(item.id),
+    title: item.label || item.title,
+    issuer: item.issuer,
+    certNumber: item.certNumber || '-',
+    validUntil: item.validUntil || 'Aktif',
+    badge: item.status || item.badge || 'LEGAL',
+    category: 'legalitas',
+    categoryLabel: 'Legalitas Usaha & Pajak',
+    documentUrl: item.document_url || item.documentUrl || '/images/brand/halal-cert.png',
+    fileType: item.file_type || item.fileType || 'image',
+    detail: item.detail || `Legalitas resmi operasional Dzanis Catering untuk jaminan kepatuhan hukum.`
+  }))
+];
+---
+
+<section class="py-12 bg-bg relative" id="dokumen-resmi">
+  <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-14">
+    <!-- Section Header & Filter Tabs -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-divider pb-8">
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-accent-900">
+          DOKUMEN RESMI TERVERIFIKASI
+        </p>
+        <h2 class="mt-2 font-heading text-2xl font-bold text-text sm:text-3xl lg:text-4xl">
+          Pameran Sertifikat &amp; Kelaikan Hukum
+        </h2>
+        <p class="mt-2 text-sm text-neutral-700 max-w-xl">
+          Seluruh berkas pindaian asli beresolusi tinggi dapat diperiksa langsung untuk memenuhi persyaratan administrasi pengadaan atau keyakinan konsumen.
+        </p>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex flex-wrap items-center gap-2" role="tablist" aria-label="Filter kategori dokumen">
+        <button
+          type="button"
+          data-filter="all"
+          class="cert-filter-btn active-filter px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer border border-accent-900 bg-accent-900 text-bg shadow-sm"
+        >
+          Semua Dokumen ({allDocuments.length})
+        </button>
+        <button
+          type="button"
+          data-filter="sertifikat"
+          class="cert-filter-btn px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer border border-divider bg-surface text-neutral-800 hover:border-accent-900/40"
+        >
+          Sertifikasi Mutu ({certificates.length})
+        </button>
+        <button
+          type="button"
+          data-filter="legalitas"
+          class="cert-filter-btn px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer border border-divider bg-surface text-neutral-800 hover:border-accent-900/40"
+        >
+          Izin Usaha &amp; Pajak ({legalDocuments.length})
+        </button>
+      </div>
+    </div>
+
+    <!-- Document Cards Grid (SSR-First) -->
+    <div 
+      id="cert-documents-grid" 
+      class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+      data-api-url={publicApiUrl}
+    >
+      {allDocuments.map((doc) => {
+        const payloadStr = JSON.stringify({
+          title: doc.title,
+          issuer: doc.issuer,
+          certNumber: doc.certNumber,
+          validUntil: doc.validUntil,
+          badge: doc.badge,
+          documentUrl: doc.documentUrl,
+          fileType: doc.fileType,
+          detail: doc.detail
+        });
+
+        const isHalalOrSanitasi = doc.badge.toLowerCase().includes('halal') || doc.badge.toLowerCase().includes('slhs');
+        const badgeColorClass = isHalalOrSanitasi
+          ? 'bg-accent-2-200 text-accent-2-900 border-accent-2-300'
+          : 'bg-accent-200 text-accent-900 border-accent-300';
+
+        return (
+          <article 
+            class="cert-card group flex flex-col justify-between rounded-[24px] border border-divider bg-surface p-5 shadow-[var(--shadow-md)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] hover:border-accent-900/30"
+            data-category={doc.category}
+          >
+            <!-- Card Upper Section: Badge & Document Framing -->
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border ${badgeColorClass}`}>
+                  {doc.badge}
+                </span>
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-neutral-700">
+                  <span class="h-1.5 w-1.5 rounded-full bg-accent-2-700"></span>
+                  {doc.validUntil}
+                </span>
+              </div>
+
+              <!-- Document Preview Thumbnail Canvas -->
+              <div class="relative mt-4 overflow-hidden rounded-xl border border-divider/70 bg-bg p-3 shadow-inner group-hover:border-accent-900/30 transition">
+                <div class="relative flex items-center justify-center min-h-[170px] max-h-[190px] overflow-hidden rounded-lg bg-neutral-100">
+                  <img
+                    src={doc.documentUrl}
+                    alt={`Pindaian Dokumen Resmi: ${doc.title}`}
+                    width="400"
+                    height="280"
+                    loading="lazy"
+                    class="h-full w-full object-contain object-top transition duration-300 group-hover:scale-105"
+                  />
+                  <!-- Stamp / Watermark Overlay -->
+                  <div class="pointer-events-none absolute bottom-2 right-2 rounded-md bg-accent-900/80 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-bg backdrop-blur-sm shadow-sm">
+                    Verified Stamp
+                  </div>
+                </div>
+
+                <!-- Hover Overlay Trigger -->
+                <button
+                  type="button"
+                  class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100 cursor-pointer text-bg font-heading font-semibold text-xs gap-1.5"
+                  onclick={`window.openCertLightbox(${payloadStr.replace(/"/g, '&quot;')})`}
+                  aria-label={`Pratinjau dokumen ${doc.title}`}
+                >
+                  <span class="rounded-full bg-accent-900 px-3.5 py-2 shadow-lg flex items-center gap-1.5 hover:bg-accent-700 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                    </svg>
+                    <span>Perbesar Dokumen</span>
+                  </span>
+                </button>
+              </div>
+
+              <!-- Document Meta -->
+              <div class="mt-4">
+                <h3 class="font-heading text-lg font-bold leading-snug text-text group-hover:text-accent-900 transition-colors">
+                  {doc.title}
+                </h3>
+                <p class="mt-1 text-xs text-neutral-700 line-clamp-2">
+                  {doc.issuer}
+                </p>
+                <div class="mt-3 flex items-center justify-between rounded-lg bg-bg px-2.5 py-1.5 border border-divider/60">
+                  <span class="text-[10px] uppercase tracking-wider text-neutral-600 font-medium">No. SK/Reg:</span>
+                  <span class="font-mono text-xs font-bold text-accent-900 select-all">{doc.certNumber}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Bottom Action -->
+            <div class="mt-5 border-t border-divider/60 pt-3 flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+                Dokumen Sah
+              </span>
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 text-xs font-bold text-accent-900 hover:text-accent-700 transition cursor-pointer"
+                onclick={`window.openCertLightbox(${payloadStr.replace(/"/g, '&quot;')})`}
+              >
+                <span>Lihat Berkas Asli</span>
+                <span aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function initCertGridFilters() {
+    const filterButtons = document.querySelectorAll('.cert-filter-btn');
+    const cards = document.querySelectorAll('.cert-card');
+
+    if (!filterButtons.length || !cards.length) return;
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetCategory = btn.getAttribute('data-filter');
+
+        // Update button states
+        filterButtons.forEach(b => {
+          b.classList.remove('active-filter', 'bg-accent-900', 'text-bg', 'border-accent-900');
+          b.classList.add('bg-surface', 'text-neutral-800', 'border-divider');
+        });
+        btn.classList.add('active-filter', 'bg-accent-900', 'text-bg', 'border-accent-900');
+        btn.classList.remove('bg-surface', 'text-neutral-800', 'border-divider');
+
+        // Filter cards
+        cards.forEach(card => {
+          const cardCat = card.getAttribute('data-category');
+          if (targetCategory === 'all' || cardCat === targetCategory) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  })();
+</script>

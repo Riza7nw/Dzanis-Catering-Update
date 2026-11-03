@@ -5,13 +5,13 @@ import { getShowcaseCertificates } from '../../services/api/certService';
 const defaultCertificates = await getShowcaseCertificates();
 ---
 
-<section class="py-14 bg-[#fcfbf7] relative overflow-x-clip" id="showcase-sertifikat-section">
+<section class="py-14 bg-bg relative overflow-x-clip" id="showcase-sertifikat-section">
   <div class="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 relative">
     
     <!-- Header Bagian -->
     <div class="mb-8">
-      <span class="text-[11px] font-bold tracking-wider text-slate-400 uppercase">DOKUMEN LENGKAP</span>
-      <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Showcase Sertifikat Resmi Berlaku</h2>
+      <span class="text-[11px] font-bold tracking-[0.2em] text-accent-900 uppercase">DOKUMEN RESMI</span>
+      <h2 class="text-2xl sm:text-3xl font-heading font-bold text-text mt-1">Showcase Sertifikat Resmi Berlaku</h2>
     </div>
 
     <!-- Kontainer Slider dengan Panah Melayang & Gap Ekstra -->
@@ -22,7 +22,7 @@ const defaultCertificates = await getShowcaseCertificates();
         type="button" 
         id="cert-prev-btn"
         aria-label="Halaman Sebelumnya"
-        class="absolute -left-2 sm:-left-5 md:-left-7 lg:-left-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/95 border border-[#e5ded0] text-slate-700 hover:bg-[#b04a22] hover:text-white hover:border-[#b04a22] shadow-md flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer">
+        class="absolute -left-2 sm:-left-5 md:-left-7 lg:-left-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-surface border border-divider text-text hover:bg-accent-900 hover:text-bg hover:border-accent-900 shadow-md flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
@@ -35,7 +35,37 @@ const defaultCertificates = await getShowcaseCertificates();
           class="flex transition-transform duration-500 ease-out will-change-transform"
           data-certificates={JSON.stringify(defaultCertificates)}
         >
-          <!-- Konten Slide dirender secara dinamis oleh skrip client-side -->
+          <!-- SSR Initial Render: First Page Preview -->
+          <div class="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-5 px-1">
+            {defaultCertificates.slice(0, 4).map(cert => (
+              <div class="bg-surface border border-divider rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-200">
+                <div>
+                  <div class="flex items-center justify-between text-xs mb-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-accent-2-200 text-accent-2-900 tracking-wider uppercase">{cert.badge || 'RESMI'}</span>
+                    <span class="text-neutral-700 text-xs font-medium">{cert.date || '-'}</span>
+                  </div>
+                  <h3 class="font-heading font-bold text-text text-base sm:text-lg mt-3 leading-snug">{cert.title}</h3>
+                  <p class="text-xs text-neutral-600 font-mono mt-1">No. {cert.no}</p>
+                </div>
+
+                <div class="flex items-center justify-between pt-5 mt-5 border-t border-divider text-xs">
+                  <span class="font-bold text-neutral-600 text-[11px] tracking-wider uppercase">DOKUMEN TERVERIFIKASI</span>
+                  <button 
+                    type="button"
+                    data-view-doc={cert.docUrl || '/images/brand/halal-cert.png'}
+                    data-view-title={cert.title}
+                    data-view-issuer={cert.issuer}
+                    data-view-no={cert.no}
+                    data-view-date={cert.date}
+                    data-view-badge={cert.badge}
+                    class="btn-view-cert text-accent-900 font-bold hover:underline flex items-center gap-1.5 transition cursor-pointer">
+                    <span>Lihat Dokumen Asli</span>
+                    <span>&rarr;</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -44,7 +74,7 @@ const defaultCertificates = await getShowcaseCertificates();
         type="button" 
         id="cert-next-btn"
         aria-label="Halaman Selanjutnya"
-        class="absolute -right-2 sm:-right-5 md:-right-7 lg:-right-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/95 border border-[#e5ded0] text-slate-700 hover:bg-[#b04a22] hover:text-white hover:border-[#b04a22] shadow-md flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer">
+        class="absolute -right-2 sm:-right-5 md:-right-7 lg:-right-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-surface border border-divider text-text hover:bg-accent-900 hover:text-bg hover:border-accent-900 shadow-md flex items-center justify-center transition-all duration-200 focus:outline-none cursor-pointer">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
         </svg>
@@ -58,23 +88,6 @@ const defaultCertificates = await getShowcaseCertificates();
     </div>
 
   </div>
-
-  <!-- LIGHTBOX MODAL PREVIEW DOKUMEN ASLI -->
-  <div id="cert-lightbox-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-        <div>
-          <h3 id="cert-modal-title" class="font-bold text-slate-900 text-base">Pratinjau Dokumen Legalitas</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Dokumen Resmi Dzanis Catering Terverifikasi</p>
-        </div>
-        <button id="cert-modal-close-btn" type="button" aria-label="Tutup pratinjau sertifikat" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold transition cursor-pointer">✕</button>
-      </div>
-      <div class="flex-1 overflow-auto rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-4 min-h-[350px]">
-        <img id="cert-modal-img" src="/images/brand/halal-cert.png" width="800" height="1130" alt="Dokumen Sertifikat Resmi Dzanis Catering" class="max-h-[65vh] object-contain rounded-lg shadow-sm" />
-        <iframe id="cert-modal-iframe" src="" class="w-full h-[65vh] rounded-lg border border-slate-100 hidden" title="Dokumen PDF Asli"></iframe>
-      </div>
-    </div>
-  </div>
 </section>
 
 <script is:inline>
@@ -83,11 +96,6 @@ const defaultCertificates = await getShowcaseCertificates();
   const dotsContainer = document.getElementById('cert-dots-container');
   const prevBtn = document.getElementById('cert-prev-btn');
   const nextBtn = document.getElementById('cert-next-btn');
-  const modal = document.getElementById('cert-lightbox-modal');
-  const modalImg = document.getElementById('cert-modal-img');
-  const modalIframe = document.getElementById('cert-modal-iframe');
-  const modalTitle = document.getElementById('cert-modal-title');
-  const modalCloseBtn = document.getElementById('cert-modal-close-btn');
 
   if (!track) return;
 
@@ -118,23 +126,27 @@ const defaultCertificates = await getShowcaseCertificates();
       html += `
         <div class="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-5 px-1">
           ${pageCerts.map(cert => `
-            <div class="bg-[#f6f2e9] border border-[#e8e1d3] rounded-3xl p-6 flex flex-col justify-between hover:shadow-sm transition duration-200">
+            <div class="bg-surface border border-divider rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-200">
               <div>
                 <div class="flex items-center justify-between text-xs mb-2">
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#efe7da] text-[#8c6d48] tracking-wider uppercase">${cert.badge || 'RESMI'}</span>
-                  <span class="text-slate-500 text-xs font-medium">${cert.date || '-'}</span>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-accent-2-200 text-accent-2-900 tracking-wider uppercase">${cert.badge || 'RESMI'}</span>
+                  <span class="text-neutral-700 text-xs font-medium">${cert.date || '-'}</span>
                 </div>
-                <h3 class="font-bold text-slate-900 text-base sm:text-lg mt-3 leading-snug">${cert.title}</h3>
-                <p class="text-xs text-slate-500 font-mono mt-1">No. ${cert.no}</p>
+                <h3 class="font-heading font-bold text-text text-base sm:text-lg mt-3 leading-snug">${cert.title}</h3>
+                <p class="text-xs text-neutral-600 font-mono mt-1">No. ${cert.no}</p>
               </div>
 
-              <div class="flex items-center justify-between pt-5 mt-5 border-t border-[#e5ded0] text-xs">
-                <span class="font-bold text-slate-500 text-[11px] tracking-wider uppercase">DOKUMEN TERVERIFIKASI</span>
+              <div class="flex items-center justify-between pt-5 mt-5 border-t border-divider text-xs">
+                <span class="font-bold text-neutral-600 text-[11px] tracking-wider uppercase">DOKUMEN TERVERIFIKASI</span>
                 <button 
                   type="button"
                   data-view-doc="${cert.docUrl || '/images/brand/halal-cert.png'}"
                   data-view-title="${cert.title}"
-                  class="btn-view-cert text-[#b04a22] font-semibold hover:underline flex items-center gap-1.5 transition cursor-pointer">
+                  data-view-issuer="${cert.issuer || ''}"
+                  data-view-no="${cert.no || ''}"
+                  data-view-date="${cert.date || ''}"
+                  data-view-badge="${cert.badge || 'RESMI'}"
+                  class="btn-view-cert text-accent-900 font-bold hover:underline flex items-center gap-1.5 transition cursor-pointer">
                   <span>Lihat Dokumen Asli</span>
                   <span>&rarr;</span>
                 </button>
@@ -161,7 +173,6 @@ const defaultCertificates = await getShowcaseCertificates();
     if (!dotsContainer) return;
     dotsContainer.innerHTML = '';
     
-    // Jangan tampilkan titik jika hanya ada 1 halaman
     if (totalPages <= 1) {
       if (prevBtn) prevBtn.style.display = 'none';
       if (nextBtn) nextBtn.style.display = 'none';
@@ -174,7 +185,7 @@ const defaultCertificates = await getShowcaseCertificates();
     for (let i = 0; i < totalPages; i++) {
       const dot = document.createElement('button');
       dot.type = 'button';
-      dot.className = `h-2 rounded-full transition-all duration-300 focus:outline-none cursor-pointer ${i === currentPage ? 'w-7 bg-[#b04a22]' : 'w-2 bg-[#d8d0c0] hover:bg-[#b8ae9c]'}`;
+      dot.className = `h-2 rounded-full transition-all duration-300 focus:outline-none cursor-pointer ${i === currentPage ? 'w-7 bg-accent-900' : 'w-2 bg-neutral-300 hover:bg-neutral-400'}`;
       dot.setAttribute('aria-label', `Halaman ${i + 1}`);
       dot.addEventListener('click', () => {
         currentPage = i;
@@ -189,14 +200,13 @@ const defaultCertificates = await getShowcaseCertificates();
     const dots = dotsContainer.querySelectorAll('button');
     dots.forEach((dot, idx) => {
       if (idx === currentPage) {
-        dot.className = 'h-2 w-7 rounded-full bg-[#b04a22] transition-all duration-300 focus:outline-none cursor-pointer';
+        dot.className = 'h-2 w-7 rounded-full bg-accent-900 transition-all duration-300 focus:outline-none cursor-pointer';
       } else {
-        dot.className = 'h-2 w-2 rounded-full bg-[#d8d0c0] hover:bg-[#b8ae9c] transition-all duration-300 focus:outline-none cursor-pointer';
+        dot.className = 'h-2 w-2 rounded-full bg-neutral-300 hover:bg-neutral-400 transition-all duration-300 focus:outline-none cursor-pointer';
       }
     });
   }
 
-  // Navigasi Panah
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
       currentPage = currentPage > 0 ? currentPage - 1 : totalPages - 1;
@@ -211,7 +221,7 @@ const defaultCertificates = await getShowcaseCertificates();
     });
   }
 
-  // Dukungan Touch Swipe di Mobile
+  // Touch Swipe
   let touchStartX = 0;
   track.addEventListener('touchstart', (e) => {
     touchStartX = e.changedTouches[0].screenX;
@@ -226,56 +236,31 @@ const defaultCertificates = await getShowcaseCertificates();
     }
   }, { passive: true });
 
-  // Event Delegation Lightbox Modal
+  // Event Delegation Lightbox Modal Trigger
   document.addEventListener('click', (e) => {
     const target = e.target.closest('.btn-view-cert');
-    if (target && modal && modalTitle) {
+    if (target) {
       const docUrl = target.getAttribute('data-view-doc') || '';
       const title = target.getAttribute('data-view-title') || 'Dokumen Sertifikat';
-      modalTitle.innerText = title;
-      const isPdf = docUrl.toLowerCase().endsWith('.pdf');
+      const issuer = target.getAttribute('data-view-issuer') || 'Dzanis Catering';
+      const certNumber = target.getAttribute('data-view-no') || '-';
+      const validUntil = target.getAttribute('data-view-date') || 'Aktif';
+      const badge = target.getAttribute('data-view-badge') || 'RESMI';
 
-      if (isPdf && modalIframe) {
-        if (modalImg) modalImg.classList.add('hidden');
-        modalIframe.classList.remove('hidden');
-        modalIframe.src = docUrl;
-      } else if (modalImg) {
-        if (modalIframe) {
-          modalIframe.classList.add('hidden');
-          modalIframe.src = '';
-        }
-        modalImg.classList.remove('hidden');
-        modalImg.src = docUrl;
+      if (typeof window.openCertLightbox === 'function') {
+        window.openCertLightbox({
+          title,
+          issuer,
+          certNumber,
+          validUntil,
+          badge,
+          documentUrl: docUrl,
+          fileType: docUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image'
+        });
       }
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.body.style.overflow = 'hidden';
     }
   });
 
-  function closeModal() {
-    if (!modal) return;
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    if (modalIframe) modalIframe.src = '';
-    if (modalImg) modalImg.src = '';
-    document.body.style.overflow = '';
-  }
-
-  if (modalCloseBtn && modal) {
-    modalCloseBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
-    });
-  }
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-      closeModal();
-    }
-  });
-
-  // Auto Render saat Load & Resize
   renderSlides();
   window.addEventListener('resize', () => {
     const newPageSize = getPageSize();
@@ -283,40 +268,5 @@ const defaultCertificates = await getShowcaseCertificates();
       renderSlides();
     }
   });
-
-  // Sinkronisasi Dinamis dari Backend API jika tersedia
-  (async function syncCertificatesFromBackend() {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const queryApi = urlParams.get('apiUrl');
-      const hostname = window.location.hostname;
-      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
-      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-      const apiUrl = queryApi || (isLocal ? defaultLocalApi : 'https://alkalize-rewire-scruffy.ngrok-free.dev');
-      
-      const res = await fetch(`${apiUrl}/api/certifications?active=true`, {
-        headers: { 'ngrok-skip-browser-warning': 'true', 'Accept': 'application/json' }
-      });
-      if (!res.ok) return;
-      const data = await res.json();
-      const rawCerts = Array.isArray(data) ? data : (Array.isArray(data.certifications) ? data.certifications : (Array.isArray(data.data) ? data.data : []));
-      if (!rawCerts || rawCerts.length === 0) return;
-
-      const activeCerts = rawCerts.filter(c => c.is_active !== 0 && c.is_active !== false && (c.category || '').toLowerCase() === 'sertifikat');
-      if (activeCerts.length > 0) {
-        certList = activeCerts.map((c, i) => ({
-          id: c.id || (i + 1),
-          title: c.title || c.label || 'Sertifikat Resmi',
-          no: c.cert_number || c.meta || '-',
-          date: (c.valid_until || c.date || '-').toUpperCase(),
-          badge: c.badge || 'RESMI',
-          docUrl: c.document_url || '/images/brand/halal-cert.png'
-        }));
-        renderSlides();
-      }
-    } catch (e) {
-      // Menggunakan fallback data default
-    }
-  })();
 })();
 </script>

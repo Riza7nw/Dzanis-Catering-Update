@@ -1,0 +1,215 @@
+---
+// src/components/sertifikat/CertLightboxModal.astro
+---
+
+<!-- Single Source of Truth: Accessible High-Resolution Document Lightbox -->
+<div 
+  id="cert-lightbox-modal" 
+  class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-6 transition-all duration-300"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cert-lightbox-title"
+>
+  <div 
+    id="cert-lightbox-card"
+    class="bg-surface border border-divider rounded-[28px] max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200"
+  >
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-4 sm:p-5 border-b border-divider bg-bg/80">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <span 
+          id="cert-lightbox-badge" 
+          class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-accent-200 text-accent-900 border border-accent-300 shrink-0"
+        >
+          RESMI
+        </span>
+        <div class="truncate">
+          <h3 id="cert-lightbox-title" class="font-heading text-base sm:text-lg font-bold text-text truncate">
+            Dokumen Sertifikasi Resmi
+          </h3>
+          <p class="text-xs text-neutral-700 truncate mt-0.5">
+            <span id="cert-lightbox-issuer" class="font-semibold text-accent-900">Lembaga Penerbit</span> &bull; 
+            <span id="cert-lightbox-number" class="font-mono font-semibold">No. -</span>
+          </p>
+        </div>
+      </div>
+
+      <button 
+        id="cert-lightbox-close-btn" 
+        type="button"
+        class="w-9 h-9 rounded-full bg-surface border border-divider text-neutral-700 hover:text-text hover:bg-neutral-200 transition flex items-center justify-center shrink-0 ml-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent-900"
+        aria-label="Tutup jendela pratinjau dokumen"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body: Scanned Document High-Res Viewer -->
+    <div class="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col items-center justify-center bg-neutral-900/5 min-h-[360px] text-center relative select-none">
+      <!-- Image Viewer -->
+      <div id="cert-lightbox-img-container" class="w-full flex flex-col items-center justify-center relative">
+        <div class="relative overflow-hidden rounded-xl border border-divider bg-white p-2 shadow-lg max-h-[62vh]">
+          <img 
+            id="cert-lightbox-img" 
+            src="/images/brand/halal-cert.png" 
+            width="800"
+            height="1130"
+            alt="Pindaian Dokumen Asli Legalitas Dzanis Catering" 
+            class="max-h-[58vh] w-auto max-w-full object-contain mx-auto transition-transform duration-200"
+          />
+        </div>
+        <p class="mt-2.5 text-[11px] text-neutral-600 font-medium">
+          Dokumen resmi terbitan otoritas terkait dengan stempel sah dan nomor registrasi terdaftar.
+        </p>
+      </div>
+
+      <!-- PDF Viewer -->
+      <div id="cert-lightbox-pdf-container" class="w-full h-full hidden">
+        <iframe 
+          id="cert-lightbox-iframe" 
+          src="" 
+          class="w-full h-[62vh] rounded-xl border border-divider bg-white shadow-md"
+          title="Dokumen PDF Asli"
+        ></iframe>
+      </div>
+
+      <!-- Empty State -->
+      <div id="cert-lightbox-empty-state" class="hidden flex-col items-center justify-center py-12 text-neutral-600">
+        <span class="text-4xl mb-2">📄</span>
+        <p class="text-sm font-semibold text-text">Berkas Dokumen Asli Belum Diunggah</p>
+        <p class="text-xs text-neutral-700 mt-1">Sertifikat aktif dan dapat diverifikasi via nomor registrasi.</p>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-4 border-t border-divider bg-bg/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+      <div class="text-neutral-700">
+        <span>Status Masa Berlaku: </span>
+        <strong id="cert-lightbox-valid" class="text-text font-bold text-accent-900">Aktif</strong>
+      </div>
+
+      <div class="flex items-center space-x-2.5 self-end sm:self-auto">
+        <a 
+          id="cert-lightbox-download-link" 
+          href="/images/brand/halal-cert.png" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          aria-label="Buka berkas dokumen resmi di tab baru"
+          class="px-4 py-2 rounded-xl bg-surface border border-divider text-text hover:bg-neutral-200 transition font-heading font-semibold text-xs tracking-wider inline-flex items-center gap-1.5"
+        >
+          <span>Buka Berkas</span>
+          <span aria-hidden="true">&nearr;</span>
+        </a>
+        <button 
+          id="cert-lightbox-footer-close-btn" 
+          type="button" 
+          class="px-5 py-2 rounded-xl bg-accent-900 text-bg hover:bg-accent-700 transition font-heading font-semibold text-xs tracking-wider uppercase cursor-pointer"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function initCertLightboxController() {
+    const modal = document.getElementById('cert-lightbox-modal');
+    const titleEl = document.getElementById('cert-lightbox-title');
+    const issuerEl = document.getElementById('cert-lightbox-issuer');
+    const numberEl = document.getElementById('cert-lightbox-number');
+    const badgeEl = document.getElementById('cert-lightbox-badge');
+    const validEl = document.getElementById('cert-lightbox-valid');
+    const imgEl = document.getElementById('cert-lightbox-img');
+    const iframeEl = document.getElementById('cert-lightbox-iframe');
+    const imgContainer = document.getElementById('cert-lightbox-img-container');
+    const pdfContainer = document.getElementById('cert-lightbox-pdf-container');
+    const emptyState = document.getElementById('cert-lightbox-empty-state');
+    const downloadLink = document.getElementById('cert-lightbox-download-link');
+    const closeBtn = document.getElementById('cert-lightbox-close-btn');
+    const closeFooterBtn = document.getElementById('cert-lightbox-footer-close-btn');
+
+    function openCertLightbox(doc) {
+      if (!doc || !modal) return;
+      const title = doc.title || doc.label || 'Dokumen Resmi';
+      const issuer = doc.issuer || doc.detail || 'Lembaga Penerbit';
+      const certNumber = doc.certNumber || doc.cert_number || doc.no || doc.meta || 'Nomor SK Resmi';
+      const validUntil = doc.validUntil || doc.valid_until || doc.date || 'Aktif';
+      const badge = doc.badge || doc.status || 'RESMI';
+      const docUrl = doc.documentUrl || doc.document_url || doc.docUrl || '';
+      const isPdf = doc.fileType === 'pdf' || doc.file_type === 'pdf' || docUrl.toLowerCase().endsWith('.pdf');
+
+      if (titleEl) titleEl.textContent = title;
+      if (issuerEl) issuerEl.textContent = issuer;
+      if (numberEl) numberEl.textContent = `No: ${certNumber}`;
+      if (validEl) validEl.textContent = validUntil;
+      if (badgeEl) badgeEl.textContent = badge;
+
+      if (docUrl) {
+        if (downloadLink) {
+          downloadLink.href = docUrl;
+          downloadLink.classList.remove('hidden');
+        }
+
+        if (isPdf) {
+          if (imgContainer) imgContainer.classList.add('hidden');
+          if (emptyState) emptyState.classList.add('hidden');
+          if (pdfContainer) {
+            pdfContainer.classList.remove('hidden');
+            if (iframeEl) iframeEl.src = docUrl;
+          }
+        } else {
+          if (pdfContainer) pdfContainer.classList.add('hidden');
+          if (emptyState) emptyState.classList.add('hidden');
+          if (imgContainer) {
+            imgContainer.classList.remove('hidden');
+            if (imgEl) imgEl.src = docUrl;
+          }
+        }
+      } else {
+        if (imgContainer) imgContainer.classList.add('hidden');
+        if (pdfContainer) pdfContainer.classList.add('hidden');
+        if (emptyState) emptyState.classList.remove('hidden');
+        if (downloadLink) downloadLink.classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCertLightbox() {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if (iframeEl) iframeEl.src = '';
+      if (imgEl) imgEl.src = '';
+      document.body.style.overflow = '';
+    }
+
+    // Attach to global window
+    window.openCertLightbox = openCertLightbox;
+    window.closeCertLightbox = closeCertLightbox;
+
+    // Backward compatibility for existing references
+    window.openDocModal = openCertLightbox;
+    window.closeDocModal = closeCertLightbox;
+
+    if (closeBtn) closeBtn.addEventListener('click', closeCertLightbox);
+    if (closeFooterBtn) closeFooterBtn.addEventListener('click', closeCertLightbox);
+
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeCertLightbox();
+      });
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+        closeCertLightbox();
+      }
+    });
+  })();
+</script>
