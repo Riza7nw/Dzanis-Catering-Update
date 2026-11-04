@@ -161,6 +161,7 @@ h4 {
     text-align: center;
     text-decoration: none;
     cursor: pointer;
+    touch-action: manipulation;
     transition:
       background-color var(--durasi-cepat) var(--easing-keluar),
       color var(--durasi-cepat) var(--easing-keluar),
@@ -489,4 +490,19 @@ h4 {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── Floating Actions & Modal Coexistence Invariant ────────────────── */
+body.modal-open #floating-whatsapp-btn,
+body[data-modal-open="true"] #floating-whatsapp-btn,
+body.drawer-open #floating-whatsapp-btn,
+body:has(dialog[open]) #floating-whatsapp-btn,
+body:has(#cert-lightbox-modal:not(.hidden)) #floating-whatsapp-btn {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transform: scale(0.9) !important;
+  transition: opacity var(--durasi-sedang) var(--easing-keluar),
+              transform var(--durasi-sedang) var(--easing-keluar),
+              visibility var(--durasi-sedang);
 }

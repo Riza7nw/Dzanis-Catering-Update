@@ -97,7 +97,7 @@
           target="_blank" 
           rel="noopener noreferrer"
           aria-label="Buka berkas dokumen resmi di tab baru"
-          class="px-4 py-2 rounded-xl bg-surface border border-divider text-text hover:bg-neutral-200 transition font-heading font-semibold text-xs tracking-wider inline-flex items-center gap-1.5"
+          class="min-h-[44px] px-4 py-2.5 rounded-xl bg-surface border border-divider text-text hover:bg-neutral-200 transition font-heading font-semibold text-xs tracking-wider inline-flex items-center justify-center gap-1.5 touch-manipulation"
         >
           <span>Buka Berkas</span>
           <span aria-hidden="true">&nearr;</span>
@@ -105,7 +105,7 @@
         <button 
           id="cert-lightbox-footer-close-btn" 
           type="button" 
-          class="px-5 py-2 rounded-xl bg-accent-900 text-bg hover:bg-accent-700 transition font-heading font-semibold text-xs tracking-wider uppercase cursor-pointer"
+          class="min-h-[44px] px-5 py-2.5 rounded-xl bg-accent-900 text-bg hover:bg-accent-700 transition font-heading font-semibold text-xs tracking-wider uppercase cursor-pointer inline-flex items-center justify-center touch-manipulation"
         >
           Tutup
         </button>
@@ -207,6 +207,18 @@
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
+    document.body.setAttribute('data-modal-open', 'true');
+    if (typeof window.setFloatingWaSuppressed === 'function') {
+      window.setFloatingWaSuppressed(true);
+    } else {
+      const floatingWa = document.getElementById('floating-whatsapp-btn');
+      if (floatingWa) {
+        floatingWa.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+        floatingWa.setAttribute('tabindex', '-1');
+        floatingWa.setAttribute('aria-hidden', 'true');
+      }
+    }
 
     // Focus close button for accessibility
     const closeBtn = document.getElementById('cert-lightbox-close-btn');
@@ -223,6 +235,18 @@
     if (iframeEl) iframeEl.src = '';
     if (imgEl) imgEl.src = '';
     document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
+    document.body.removeAttribute('data-modal-open');
+    if (typeof window.setFloatingWaSuppressed === 'function') {
+      window.setFloatingWaSuppressed(false);
+    } else {
+      const floatingWa = document.getElementById('floating-whatsapp-btn');
+      if (floatingWa) {
+        floatingWa.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+        floatingWa.removeAttribute('tabindex');
+        floatingWa.removeAttribute('aria-hidden');
+      }
+    }
 
     // Restore focus
     if (certLightboxLastFocusedEl && typeof certLightboxLastFocusedEl.focus === 'function') {

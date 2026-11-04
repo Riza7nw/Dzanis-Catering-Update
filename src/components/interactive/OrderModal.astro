@@ -12,7 +12,7 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
 <dialog
   id="order-modal"
   data-phone={phoneNumber}
-  class="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg rounded-[var(--radius-lg)] border border-[var(--color-divider)] bg-[var(--color-bg)] p-0 text-[var(--color-text)] shadow-[var(--shadow-lg)] backdrop:bg-black/50 backdrop:blur-sm focus:outline-none max-h-[92vh] overflow-y-auto dz-scroll"
+  class="fixed inset-0 m-auto z-[120] w-[calc(100%-2rem)] max-w-lg rounded-[var(--radius-lg)] border border-[var(--color-divider)] bg-[var(--color-bg)] p-0 text-[var(--color-text)] shadow-[var(--shadow-lg)] backdrop:bg-black/50 backdrop:blur-sm focus:outline-none max-h-[92vh] overflow-y-auto dz-scroll"
 >
   <div class="relative flex flex-col p-5 sm:p-7">
     <!-- Header -->
@@ -30,7 +30,7 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
       <button
         type="button"
         id="modal-close-icon"
-        class="inline-flex size-8 items-center justify-center rounded-full text-neutral-900 hover:bg-neutral-200 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-accent cursor-pointer"
+        class="inline-flex min-h-[44px] min-w-[44px] size-11 items-center justify-center rounded-full text-neutral-900 hover:bg-neutral-200 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-accent cursor-pointer touch-manipulation"
         aria-label="Tutup form"
       >
         <svg

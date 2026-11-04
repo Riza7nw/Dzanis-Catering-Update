@@ -11,6 +11,8 @@
 
 import { buildOrderModalWhatsAppUrl } from '../services/whatsapp/orderModalMessage';
 import { submitLead } from '../services/api/leadService';
+import { waPhoneNumber } from '../data/company';
+import { setFloatingWaSuppressed } from './floating-actions-controller';
 import type { OrderModalPrefill } from '../types/order';
 import type { BackendLeadPayload } from '../types/api';
 
@@ -75,6 +77,7 @@ export function teardownOrderModalController(): void {
     orderModalAbortController.abort();
     orderModalAbortController = null;
   }
+  setFloatingWaSuppressed(false);
 }
 
 /**
@@ -154,6 +157,7 @@ export function initOrderModalController(): void {
         if (latInput) latInput.value = '';
         if (lngInput) lngInput.value = '';
         window.dispatchEvent(new CustomEvent('reset-peta-picker'));
+        setFloatingWaSuppressed(true);
         dialog.showModal();
         window.dispatchEvent(new CustomEvent('order-modal-opened'));
       }
@@ -193,6 +197,15 @@ export function initOrderModalController(): void {
     { signal }
   );
 
+  dialog.addEventListener(
+    'close',
+    () => {
+      setFloatingWaSuppressed(false);
+      window.dispatchEvent(new CustomEvent('order-modal-closed'));
+    },
+    { signal }
+  );
+
   // Handler Submit Form Pemesanan
   form.addEventListener(
     'submit',
@@ -215,7 +228,7 @@ export function initOrderModalController(): void {
       const notes = String(data.get('notes') || '').trim();
 
       // Bangun URL WhatsApp resmi dan alihkan pelanggan langsung dari trusted user gesture
-      const phone = dialog.dataset.phone || '6281324383858';
+      const phone = dialog.dataset.phone || waPhoneNumber;
       const waUrl = buildOrderModalWhatsAppUrl(phone, {
         packageName: pkg,
         customDetails: details,

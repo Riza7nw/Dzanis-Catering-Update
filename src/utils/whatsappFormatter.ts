@@ -3,11 +3,13 @@
  * Format pesan dinamis, kontekstual, data-driven tanpa placeholder kaku.
  */
 
+import { waPhoneNumber } from '../data/company.ts';
+
 /**
  * Menormalkan nomor telepon ke format internasional standar tanpa karakter non-digit.
  * Contoh: "0813-2438-3858" -> "6281324383858", "+62 813..." -> "62813..."
  */
-export function normalizePhoneNumber(rawPhone: string, fallbackPhone = '6281324383858'): string {
+export function normalizePhoneNumber(rawPhone: string, fallbackPhone = waPhoneNumber): string {
   if (!rawPhone) return fallbackPhone;
   let digits = String(rawPhone).replace(/\D/g, '');
   if (digits.startsWith('0')) {
@@ -19,7 +21,7 @@ export function normalizePhoneNumber(rawPhone: string, fallbackPhone = '62813243
 /**
  * Helper untuk Layanan Lain: Menghasilkan URL WhatsApp konsultasi layanan.
  */
-export function buildServiceInquiryUrl(serviceName: string, phone: string = '6281324383858'): string {
+export function buildServiceInquiryUrl(serviceName: string, phone: string = waPhoneNumber): string {
   const cleanPhone = normalizePhoneNumber(phone);
   const pesan = `Halo Dzanis Catering, saya ingin konsultasi mengenai layanan *${serviceName}* untuk rencana acara saya. Boleh minta info katalog paket dan pricelist lengkapnya? Terima kasih.`;
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(pesan)}`;
@@ -39,7 +41,7 @@ export interface SnackTemplateData {
 /**
  * Helper untuk Template Snack Box: Dinamis membaca array isian backend.
  */
-export function buildSnackTemplateWaUrl(template: SnackTemplateData, phone: string = '6281324383858'): string {
+export function buildSnackTemplateWaUrl(template: SnackTemplateData, phone: string = waPhoneNumber): string {
   const cleanPhone = normalizePhoneNumber(phone);
   const daftarIsian = template.items
     .map((item, idx) => `${idx + 1}. ${item.kategori ? item.kategori + ': ' : ''}${item.nama}`)

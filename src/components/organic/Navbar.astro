@@ -118,7 +118,7 @@ const tautan = [
         type="button"
         id="mobile-nav-close-btn"
         aria-label="Tutup menu navigasi"
-        class="size-8 rounded-full bg-surface hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        class="min-h-[44px] min-w-[44px] size-11 rounded-full bg-surface hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 flex items-center justify-center transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
@@ -191,10 +191,19 @@ const tautan = [
       backdrop?.classList.remove('opacity-0', 'pointer-events-none');
       backdrop?.classList.add('opacity-100', 'pointer-events-auto');
 
-      // Sembunyikan tombol floating WhatsApp agar tidak bertumpuk dengan drawer
-      const floatingWa = getFloatingWa();
-      if (floatingWa) {
-        floatingWa.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+      document.body.classList.add('modal-open', 'drawer-open');
+      document.body.setAttribute('data-modal-open', 'true');
+
+      // Sembunyikan tombol floating WhatsApp agar tidak bertumpuk dengan drawer & putus fokus keyboard
+      if (typeof (window as any).setFloatingWaSuppressed === 'function') {
+        (window as any).setFloatingWaSuppressed(true);
+      } else {
+        const floatingWa = getFloatingWa();
+        if (floatingWa) {
+          floatingWa.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+          floatingWa.setAttribute('tabindex', '-1');
+          floatingWa.setAttribute('aria-hidden', 'true');
+        }
       }
 
       document.body.style.overflow = 'hidden';
@@ -220,10 +229,19 @@ const tautan = [
       backdrop?.classList.remove('opacity-100', 'pointer-events-auto');
       backdrop?.classList.add('opacity-0', 'pointer-events-none');
 
+      document.body.classList.remove('modal-open', 'drawer-open');
+      document.body.removeAttribute('data-modal-open');
+
       // Munculkan kembali tombol floating WhatsApp saat drawer tertutup
-      const floatingWa = getFloatingWa();
-      if (floatingWa) {
-        floatingWa.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+      if (typeof (window as any).setFloatingWaSuppressed === 'function') {
+        (window as any).setFloatingWaSuppressed(false);
+      } else {
+        const floatingWa = getFloatingWa();
+        if (floatingWa) {
+          floatingWa.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+          floatingWa.removeAttribute('tabindex');
+          floatingWa.removeAttribute('aria-hidden');
+        }
       }
 
       document.body.style.overflow = '';

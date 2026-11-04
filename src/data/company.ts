@@ -74,7 +74,7 @@ export const company: Company = {
     whatsappLink: waLink(
       "Halo Dzanis Catering, saya mau tanya paket yang ada di Dzanis Catering.",
     ),
-    phoneHref: "https://wa.me/6281324383858?text=Halo%20Dzanis%20Catering%2C%20saya%20ingin%20bertanya%20mengenai%20layanan%20katering.",
+    phoneHref: waLink("Halo Dzanis Catering, saya ingin bertanya mengenai layanan katering."),
     address: "Majalengka, Jawa Barat",
     operatingHours: "Menerima pesanan setiap hari, pengantaran mulai pukul 06.00.",
   },

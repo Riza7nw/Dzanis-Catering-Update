@@ -129,7 +129,7 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
         type="button"
         id="pkg-selector-close"
         aria-label="Tutup pilihan paket"
-        class="size-8 rounded-full bg-surface hover:bg-neutral-200/80 text-neutral-500 hover:text-neutral-800 flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        class="min-h-[44px] min-w-[44px] size-11 rounded-full bg-surface hover:bg-neutral-200/80 text-neutral-500 hover:text-neutral-800 flex items-center justify-center transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path
@@ -318,9 +318,17 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
       // Lock body scroll and hide floating WA button on mobile
       if (window.innerWidth < 768) {
         document.body.style.overflow = 'hidden';
-        const floatingWa = getFloatingWa();
-        if (floatingWa) {
-          floatingWa.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+        document.body.classList.add('modal-open');
+        document.body.setAttribute('data-modal-open', 'true');
+        if (typeof (window as any).setFloatingWaSuppressed === 'function') {
+          (window as any).setFloatingWaSuppressed(true);
+        } else {
+          const floatingWa = getFloatingWa();
+          if (floatingWa) {
+            floatingWa.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+            floatingWa.setAttribute('tabindex', '-1');
+            floatingWa.setAttribute('aria-hidden', 'true');
+          }
         }
       }
 
@@ -353,9 +361,17 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
 
       // Restore body scroll and floating WA button
       document.body.style.overflow = '';
-      const floatingWa = getFloatingWa();
-      if (floatingWa) {
-        floatingWa.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+      document.body.classList.remove('modal-open');
+      document.body.removeAttribute('data-modal-open');
+      if (typeof (window as any).setFloatingWaSuppressed === 'function') {
+        (window as any).setFloatingWaSuppressed(false);
+      } else {
+        const floatingWa = getFloatingWa();
+        if (floatingWa) {
+          floatingWa.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+          floatingWa.removeAttribute('tabindex');
+          floatingWa.removeAttribute('aria-hidden');
+        }
       }
 
       // Return focus to trigger
