@@ -1,14 +1,17 @@
 /**
  * Service: API Configuration & Base URL Resolver
- * Menangani resolusi URL API dinamis untuk lingkungan build SSG (Node)
- * maupun interaksi browser klien dengan aman.
+ * Menangani resolusi URL API untuk build SSG (Node) maupun browser klien.
+ *
+ * Alamat backend hanya berasal dari PUBLIC_API_URL saat build (atau localhost saat pengembangan).
+ * Tidak ada override lewat query string: link pihak ketiga tidak boleh bisa membelokkan
+ * data pesanan pelanggan ke server lain.
  */
 
-export const DEFAULT_NGROK_URL = 'https://alkalize-rewire-scruffy.ngrok-free.dev';
 export const DEFAULT_TIMEOUT_MS = 2000;
 
 /**
- * Mengambil base URL API backend yang aktif.
+ * Mengambil base URL API backend yang aktif, atau string kosong bila backend tidak dikonfigurasi
+ * (website lalu memakai data katalog lokal).
  */
 export function getApiBaseUrl(): string {
   // 1. Variabel lingkungan PUBLIC_API_URL (prioritas utama pada mode build/hosting)
@@ -17,39 +20,30 @@ export function getApiBaseUrl(): string {
     if (envUrl) return envUrl.replace(/\/+$/, '');
   }
 
-  // 2. Lingkungan Klien Browser: Periksa parameter URL ?apiUrl= atau deteksi localhost
+  // 2. Pengembangan lokal: backend berjalan di port 8000 pada host yang sama
   if (typeof window !== 'undefined') {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const queryApi = urlParams.get('apiUrl');
-      if (queryApi) return queryApi.trim().replace(/\/+$/, '');
+    const hostname = window.location.hostname;
+    const isLocal =
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      hostname.endsWith('.local');
 
-      const hostname = window.location.hostname;
-      const isLocal =
-        hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
-        hostname.startsWith('192.168.') ||
-        hostname.startsWith('10.') ||
-        hostname.endsWith('.local');
-
-      if (isLocal) {
-        return `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-      }
-    } catch {
-      // Fallback diam jika URLSearchParams atau window tidak dapat diakses
+    if (isLocal) {
+      return `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
     }
   }
 
-  // 3. Fallback tunnel produksi/staging default
-  return DEFAULT_NGROK_URL;
+  // 3. Backend tidak dikonfigurasi: pemanggil memakai data lokal
+  return '';
 }
 
 /**
- * Default header untuk bypass browser warning ngrok pada testing tunnel.
+ * Header standar untuk permintaan API backend.
  */
 export function getCommonApiHeaders(): HeadersInit {
   return {
     'Accept': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
   };
 }
