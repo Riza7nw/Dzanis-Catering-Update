@@ -274,7 +274,7 @@ Retrieves a single package detail by its URL slug.
     "deskripsiSingkat": "Kombinasi dua protein dengan buah pencuci mulut, menu terfavorit untuk seminar dan instansi.",
     "deskripsiLengkap": "Pilihan terfavorit yang paling sering dipesan untuk kebutuhan seminar, workshop instansi, dan acara korporat. Mengombinasikan dua varian protein lezat dengan pelengkap buah pisang segar serta disajikan rapi dalam kemasan bento bersekat higienis.",
     "menuUtama": [
-      "Ayam Bakar Madu / Ayam Goreng Lengkuas",
+      "Ayam Bakar / Ayam Goreng",
       "Telur Balado 1/2 Butir"
     ],
     "laukPendamping": [

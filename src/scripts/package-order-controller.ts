@@ -16,6 +16,8 @@ import {
   buildNasiKotakCustomDetails,
   buildNasiKotakWhatsAppMessage,
 } from '../services/whatsapp/nasiKotakMessage';
+import { buildLargeOrderWhatsAppUrl } from '../services/whatsapp/waUrl';
+import { waPhoneNumber } from '../data/company';
 import type { OrderModalPrefill } from '../types/order';
 
 export interface PackageConfig {
@@ -79,6 +81,45 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
   let selectedSideDishes = Array.isArray(defaultSideDishes) ? [...defaultSideDishes] : [];
   let selectedEventDate: string | null = null;
 
+  const largeNotice = document.getElementById('package-large-order-notice');
+  const largeWaLink = document.getElementById('package-wa-admin-link') as HTMLAnchorElement | null;
+  let isLargeOrderMode = false;
+  let largeOrderPortion: number | null = null;
+
+  function updateLargeOrderNotice(inputQty?: number): void {
+    if (!largeNotice) return;
+
+    if (inputQty !== undefined) {
+      if (inputQty > maxOrder) {
+        isLargeOrderMode = true;
+        largeOrderPortion = inputQty;
+      } else if (inputQty > 0) {
+        isLargeOrderMode = false;
+        largeOrderPortion = null;
+      }
+    } else if (!isLargeOrderMode) {
+      const currentVal = parseInt(portionInput.value, 10);
+      if (currentVal > maxOrder) {
+        isLargeOrderMode = true;
+        largeOrderPortion = currentVal;
+      }
+    }
+
+    if (isLargeOrderMode) {
+      if (largeWaLink) {
+        const portionToUse = largeOrderPortion || parseInt(portionInput.value, 10);
+        largeWaLink.href = buildLargeOrderWhatsAppUrl(config.phone || waPhoneNumber, {
+          packageName,
+          portionCount: portionToUse,
+          eventDate: eventDateInput?.value || undefined,
+        });
+      }
+      largeNotice.classList.remove('hidden');
+    } else {
+      largeNotice.classList.add('hidden');
+    }
+  }
+
   function getActiveMoQ(): number {
     return getMinOrderByDate(eventDateInput?.value, minOrder, minOrderWeekend);
   }
@@ -101,8 +142,14 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
       const currentVal = parseInt(portionInput.value, 10);
       if (isNaN(currentVal) || currentVal < currentMoQ) {
         portionInput.value = String(currentMoQ);
+        isLargeOrderMode = false;
+        largeOrderPortion = null;
+        updateLargeOrderNotice(currentMoQ);
       } else if (currentVal > maxOrder) {
         portionInput.value = String(maxOrder);
+        updateLargeOrderNotice(currentVal);
+      } else if (!isLargeOrderMode) {
+        updateLargeOrderNotice(currentVal);
       }
     }
   }
@@ -409,6 +456,17 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
         }
       }
 
+      if (isLargeOrderMode || parseInt(portionInput.value, 10) > maxOrder) {
+        if (parseInt(portionInput.value, 10) > maxOrder) {
+          const raw = parseInt(portionInput.value, 10);
+          portionInput.value = maxOrder.toString();
+          updateLargeOrderNotice(raw);
+        }
+        largeNotice?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        largeWaLink?.focus();
+        return;
+      }
+
       if (eventDateInput && !eventDateInput.value) {
         alert('Mohon pilih tanggal acara minimal hari berikutnya.');
         eventDateInput.focus();
@@ -459,7 +517,15 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
     { signal }
   );
 
-  portionInput.addEventListener('input', updateCheckout, { signal });
+  portionInput.addEventListener(
+    'input',
+    () => {
+      const val = parseInt(portionInput.value, 10);
+      updateLargeOrderNotice(val);
+      updateCheckout();
+    },
+    { signal }
+  );
 
   portionInput.addEventListener(
     'blur',
@@ -468,8 +534,12 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
       const currentMoQ = getActiveMoQ();
       if (isNaN(val) || val < currentMoQ) {
         portionInput.value = currentMoQ.toString();
+        updateLargeOrderNotice(currentMoQ);
       } else if (val > maxOrder) {
         portionInput.value = maxOrder.toString();
+        updateLargeOrderNotice(val);
+      } else {
+        updateLargeOrderNotice(val);
       }
       updateCheckout();
     },
@@ -481,6 +551,9 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
       const target = e.target as HTMLInputElement;
       selectedEventDate = target.value;
       syncActiveMoQ(true);
+      if (isLargeOrderMode) {
+        updateLargeOrderNotice();
+      }
       updateCheckout();
     };
     eventDateInput.addEventListener('change', handleDateChange, { signal });

@@ -1,5 +1,6 @@
 ---
 import type { Paket } from '../../types/catalog';
+import LargeOrderNotice from '../interactive/LargeOrderNotice.astro';
 
 interface Props {
   paket: Paket;
@@ -56,6 +57,15 @@ const { paket, minEventDateString } = Astro.props;
       >
         Rp {(paket.harga * paket.minOrder).toLocaleString("id-ID")}
       </span>
+    </div>
+
+    <!-- Callout Notifikasi Pesanan Skala Besar (>500 Box) -->
+    <div class="sm:col-span-12">
+      <LargeOrderNotice
+        id="package-large-order-notice"
+        linkId="package-wa-admin-link"
+        defaultPackageName={paket.nama}
+      />
     </div>
   </div>
 

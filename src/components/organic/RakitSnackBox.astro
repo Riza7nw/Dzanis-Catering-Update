@@ -8,6 +8,7 @@ import SnackTemplateCarousel from '../snack/SnackTemplateCarousel.astro';
 import SnackCategoryNav from '../snack/SnackCategoryNav.astro';
 import SnackCatalogGrid from '../snack/SnackCatalogGrid.astro';
 import SnackBuilderBar from '../snack/SnackBuilderBar.astro';
+import LargeOrderNotice from '../interactive/LargeOrderNotice.astro';
 
 const totalSnackItems = snackKategori.reduce((sum, cat) => sum + cat.items.length, 0);
 const snackTemplates = await getSnackTemplates();
@@ -76,6 +77,14 @@ const snackTemplates = await getSnackTemplates();
             <span class="text-[11px] text-neutral-500">(Min. {MIN_BOX})</span>
           </div>
         </div>
+
+        <!-- Callout Notifikasi Pesanan Skala Besar (>500 Box) -->
+        <LargeOrderNotice
+          id="snack-builder-large-notice"
+          linkId="snack-builder-wa-admin-link"
+          defaultPackageName="Snack Box Custom"
+          customClass="mb-6"
+        />
 
         <!-- Filter Kategori Pill Buttons -->
         <SnackCategoryNav snackKategori={snackKategori} totalSnackItems={totalSnackItems} />

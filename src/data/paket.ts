@@ -131,9 +131,8 @@ export const DAFTAR_PAKET: Paket[] = [
     deskripsiLengkap:
       "Pilihan terfavorit yang paling sering dipesan untuk kebutuhan seminar, workshop instansi, dan acara korporat. Mengombinasikan sajian olahan ayam lezat dengan keleluasaan memilih 3 lauk pendamping favorit dari 9 pilihan menu tradisional, disajikan rapi dalam kemasan bento higienis.",
     menuUtama: [
-      "Ayam Bakar Madu",
-      "Ayam Goreng Lengkuas",
-      "Ayam Rica Kemangi",
+      "Ayam Bakar",
+      "Ayam Goreng",
     ],
     laukPendamping: [
       "Bihun goreng",
@@ -156,9 +155,8 @@ export const DAFTAR_PAKET: Paket[] = [
     // Menu selection: 1 Main Menu, 3 Side Dishes dari POOL_LAUK_23K
     canSelectMainMenu: true,
     selectableMainMenus: [
-      "Ayam Bakar Madu",
-      "Ayam Goreng Lengkuas",
-      "Ayam Rica Kemangi",
+      "Ayam Bakar",
+      "Ayam Goreng",
     ],
     selectableSideDishes: POOL_LAUK_23K,
     sideDishesSelectMin: 3,

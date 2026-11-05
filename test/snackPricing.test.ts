@@ -360,11 +360,41 @@ test('Interactive Headless Chrome: /rakit-snack-box/ custom builder calculation 
                     const subtotalText = document.getElementById('summary-subtotal')?.textContent?.trim();
                     const totalText = document.getElementById('summary-total')?.textContent?.trim();
 
-                    // Increase box count to 25
+                    // Test Large Order notice on Snack Builder (>500 box)
                     const boxInput = document.getElementById('builder-box-count');
+                    let snackNoticeVisibleOn600 = false;
+                    let snackWaHrefOn600 = '';
+                    let snackWaLinkHeight = 0;
+                    let snackNoticeStillVisibleAfterBlur = false;
+                    let orderBlockedOnLarge = false;
+                    let snackNoticeHiddenOnMinus = false;
+                    let snackNoticeHiddenOn25 = false;
+
                     if (boxInput) {
+                      boxInput.value = '600';
+                      boxInput.dispatchEvent(new Event('input', { bubbles: true }));
+                      snackNoticeVisibleOn600 = !document.getElementById('snack-builder-large-notice')?.classList.contains('hidden');
+                      snackWaHrefOn600 = document.getElementById('snack-builder-wa-admin-link')?.getAttribute('href') || '';
+                      snackWaLinkHeight = document.getElementById('snack-builder-wa-admin-link')?.getBoundingClientRect().height || 0;
+
+                      // Blur clamps to 500, but notice must remain visible
+                      boxInput.dispatchEvent(new Event('blur', { bubbles: true }));
+                      snackNoticeStillVisibleAfterBlur = !document.getElementById('snack-builder-large-notice')?.classList.contains('hidden');
+
+                      // Try clicking order button while in large order mode -> must block opening modal
+                      const testOrderBtn = document.getElementById('builder-order-btn');
+                      testOrderBtn?.click();
+                      orderBlockedOnLarge = !document.getElementById('order-modal')?.hasAttribute('open');
+
+                      // Click minus button -> must dismiss large order mode
+                      const minusBtn = document.getElementById('builder-box-minus');
+                      minusBtn?.click();
+                      snackNoticeHiddenOnMinus = document.getElementById('snack-builder-large-notice')?.classList.contains('hidden');
+
+                      // Set box count to 25
                       boxInput.value = '25';
                       boxInput.dispatchEvent(new Event('input', { bubbles: true }));
+                      snackNoticeHiddenOn25 = document.getElementById('snack-builder-large-notice')?.classList.contains('hidden');
                     }
 
                     const subtotalAfterBoxChange = document.getElementById('summary-subtotal')?.textContent?.trim();
@@ -387,6 +417,13 @@ test('Interactive Headless Chrome: /rakit-snack-box/ custom builder calculation 
                       itemCount,
                       subtotalText,
                       totalText,
+                      snackNoticeVisibleOn600,
+                      snackWaHrefOn600,
+                      snackWaLinkHeight,
+                      snackNoticeStillVisibleAfterBlur,
+                      orderBlockedOnLarge,
+                      snackNoticeHiddenOnMinus,
+                      snackNoticeHiddenOn25,
                       subtotalAfterBoxChange,
                       totalAfterBoxChange,
                       isModalOpen,
@@ -419,6 +456,17 @@ test('Interactive Headless Chrome: /rakit-snack-box/ custom builder calculation 
     assert.equal(result.itemCount, '3 macam');
     assert.equal(result.subtotalText, 'Rp9.000'); // 3000 + 3000 + 3000
     assert.equal(result.totalText, 'Rp180.000'); // 9000 * 20
+
+    // Snack Builder Large Order Notice (>500 Box)
+    assert.equal(result.snackNoticeVisibleOn600, true, 'Snack builder large order notice must show when boxCount is 600');
+    assert.ok(result.snackWaHrefOn600.includes('600%20box'), 'Snack builder WA link must include 600 box');
+    assert.ok(result.snackWaHrefOn600.includes('6281324383858'), 'Snack builder WA link must use SSOT number');
+    assert.ok(result.snackWaLinkHeight >= 44, `Snack builder WA CTA button height must be >= 44px (actual: ${result.snackWaLinkHeight})`);
+    assert.equal(result.snackNoticeStillVisibleAfterBlur, true, 'Snack builder notice must remain visible after blur');
+    assert.equal(result.orderBlockedOnLarge, true, 'Clicking order button must be blocked while large order notice is active');
+    assert.equal(result.snackNoticeHiddenOnMinus, true, 'Clicking minus button when at maxBoxes dismisses large order notice');
+    assert.equal(result.snackNoticeHiddenOn25, true, 'Snack builder large order notice must hide when boxCount returns to 25');
+
     assert.equal(result.subtotalAfterBoxChange, 'Rp9.000');
     assert.equal(result.totalAfterBoxChange, 'Rp225.000'); // 9000 * 25
     assert.equal(result.isModalOpen, true, 'OrderModal must open after clicking builder-order-btn');

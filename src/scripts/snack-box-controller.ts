@@ -14,6 +14,8 @@ import {
   buildSnackBoxCustomDetails,
   buildSnackBoxPackageName,
 } from '../services/whatsapp/snackBoxMessage';
+import { buildLargeOrderWhatsAppUrl } from '../services/whatsapp/waUrl';
+import { waPhoneNumber } from '../data/company';
 import type { OrderModalPrefill } from '../types/order';
 
 let teardowns: Array<() => void> = [];
@@ -69,6 +71,45 @@ export function initSnackBoxPage(): (() => void) | null {
     const subtotalDisplay = document.getElementById('summary-subtotal');
     const totalDisplay = document.getElementById('summary-total');
     const orderBtn = document.getElementById('builder-order-btn') as HTMLButtonElement | null;
+    const largeNotice = document.getElementById('snack-builder-large-notice');
+    const largeWaLink = document.getElementById('snack-builder-wa-admin-link') as HTMLAnchorElement | null;
+    let isLargeOrderMode = false;
+    let largeOrderPortion: number | null = null;
+
+    function updateSnackLargeOrderNotice(inputQty?: number): void {
+      if (!largeNotice) return;
+
+      if (inputQty !== undefined) {
+        if (inputQty > maxBoxes) {
+          isLargeOrderMode = true;
+          largeOrderPortion = inputQty;
+        } else if (inputQty > 0) {
+          isLargeOrderMode = false;
+          largeOrderPortion = null;
+        }
+      } else if (!isLargeOrderMode) {
+        const val = parseInt(boxInput?.value || '0', 10);
+        if (val > maxBoxes) {
+          isLargeOrderMode = true;
+          largeOrderPortion = val;
+        }
+      }
+
+      if (isLargeOrderMode) {
+        if (largeWaLink) {
+          const checkedCount = Array.from(checkboxes).filter((cb) => cb.checked).length;
+          const pkg = checkedCount > 0 ? buildSnackBoxPackageName(checkedCount) : 'Snack Box Custom Dzanis';
+          const portionToUse = largeOrderPortion || parseInt(boxInput?.value || '0', 10);
+          largeWaLink.href = buildLargeOrderWhatsAppUrl(waPhoneNumber, {
+            packageName: pkg,
+            portionCount: portionToUse,
+          });
+        }
+        largeNotice.classList.remove('hidden');
+      } else {
+        largeNotice.classList.add('hidden');
+      }
+    }
 
     // Category Switching Elements
     const categoryButtons = root.querySelectorAll<HTMLButtonElement>('.category-filter-btn');
@@ -248,9 +289,16 @@ export function initSnackBoxPage(): (() => void) | null {
     boxMinusBtn?.addEventListener(
       'click',
       () => {
+        if (isLargeOrderMode) {
+          isLargeOrderMode = false;
+          largeOrderPortion = null;
+          updateSnackLargeOrderNotice(boxCount);
+          return;
+        }
         if (boxCount > minBoxes) {
           boxCount -= stepBoxes;
           syncBoxUI();
+          updateSnackLargeOrderNotice(boxCount);
           recalculate();
         }
       },
@@ -263,7 +311,10 @@ export function initSnackBoxPage(): (() => void) | null {
         if (boxCount < maxBoxes) {
           boxCount += stepBoxes;
           syncBoxUI();
+          updateSnackLargeOrderNotice(boxCount);
           recalculate();
+        } else {
+          updateSnackLargeOrderNotice(boxCount + 1);
         }
       },
       { signal }
@@ -273,6 +324,7 @@ export function initSnackBoxPage(): (() => void) | null {
       'input',
       () => {
         const val = parseInt(boxInput.value, 10);
+        updateSnackLargeOrderNotice(val);
         if (!isNaN(val) && val >= minBoxes) {
           boxCount = Math.min(val, maxBoxes);
           if (boxMinusBtn) boxMinusBtn.disabled = boxCount <= minBoxes;
@@ -288,8 +340,14 @@ export function initSnackBoxPage(): (() => void) | null {
       let val = parseInt(boxInput.value, 10);
       if (isNaN(val) || val < minBoxes) {
         val = minBoxes;
+        isLargeOrderMode = false;
+        largeOrderPortion = null;
+        updateSnackLargeOrderNotice(val);
       } else if (val > maxBoxes) {
+        updateSnackLargeOrderNotice(val);
         val = maxBoxes;
+      } else if (!isLargeOrderMode) {
+        updateSnackLargeOrderNotice(val);
       }
       boxCount = val;
       syncBoxUI();
@@ -310,12 +368,32 @@ export function initSnackBoxPage(): (() => void) | null {
     );
 
     checkboxes.forEach((cb) => {
-      cb.addEventListener('change', recalculate, { signal });
+      cb.addEventListener(
+        'change',
+        () => {
+          recalculate();
+          if (isLargeOrderMode) {
+            updateSnackLargeOrderNotice();
+          }
+        },
+        { signal }
+      );
     });
 
     orderBtn?.addEventListener(
       'click',
       () => {
+        if (isLargeOrderMode || (boxInput && parseInt(boxInput.value, 10) > maxBoxes)) {
+          if (boxInput && parseInt(boxInput.value, 10) > maxBoxes) {
+            const val = parseInt(boxInput.value, 10);
+            boxInput.value = String(maxBoxes);
+            updateSnackLargeOrderNotice(val);
+          }
+          largeNotice?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          largeWaLink?.focus();
+          return;
+        }
+
         if (boxInput) {
           let val = parseInt(boxInput.value, 10);
           if (isNaN(val) || val < minBoxes) {

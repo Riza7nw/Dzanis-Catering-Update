@@ -26,4 +26,10 @@ export {
   type SnackTemplateData,
 } from '../../utils/whatsappFormatter.ts';
 
+export {
+  buildLargeOrderWhatsAppMessage,
+  buildLargeOrderWhatsAppUrl,
+  type LargeOrderConsultationData,
+} from './largeOrderMessage.ts';
+
 

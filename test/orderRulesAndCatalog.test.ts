@@ -18,6 +18,11 @@ import { langkah } from '../src/data/konten.ts';
 import { normalizePackage } from '../src/services/api/menuService.ts';
 import { buildOrderModalWhatsAppMessage } from '../src/services/whatsapp/orderModalMessage.ts';
 import { buildNasiKotakWhatsAppMessage } from '../src/services/whatsapp/nasiKotakMessage.ts';
+import {
+  buildLargeOrderWhatsAppMessage,
+  buildLargeOrderWhatsAppUrl,
+} from '../src/services/whatsapp/largeOrderMessage.ts';
+import { waPhoneNumber } from '../src/data/company.ts';
 import { generateProductSchema, generateFoodEstablishmentSchema } from '../src/utils/schema.ts';
 
 test('SSOT DAFTAR_PAKET: contains exactly 4 packages with correct properties', () => {
@@ -57,6 +62,9 @@ test('SSOT DAFTAR_PAKET: contains exactly 4 packages with correct properties', (
   assert.equal(p23k.sideDishesSelectMin, 3);
   assert.equal(p23k.sideDishesSelectMax, 3);
   assert.deepEqual(p23k.selectableSideDishes, POOL_LAUK_23K);
+  assert.deepEqual(p23k.menuUtama, ['Ayam Bakar', 'Ayam Goreng']);
+  assert.deepEqual(p23k.selectableMainMenus, ['Ayam Bakar', 'Ayam Goreng']);
+  assert.equal(p23k.selectableMainMenus[0], 'Ayam Bakar');
 
   // 3. Paket Spesial 25k
   const p25k = DAFTAR_PAKET.find((p) => p.slug === 'paket-spesial-25k');
@@ -226,12 +234,13 @@ test('WhatsApp Generator: nasiKotakMessage formats date and includes DP 25% & pe
     total: 30 * 23000,
     hasMenuSelection: true,
     orderMode: 'default',
-    defaultMainMenu: 'Ayam Bakar Madu',
+    defaultMainMenu: 'Ayam Bakar',
     defaultSideDishes: ['Bihun goreng', 'Capcay', 'Sambal goreng kentang'],
     selectedEventDate: '2026-11-06',
   });
 
   assert.ok(msg.includes('Jumat, 6 November 2026'), 'Date must be formatted in Indonesian');
+  assert.ok(msg.includes('Menu Utama: Ayam Bakar'), 'Must include simplified Ayam Bakar');
   assert.ok(msg.includes('Total estimasi: Rp 690.000.'));
   assert.ok(msg.includes('DP 25%'));
   assert.ok(msg.includes('pelunasan'));
@@ -276,6 +285,261 @@ test('SSOT Package Lauk: default lauk for each package is contained in its respe
   assert.ok(p28k.laukPendamping.length >= 2 && p28k.laukPendamping.length <= 3);
   for (const item of p28k.laukPendamping) {
     assert.ok(POOL_LAUK_25K_28K.includes(item), `28k lauk "${item}" must be in POOL_LAUK_25K_28K`);
+  }
+});
+
+test('WhatsApp Generator: largeOrderMessage formats consultation template for orders > 500 box', () => {
+  const msgDefault = buildLargeOrderWhatsAppMessage();
+  assert.ok(msgDefault.includes('Halo Dzanis Catering, saya ingin konsultasi pesanan katering skala besar (>500 box)'));
+  assert.ok(msgDefault.includes('- Rencana Jumlah: >500 box'));
+
+  const msgCustom = buildLargeOrderWhatsAppMessage({
+    packageName: 'Paket Spesial 25k',
+    portionCount: 750,
+    eventDate: '2026-11-20',
+    customerName: 'Siti Rahma',
+  });
+  assert.ok(msgCustom.includes('- Paket: Paket Spesial 25k'));
+  assert.ok(msgCustom.includes('- Rencana Jumlah: 750 box'));
+  assert.ok(msgCustom.includes('- Tanggal Acara: Jumat, 20 November 2026'));
+  assert.ok(msgCustom.includes('- Nama Pemesan: Siti Rahma'));
+
+  const url = buildLargeOrderWhatsAppUrl(waPhoneNumber, {
+    packageName: 'Paket Ayam Kampung 28k',
+    portionCount: 600,
+  });
+  assert.ok(url.startsWith('https://wa.me/6281324383858?text='));
+  assert.ok(!url.includes('tel:'));
+  assert.ok(url.includes('600%20box'));
+});
+
+test('Static Built HTML: contains large order callout notices with touch targets >= 44px', () => {
+  const distDir = path.resolve('dist');
+  assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
+
+  const paketHtml = fs.readFileSync(path.join(distDir, 'paket/paket-ayam-kampung-28k/index.html'), 'utf-8');
+  assert.ok(paketHtml.includes('id="package-large-order-notice"'));
+  assert.ok(paketHtml.includes('id="package-wa-admin-link"'));
+  assert.ok(paketHtml.includes('min-h-[44px]'));
+
+  const indexHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
+  assert.ok(indexHtml.includes('id="order-modal-large-notice"'));
+  assert.ok(indexHtml.includes('id="order-modal-wa-admin-link"'));
+
+  const snackHtml = fs.readFileSync(path.join(distDir, 'rakit-snack-box/index.html'), 'utf-8');
+  assert.ok(snackHtml.includes('id="snack-builder-large-notice"'));
+  assert.ok(snackHtml.includes('id="snack-builder-wa-admin-link"'));
+});
+
+test('Static Built HTML: paket-favorit-23k contains simplified Ayam Bakar & Ayam Goreng with default checked radio', () => {
+  const distDir = path.resolve('dist');
+  assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
+
+  const p23kHtml = fs.readFileSync(path.join(distDir, 'paket/paket-favorit-23k/index.html'), 'utf-8');
+  assert.ok(p23kHtml.includes('data-default-main-menu="Ayam Bakar"'), 'Default main menu attribute must be Ayam Bakar');
+  assert.ok(p23kHtml.includes('value="Ayam Bakar"'), 'Must contain radio option for Ayam Bakar');
+  assert.ok(p23kHtml.includes('value="Ayam Goreng"'), 'Must contain radio option for Ayam Goreng');
+  // Check that Ayam Bakar radio input specifically has checked attribute and Ayam Goreng does not
+  assert.match(
+    p23kHtml,
+    /<input[^>]*value="Ayam Bakar"[^>]*checked[^>]*>/,
+    'Ayam Bakar radio input must have the checked attribute'
+  );
+  assert.doesNotMatch(
+    p23kHtml,
+    /<input[^>]*value="Ayam Goreng"[^>]*checked[^>]*>/,
+    'Ayam Goreng radio input must NOT have the checked attribute by default'
+  );
+  assert.ok(!p23kHtml.includes('Ayam Bakar Madu'), 'Must not contain old Ayam Bakar Madu');
+  assert.ok(!p23kHtml.includes('Ayam Goreng Lengkuas'), 'Must not contain old Ayam Goreng Lengkuas');
+});
+
+test('Real headless Chrome: /paket/paket-favorit-23k default radio selection (Ayam Bakar), dynamic switch to Ayam Goreng, and OrderModal prefill', async () => {
+  const distDir = path.resolve('dist');
+  assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
+
+  const server = http.createServer((req, res) => {
+    let reqPath = (req.url || '/').split('?')[0];
+    if (reqPath.endsWith('/')) reqPath += 'index.html';
+    let filePath = path.join(distDir, reqPath);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(filePath, 'index.html');
+    }
+    if (!fs.existsSync(filePath)) {
+      res.statusCode = 404;
+      return res.end('Not found');
+    }
+    const ext = path.extname(filePath);
+    const mimeMap: Record<string, string> = {
+      '.html': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.png': 'image/png',
+      '.svg': 'image/svg+xml',
+    };
+    res.setHeader('Content-Type', mimeMap[ext] || 'application/octet-stream');
+    fs.createReadStream(filePath).pipe(res);
+  });
+
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const port = (server.address() as AddressInfo).port;
+  const baseUrl = `http://127.0.0.1:${port}/paket/paket-favorit-23k/`;
+
+  const chromeDebugPort = port + 1000;
+  const chrome = spawn('google-chrome', [
+    '--headless=new',
+    `--remote-debugging-port=${chromeDebugPort}`,
+    `--user-data-dir=/tmp/chrome-test-p23k-${port}`,
+    '--window-size=375,812',
+    baseUrl,
+  ]);
+
+  await new Promise((r) => setTimeout(r, 1500));
+
+  try {
+    const listRes = await fetch(`http://127.0.0.1:${chromeDebugPort}/json`);
+    const tabs = await listRes.json();
+    const targetTab = tabs.find((t: any) => t.url.includes('paket-favorit-23k')) || tabs[0];
+    const ws = new WebSocket(targetTab.webSocketDebuggerUrl);
+
+    const testResult = await new Promise<any>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Headless Chrome test for paket-favorit-23k timed out after 8s'));
+      }, 8000);
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ id: 1, method: 'Runtime.enable' }));
+        setTimeout(() => {
+          ws.send(
+            JSON.stringify({
+              id: 2,
+              method: 'Runtime.evaluate',
+              params: {
+                expression: `
+                (() => {
+                  // 1. Initial State: default preset and radio
+                  const defaultPresetBox = document.getElementById('default-preset-box');
+                  const defaultPresetText = defaultPresetBox ? defaultPresetBox.textContent.trim() : '';
+                  const checkedRadioInitial = document.querySelector('input[name="main-menu"]:checked');
+                  const initialRadioValue = checkedRadioInitial ? checkedRadioInitial.value : '';
+
+                  const waCheckoutBtn = document.getElementById('wa-checkout-btn');
+                  const defaultWaMessage = waCheckoutBtn && waCheckoutBtn.dataset ? waCheckoutBtn.dataset.waMessage || '' : '';
+
+                  // Set a valid event date (H+2) to avoid date validation alert on checkout click
+                  const eventDateInput = document.getElementById('event-date-input');
+                  if (eventDateInput) {
+                    eventDateInput.value = '2026-11-09';
+                    eventDateInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
+
+                  // 2. Switch to Custom Mode (Racik Sendiri)
+                  const btnOrderCustom = document.getElementById('btn-order-custom');
+                  if (btnOrderCustom) btnOrderCustom.click();
+
+                  const customCollapsible = document.getElementById('custom-menu-collapsible');
+                  const isCustomOpen = customCollapsible ? customCollapsible.getAttribute('data-buka') === 'true' : false;
+                  const summaryMainInitial = document.getElementById('menu-summary-main')?.textContent?.trim() || '';
+
+                  // 3. Select Ayam Goreng
+                  const radioAyamGoreng = document.querySelector('input[name="main-menu"][value="Ayam Goreng"]');
+                  let switchedToGoreng = false;
+                  if (radioAyamGoreng) {
+                    radioAyamGoreng.checked = true;
+                    radioAyamGoreng.dispatchEvent(new Event('change', { bubbles: true }));
+                    switchedToGoreng = radioAyamGoreng.checked;
+                  }
+
+                  const summaryMainAfterGoreng = document.getElementById('menu-summary-main')?.textContent?.trim() || '';
+                  const customWaMessage = waCheckoutBtn && waCheckoutBtn.dataset ? waCheckoutBtn.dataset.waMessage || '' : '';
+
+                  // 4. Click Checkout to open OrderModal and inspect prefill
+                  if (waCheckoutBtn) waCheckoutBtn.click();
+                  const modal = document.getElementById('order-modal');
+                  const isModalOpen = modal ? modal.hasAttribute('open') : false;
+                  const modalCustomDetails = document.getElementById('display-custom-details')?.textContent || '';
+
+                  // 5. Close modal, switch back to Default Mode, and verify reset
+                  const modalCancelBtn = document.getElementById('modal-cancel-btn');
+                  if (modalCancelBtn) modalCancelBtn.click();
+
+                  const btnOrderDefault = document.getElementById('btn-order-default');
+                  if (btnOrderDefault) btnOrderDefault.click();
+
+                  const isCustomClosed = customCollapsible ? customCollapsible.getAttribute('data-buka') === 'false' : false;
+                  const revertedWaMessage = waCheckoutBtn && waCheckoutBtn.dataset ? waCheckoutBtn.dataset.waMessage || '' : '';
+
+                  return JSON.stringify({
+                    defaultPresetText,
+                    initialRadioValue,
+                    defaultWaMessage,
+                    isCustomOpen,
+                    summaryMainInitial,
+                    switchedToGoreng,
+                    summaryMainAfterGoreng,
+                    customWaMessage,
+                    isModalOpen,
+                    modalCustomDetails,
+                    isCustomClosed,
+                    revertedWaMessage,
+                  });
+                })()
+                `,
+              },
+            })
+          );
+        }, 500);
+      };
+
+      ws.onmessage = (msg: any) => {
+        try {
+          const data = JSON.parse(msg.data.toString());
+          if (data.id === 2) {
+            clearTimeout(timeoutId);
+            if (data.result?.exceptionDetails) {
+              reject(new Error(JSON.stringify(data.result.exceptionDetails)));
+            } else {
+              resolve(JSON.parse(data.result.result.value));
+            }
+          }
+        } catch (err) {
+          clearTimeout(timeoutId);
+          reject(err);
+        }
+      };
+      ws.onerror = (err) => {
+        clearTimeout(timeoutId);
+        reject(err);
+      };
+    });
+
+    // 1. Initial State Assertions
+    assert.ok(testResult.defaultPresetText.includes('Menu Utama: Ayam Bakar'), 'Default preset box must show Menu Utama: Ayam Bakar');
+    assert.equal(testResult.initialRadioValue, 'Ayam Bakar', 'Initial checked radio value must be Ayam Bakar');
+    assert.ok(testResult.defaultWaMessage.includes('Menu Utama: Ayam Bakar'), 'Default WA message must contain Menu Utama: Ayam Bakar');
+    assert.ok(!testResult.defaultWaMessage.includes('Ayam Bakar Madu'), 'Must not contain legacy Ayam Bakar Madu');
+
+    // 2. Custom Mode Assertions
+    assert.equal(testResult.isCustomOpen, true, 'Collapsible custom menu must open on click');
+    assert.ok(testResult.summaryMainInitial.includes('Ayam Bakar'), 'Custom summary initial menu must be Ayam Bakar');
+
+    // 3. Selection of Ayam Goreng Assertions
+    assert.equal(testResult.switchedToGoreng, true, 'Ayam Goreng radio button must be checkable');
+    assert.ok(testResult.summaryMainAfterGoreng.includes('Ayam Goreng'), 'Summary must update to Ayam Goreng');
+    assert.ok(testResult.customWaMessage.includes('Menu Utama: Ayam Goreng'), 'Custom WA message must reflect Menu Utama: Ayam Goreng');
+    assert.ok(!testResult.customWaMessage.includes('Menu Utama: Ayam Bakar'), 'Custom WA message must not reflect Ayam Bakar after switching');
+
+    // 4. Modal Prefill Assertions
+    assert.equal(testResult.isModalOpen, true, 'OrderModal must open on waCheckoutBtn click');
+    assert.ok(testResult.modalCustomDetails.includes('Ayam Goreng'), 'OrderModal custom details must be prefilled with Ayam Goreng');
+
+    // 5. Reset to Default Mode Assertions
+    assert.equal(testResult.isCustomClosed, true, 'Collapsible must close when switching back to default mode');
+    assert.ok(testResult.revertedWaMessage.includes('Menu Utama: Ayam Bakar'), 'Reverted WA message must contain Menu Utama: Ayam Bakar');
+  } finally {
+    chrome.kill();
+    server.close();
   }
 });
 
@@ -367,6 +631,33 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const weekdayMinOrderLabel = labelMin?.textContent?.trim();
                   const weekdayPortionMinAttr = portionInput?.min;
 
+                  // 3.5 Test Large Order notice on Package Order Bar (>500 box)
+                  portionInput.value = '650';
+                  portionInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  const pkgNoticeVisibleOn650 = !document.getElementById('package-large-order-notice')?.classList.contains('hidden');
+                  const pkgWaHrefOn650 = document.getElementById('package-wa-admin-link')?.getAttribute('href') || '';
+                  const pkgWaLinkHeight = document.getElementById('package-wa-admin-link')?.getBoundingClientRect().height || 0;
+
+                  // Blur to simulate moving away -> clamps input to 500, but notice must stay visible
+                  portionInput.dispatchEvent(new Event('blur', { bubbles: true }));
+                  const pkgPortionClamped500 = portionInput.value;
+                  const pkgNoticeVisibleAfterBlur = !document.getElementById('package-large-order-notice')?.classList.contains('hidden');
+
+                  // Change event date to 2026-11-20 -> notice must still stay visible and WA link must update
+                  eventDateInput.value = '2026-11-20';
+                  eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
+                  const pkgNoticeVisibleAfterDateChange = !document.getElementById('package-large-order-notice')?.classList.contains('hidden');
+                  const pkgWaHrefAfterDateChange = document.getElementById('package-wa-admin-link')?.getAttribute('href') || '';
+
+                  // Try clicking checkout while in large order mode -> must block opening modal
+                  waCheckoutBtn.click();
+                  const modalOpenBlockedOnLarge = modal?.hasAttribute('open');
+
+                  // Revert to 40
+                  portionInput.value = '40';
+                  portionInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  const pkgNoticeHiddenOn40 = document.getElementById('package-large-order-notice')?.classList.contains('hidden');
+
                   // 4. Change back to Saturday and click waCheckoutBtn to open OrderModal
                   eventDateInput.value = '2026-11-07';
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
@@ -391,10 +682,36 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   modalPortionInput.dispatchEvent(new Event('blur', { bubbles: true }));
                   const modalPortionAllowed20 = modalPortionInput.value;
 
-                  // 6. Test Max Order 500 clamping: input 600 -> should clamp to 500
+                  // 6. Test Max Order 500 clamping, notice retention on name change, and submit block
                   modalPortionInput.value = '600';
+                  modalPortionInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  const modalNoticeVisibleOn600 = !document.getElementById('order-modal-large-notice')?.classList.contains('hidden');
+                  const modalWaHrefOn600 = document.getElementById('order-modal-wa-admin-link')?.getAttribute('href') || '';
+                  const modalWaLinkHeight = document.getElementById('order-modal-wa-admin-link')?.getBoundingClientRect().height || 0;
+
                   modalPortionInput.dispatchEvent(new Event('blur', { bubbles: true }));
                   const modalPortionClamped500 = modalPortionInput.value;
+                  const modalNoticeStillVisibleAfterBlur = !document.getElementById('order-modal-large-notice')?.classList.contains('hidden');
+
+                  // Typing customer name must NOT hide notice and must update WA href
+                  const modalNameInput = document.getElementById('customer-name');
+                  if (modalNameInput) {
+                    modalNameInput.value = 'Bpk Bambang';
+                    modalNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+                  const modalNoticeVisibleAfterName = !document.getElementById('order-modal-large-notice')?.classList.contains('hidden');
+                  const modalWaHrefAfterName = document.getElementById('order-modal-wa-admin-link')?.getAttribute('href') || '';
+
+                  // Submitting form while in large order mode must block submit
+                  const modalForm = document.getElementById('order-form');
+                  const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                  modalForm?.dispatchEvent(submitEvent);
+                  const modalStillOpenAfterLargeSubmit = modal?.hasAttribute('open');
+
+                  // Reducing portion back to 30 hides the notice
+                  modalPortionInput.value = '30';
+                  modalPortionInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  const modalNoticeHiddenOn30 = document.getElementById('order-modal-large-notice')?.classList.contains('hidden');
 
                   // 7. Verify WA checkout message contains DP 25% and pelunasan
                   const waMessageBeforeSubmit = waCheckoutBtn?.dataset?.waMessage || '';
@@ -408,6 +725,15 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                     weekendSubtotal,
                     weekdayMinOrderLabel,
                     weekdayPortionMinAttr,
+                    pkgNoticeVisibleOn650,
+                    pkgWaHrefOn650,
+                    pkgWaLinkHeight,
+                    pkgPortionClamped500,
+                    pkgNoticeVisibleAfterBlur,
+                    pkgNoticeVisibleAfterDateChange,
+                    pkgWaHrefAfterDateChange,
+                    modalOpenBlockedOnLarge,
+                    pkgNoticeHiddenOn40,
                     modalOpen,
                     modalDateVal,
                     modalPortionVal,
@@ -415,7 +741,15 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                     modalMinHintWeekday,
                     modalPortionMinAttr,
                     modalPortionAllowed20,
+                    modalNoticeVisibleOn600,
+                    modalWaHrefOn600,
+                    modalWaLinkHeight,
                     modalPortionClamped500,
+                    modalNoticeStillVisibleAfterBlur,
+                    modalNoticeVisibleAfterName,
+                    modalWaHrefAfterName,
+                    modalStillOpenAfterLargeSubmit,
+                    modalNoticeHiddenOn30,
                     waMessageBeforeSubmit,
                   });
                 })()
@@ -454,6 +788,18 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
     assert.equal(testResult.weekdayMinOrderLabel, '20', 'MoQ label must return to 20 on weekday');
     assert.equal(testResult.weekdayPortionMinAttr, '20', 'Portion min attr must return to 20 on weekday');
 
+    // Package Large Order Notice (>500 Box)
+    assert.equal(testResult.pkgNoticeVisibleOn650, true, 'Package large order notice must show when portion is 650');
+    assert.ok(testResult.pkgWaHrefOn650.includes('650%20box'), 'Package WA link must include 650 box');
+    assert.ok(testResult.pkgWaHrefOn650.includes('6281324383858'), 'Package WA link must use SSOT number');
+    assert.ok(testResult.pkgWaLinkHeight >= 44, `Package WA CTA button height must be >= 44px (actual: ${testResult.pkgWaLinkHeight})`);
+    assert.equal(testResult.pkgPortionClamped500, '500', 'Package portion input must clamp to 500 on blur');
+    assert.equal(testResult.pkgNoticeVisibleAfterBlur, true, 'Package notice must remain visible after blur');
+    assert.equal(testResult.pkgNoticeVisibleAfterDateChange, true, 'Package notice must remain visible after changing event date');
+    assert.ok(testResult.pkgWaHrefAfterDateChange.includes('20%20November%202026'), 'Package WA link must reflect updated event date');
+    assert.equal(testResult.modalOpenBlockedOnLarge, false, 'waCheckoutBtn must block opening OrderModal while in large order mode');
+    assert.equal(testResult.pkgNoticeHiddenOn40, true, 'Package large order notice must hide when portion returns to 40');
+
     // Modal Prefill & Open
     assert.equal(testResult.modalOpen, true, 'OrderModal must open when clicking waCheckoutBtn');
     assert.equal(testResult.modalDateVal, '2026-11-07', 'OrderModal date must prefill with selected date');
@@ -465,8 +811,17 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
     assert.equal(testResult.modalPortionMinAttr, '20', 'Modal portion input min attribute must become 20 on weekday date');
     assert.equal(testResult.modalPortionAllowed20, '20', 'Modal must allow 20 boxes on weekday date');
 
-    // Clamping to Max 500
+    // Modal Large Order Notice & Clamping to Max 500
+    assert.equal(testResult.modalNoticeVisibleOn600, true, 'Modal large order notice must show when portion is 600');
+    assert.ok(testResult.modalWaHrefOn600.includes('600%20box'), 'Modal WA link must include 600 box');
+    assert.ok(testResult.modalWaHrefOn600.includes('6281324383858'), 'Modal WA link must use SSOT number');
+    assert.ok(testResult.modalWaLinkHeight >= 44, `Modal WA CTA button height must be >= 44px (actual: ${testResult.modalWaLinkHeight})`);
     assert.equal(testResult.modalPortionClamped500, '500', 'Modal must clamp portion > 500 to 500 on blur');
+    assert.equal(testResult.modalNoticeStillVisibleAfterBlur, true, 'Modal notice must remain visible after blur when value was > 500');
+    assert.equal(testResult.modalNoticeVisibleAfterName, true, 'Modal notice must NOT disappear when typing customer name');
+    assert.ok(testResult.modalWaHrefAfterName.includes('Bpk%20Bambang'), 'Modal WA link must reflect updated customer name');
+    assert.equal(testResult.modalStillOpenAfterLargeSubmit, true, 'Form submit must be blocked when in large order mode');
+    assert.equal(testResult.modalNoticeHiddenOn30, true, 'Modal notice must hide when portion returns to 30');
 
     // Terms in WA Message
     assert.ok(testResult.waMessageBeforeSubmit.includes('DP 25%'), 'WA message must include DP 25%');

@@ -10,6 +10,7 @@
  */
 
 import { buildOrderModalWhatsAppUrl } from '../services/whatsapp/orderModalMessage';
+import { buildLargeOrderWhatsAppUrl } from '../services/whatsapp/waUrl';
 import { submitLead } from '../services/api/leadService';
 import { waPhoneNumber } from '../data/company';
 import { setFloatingWaSuppressed } from './floating-actions-controller';
@@ -100,6 +101,9 @@ export function initOrderModalController(): void {
   const addressInput = document.getElementById('customer-address') as HTMLTextAreaElement | null;
   const latInput = document.getElementById('delivery-lat') as HTMLInputElement | null;
   const lngInput = document.getElementById('delivery-lng') as HTMLInputElement | null;
+  const customerNameInput = document.getElementById('customer-name') as HTMLInputElement | null;
+  const largeNotice = document.getElementById('order-modal-large-notice');
+  const largeWaLink = document.getElementById('order-modal-wa-admin-link') as HTMLAnchorElement | null;
 
   if (!dialog || !form) return;
 
@@ -113,6 +117,47 @@ export function initOrderModalController(): void {
   let activeMinOrder = 20;
   let activeMinOrderWeekend = 40;
   let activeMaxOrder = 500;
+  let isLargeOrderMode = false;
+  let largeOrderPortion: number | null = null;
+
+  function updateLargeOrderNotice(inputQty?: number): void {
+    if (!largeNotice) return;
+
+    if (inputQty !== undefined) {
+      if (inputQty > activeMaxOrder) {
+        isLargeOrderMode = true;
+        largeOrderPortion = inputQty;
+      } else if (inputQty > 0) {
+        isLargeOrderMode = false;
+        largeOrderPortion = null;
+      }
+    } else if (!isLargeOrderMode) {
+      const currentVal = parseInt(portionInput?.value || '0', 10);
+      if (currentVal > activeMaxOrder) {
+        isLargeOrderMode = true;
+        largeOrderPortion = currentVal;
+      }
+    }
+
+    if (isLargeOrderMode) {
+      if (largeWaLink) {
+        const pkg = inputPackage?.value || 'Katering Dzanis';
+        const dateVal = eventDateInput?.value || '';
+        const nameVal = customerNameInput?.value || '';
+        const phone = dialog?.dataset.phone || waPhoneNumber;
+        const portionToUse = largeOrderPortion || parseInt(portionInput?.value || '0', 10);
+        largeWaLink.href = buildLargeOrderWhatsAppUrl(phone, {
+          packageName: pkg,
+          portionCount: portionToUse,
+          eventDate: dateVal,
+          customerName: nameVal,
+        });
+      }
+      largeNotice.classList.remove('hidden');
+    } else {
+      largeNotice.classList.add('hidden');
+    }
+  }
 
   function syncModalMoQ(forcedPortion?: number): void {
     if (!portionInput) return;
@@ -133,12 +178,19 @@ export function initOrderModalController(): void {
 
     if (forcedPortion !== undefined) {
       portionInput.value = String(clampQuantity(forcedPortion, currentMin, activeMaxOrder));
+      updateLargeOrderNotice(forcedPortion);
     } else {
       const currentVal = parseInt(portionInput.value, 10);
       if (isNaN(currentVal) || currentVal < currentMin) {
         portionInput.value = String(currentMin);
+        isLargeOrderMode = false;
+        largeOrderPortion = null;
+        updateLargeOrderNotice(currentMin);
       } else if (currentVal > activeMaxOrder) {
         portionInput.value = String(activeMaxOrder);
+        updateLargeOrderNotice(currentVal);
+      } else if (!isLargeOrderMode) {
+        updateLargeOrderNotice(currentVal);
       }
     }
   }
@@ -146,12 +198,35 @@ export function initOrderModalController(): void {
   if (eventDateInput) {
     const handleDateChange = () => {
       syncModalMoQ();
+      if (isLargeOrderMode) {
+        updateLargeOrderNotice();
+      }
     };
     eventDateInput.addEventListener('change', handleDateChange, { signal });
     eventDateInput.addEventListener('input', handleDateChange, { signal });
   }
 
+  if (customerNameInput) {
+    customerNameInput.addEventListener(
+      'input',
+      () => {
+        if (isLargeOrderMode) {
+          updateLargeOrderNotice();
+        }
+      },
+      { signal }
+    );
+  }
+
   if (portionInput) {
+    portionInput.addEventListener(
+      'input',
+      () => {
+        const val = parseInt(portionInput.value, 10);
+        updateLargeOrderNotice(val);
+      },
+      { signal }
+    );
     portionInput.addEventListener(
       'blur',
       () => {
@@ -244,6 +319,9 @@ export function initOrderModalController(): void {
       activeMinOrder = 20;
       activeMinOrderWeekend = 40;
       activeMaxOrder = 500;
+      isLargeOrderMode = false;
+      largeOrderPortion = null;
+      largeNotice?.classList.add('hidden');
       setFloatingWaSuppressed(false);
       window.dispatchEvent(new CustomEvent('order-modal-closed'));
     },
@@ -255,6 +333,18 @@ export function initOrderModalController(): void {
     'submit',
     (e) => {
       e.preventDefault();
+
+      if (isLargeOrderMode || (portionInput && parseInt(portionInput.value, 10) > activeMaxOrder)) {
+        if (portionInput && parseInt(portionInput.value, 10) > activeMaxOrder) {
+          const currentVal = parseInt(portionInput.value, 10);
+          portionInput.value = String(activeMaxOrder);
+          updateLargeOrderNotice(currentVal);
+        }
+        largeNotice?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        largeWaLink?.focus();
+        return;
+      }
+
       if (!form.checkValidity()) {
         form.reportValidity();
         return;

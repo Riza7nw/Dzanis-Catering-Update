@@ -1,6 +1,7 @@
 ---
 import { waPhoneNumber } from "../../data/company";
 import PetaPicker from "./PetaPicker.astro";
+import LargeOrderNotice from "./LargeOrderNotice.astro";
 
 interface Props {
   phoneNumber?: string;
@@ -140,6 +141,13 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
           </span>
         </div>
       </div>
+
+      <!-- Callout Notifikasi Pesanan Skala Besar (>500 Box) -->
+      <LargeOrderNotice
+        id="order-modal-large-notice"
+        linkId="order-modal-wa-admin-link"
+        defaultPackageName="Katering Dzanis"
+      />
 
       <!-- Alamat Pengantaran & Peta Interaktif Leaflet -->
       <div>
