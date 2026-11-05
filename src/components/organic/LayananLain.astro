@@ -140,11 +140,20 @@ const waUrl = buildServiceInquiryUrl(serviceName, phone);
                 Contoh Pilihan Menu:
               </span>
               <div class="flex flex-wrap gap-2">
-                {item.menuHighlight.map((m) => (
-                  <span class="inline-flex items-center rounded-lg bg-surface px-3 py-1.5 text-xs text-neutral-800 border border-neutral-200/60">
-                    • {m}
-                  </span>
-                ))}
+                {item.menuHighlight.map((m) => {
+                  const isCustom = m.startsWith('+');
+                  return (
+                    <span
+                      class={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs border ${
+                        isCustom
+                          ? 'bg-accent-700/10 text-accent-700 font-semibold border-accent-700/30'
+                          : 'bg-surface text-neutral-800 border-neutral-200/60'
+                      }`}
+                    >
+                      {isCustom ? '✨ ' : '• '}{m}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           </div>

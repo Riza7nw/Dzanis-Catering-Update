@@ -31,17 +31,17 @@ export const DAFTAR_LAYANAN_LAIN: LayananLain[] = [
     satuanHarga: "/ pax",
     minOrder: "Min. 50 pax",
     deskripsi:
-      "Solusi prasmanan siap saji higienis dan praktis untuk rapat kerja, pelatihan, seminar, gathering, dan syukuran kantor.",
+      "Solusi prasmanan siap saji higienis dan praktis untuk rapat kerja, pelatihan, seminar, dan syukuran kantor. Pilihan sayuran bebas pilih dan menu fleksibel dengan opsi tambahan sesuai permintaan klien.",
     fasilitas: [
       "Meja & Pemanas (Chafing Dish)",
       "Piring Keramik & Sendok Garpu",
     ],
     menuHighlight: [
-      "Nasi Putih & Nasi Goreng Mentega",
-      "Daging Lada Hitam / Rolade",
-      "Ayam Teriyaki / Rica",
-      "Sup Kimlo Segar",
-      "Puding Cup & Buah Potong",
+      "Gurame Asam Manis",
+      "Ayam Kampung (Opor / Goreng)",
+      "Pilihan Sayuran (Capcay / Tumis)",
+      "Sambal & Lalapan Segar",
+      "+ Tambahan Menu Kustom Klien",
     ],
     foto: "/images/layanan/prasmanan-kantor.webp",
     fotoAlt: "Layanan Prasmanan Kantor Dzanis Catering Majalengka",
