@@ -6,9 +6,9 @@
 
 import type { Paket, SnackTemplatePackage, SnackSlot } from '../../types/catalog';
 import type { BackendPackageDto } from '../../types/api';
-import { DAFTAR_PAKET } from '../../data/paket';
-import { defaultSnackTemplates } from '../../data/snack';
-import { getApiBaseUrl, getCommonApiHeaders, DEFAULT_TIMEOUT_MS } from './apiConfig';
+import { DAFTAR_PAKET } from '../../data/paket.ts';
+import { defaultSnackTemplates } from '../../data/snack.ts';
+import { getApiBaseUrl, getCommonApiHeaders, DEFAULT_TIMEOUT_MS } from './apiConfig.ts';
 
 /**
  * Normalizer Adapter (Anti-Corruption Layer):
@@ -30,6 +30,8 @@ export function normalizePackage(dto: BackendPackageDto, fallbackList: Paket[] =
   const rawNama = dto.name || dto.nama || matchedLocal?.nama || 'Paket Nasi Kotak';
   const harga = Number(dto.price_per_pax || dto.harga || matchedLocal?.harga || 0);
   const minOrder = Number(dto.min_pax || dto.minOrder || matchedLocal?.minOrder || 20);
+  const minOrderWeekend = Number(dto.minOrderWeekend || matchedLocal?.minOrderWeekend || 40);
+  const maxOrder = Number(dto.maxOrder || matchedLocal?.maxOrder || 500);
 
   // Normalisasi URL foto
   let foto = dto.image || dto.foto || dto.gambar || matchedLocal?.foto || '/images/menu/paket-20k.webp';
@@ -66,6 +68,8 @@ export function normalizePackage(dto: BackendPackageDto, fallbackList: Paket[] =
     nama: rawNama,
     harga,
     minOrder,
+    minOrderWeekend,
+    maxOrder,
     badge: dto.badge !== undefined ? dto.badge : (matchedLocal?.badge ?? null),
     kemasan: matchedLocal?.kemasan || 'Box Bento Sekat',
     tags,

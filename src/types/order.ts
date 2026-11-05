@@ -9,6 +9,8 @@ export interface OrderModalPrefill {
   portionCount?: number;
   eventDate?: string;
   minOrder?: number;
+  minOrderWeekend?: number;
+  maxOrder?: number;
 }
 
 export interface FormOrderState {

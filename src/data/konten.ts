@@ -31,6 +31,6 @@ export const langkah: Langkah[] = [
     judul: "Diantar hari acara",
     judulRingkas: "Diantar",
     deskripsi:
-      "Diantar sesuai jam yang disepakati, pelunasan saat serah terima.",
+      "Diantar sesuai jam yang disepakati, pelunasan saat pesanan sampai di tempat pengantaran.",
   },
 ];

@@ -57,6 +57,7 @@ export function initSnackBoxPage(): (() => void) | null {
   if (root) {
     let boxCount = 20;
     const minBoxes = 20;
+    const maxBoxes = 500;
     const stepBoxes = 1;
 
     const checkboxes = root.querySelectorAll<HTMLInputElement>('input[name="snack-choice"]');
@@ -239,6 +240,9 @@ export function initSnackBoxPage(): (() => void) | null {
       if (boxMinusBtn) {
         boxMinusBtn.disabled = boxCount <= minBoxes;
       }
+      if (boxPlusBtn) {
+        boxPlusBtn.disabled = boxCount >= maxBoxes;
+      }
     }
 
     boxMinusBtn?.addEventListener(
@@ -256,9 +260,11 @@ export function initSnackBoxPage(): (() => void) | null {
     boxPlusBtn?.addEventListener(
       'click',
       () => {
-        boxCount += stepBoxes;
-        syncBoxUI();
-        recalculate();
+        if (boxCount < maxBoxes) {
+          boxCount += stepBoxes;
+          syncBoxUI();
+          recalculate();
+        }
       },
       { signal }
     );
@@ -268,8 +274,9 @@ export function initSnackBoxPage(): (() => void) | null {
       () => {
         const val = parseInt(boxInput.value, 10);
         if (!isNaN(val) && val >= minBoxes) {
-          boxCount = val;
+          boxCount = Math.min(val, maxBoxes);
           if (boxMinusBtn) boxMinusBtn.disabled = boxCount <= minBoxes;
+          if (boxPlusBtn) boxPlusBtn.disabled = boxCount >= maxBoxes;
           recalculate();
         }
       },
@@ -281,6 +288,8 @@ export function initSnackBoxPage(): (() => void) | null {
       let val = parseInt(boxInput.value, 10);
       if (isNaN(val) || val < minBoxes) {
         val = minBoxes;
+      } else if (val > maxBoxes) {
+        val = maxBoxes;
       }
       boxCount = val;
       syncBoxUI();
@@ -331,6 +340,8 @@ export function initSnackBoxPage(): (() => void) | null {
           portionCount: boxCount,
           customDetails,
           minOrder: minBoxes,
+          minOrderWeekend: 40,
+          maxOrder: maxBoxes,
         };
 
         window.dispatchEvent(

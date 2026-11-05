@@ -11,6 +11,7 @@
 
 import { clampQuantity, calculatePackageTotal } from '../utils/pricing';
 import { formatRupiah } from '../utils/currency';
+import { getMinOrderByDate } from '../utils/date';
 import {
   buildNasiKotakCustomDetails,
   buildNasiKotakWhatsAppMessage,
@@ -21,6 +22,8 @@ export interface PackageConfig {
   basePrice: number;
   packageName: string;
   minOrder: number;
+  minOrderWeekend: number;
+  maxOrder: number;
   phone: string;
   hasMenuSelection: boolean;
   sideDishesMin: number;
@@ -50,6 +53,8 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
     basePrice,
     packageName,
     minOrder,
+    minOrderWeekend,
+    maxOrder,
     hasMenuSelection,
     sideDishesMin,
     sideDishesMax,
@@ -74,8 +79,32 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
   let selectedSideDishes = Array.isArray(defaultSideDishes) ? [...defaultSideDishes] : [];
   let selectedEventDate: string | null = null;
 
+  function getActiveMoQ(): number {
+    return getMinOrderByDate(eventDateInput?.value, minOrder, minOrderWeekend);
+  }
+
   function calculateClampedQty(): number {
-    return clampQuantity(portionInput.value, minOrder);
+    return clampQuantity(portionInput.value, getActiveMoQ(), maxOrder);
+  }
+
+  function syncActiveMoQ(adjustValue = false): void {
+    const currentMoQ = getActiveMoQ();
+    portionInput.min = String(currentMoQ);
+    portionInput.max = String(maxOrder);
+
+    const labelMin = document.getElementById('label-min-order');
+    if (labelMin) {
+      labelMin.textContent = String(currentMoQ);
+    }
+
+    if (adjustValue) {
+      const currentVal = parseInt(portionInput.value, 10);
+      if (isNaN(currentVal) || currentVal < currentMoQ) {
+        portionInput.value = String(currentMoQ);
+      } else if (currentVal > maxOrder) {
+        portionInput.value = String(maxOrder);
+      }
+    }
   }
 
   function syncActiveCustomInputs(): void {
@@ -303,7 +332,10 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
         validationIndicator.textContent = '✓ Pilihan Siap';
         validationIndicator.className = 'text-xs font-semibold text-accent-700';
       } else {
-        validationIndicator.textContent = `Pilih min. ${sideDishesMin} lauk`;
+        validationIndicator.textContent =
+          sideDishesMin === sideDishesMax
+            ? `Pilih ${sideDishesMin} lauk`
+            : `Pilih min. ${sideDishesMin} lauk`;
         validationIndicator.className = 'text-xs font-semibold text-amber-600';
       }
     }
@@ -413,6 +445,8 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
         portionCount: qty,
         eventDate: eventDateInput?.value || '',
         minOrder,
+        minOrderWeekend,
+        maxOrder,
       };
 
       // Dispatch event untuk membuka OrderModal dengan seluruh data ter-prefill
@@ -431,27 +465,30 @@ function initPortionCalculator(config: PackageConfig, signal: AbortSignal): void
     'blur',
     () => {
       let val = parseInt(portionInput.value, 10);
-      if (isNaN(val) || val < minOrder) {
-        portionInput.value = minOrder.toString();
-        updateCheckout();
+      const currentMoQ = getActiveMoQ();
+      if (isNaN(val) || val < currentMoQ) {
+        portionInput.value = currentMoQ.toString();
+      } else if (val > maxOrder) {
+        portionInput.value = maxOrder.toString();
       }
+      updateCheckout();
     },
     { signal }
   );
 
   if (eventDateInput) {
-    eventDateInput.addEventListener(
-      'change',
-      (e) => {
-        const target = e.target as HTMLInputElement;
-        selectedEventDate = target.value;
-        updateCheckout();
-      },
-      { signal }
-    );
+    const handleDateChange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      selectedEventDate = target.value;
+      syncActiveMoQ(true);
+      updateCheckout();
+    };
+    eventDateInput.addEventListener('change', handleDateChange, { signal });
+    eventDateInput.addEventListener('input', handleDateChange, { signal });
   }
 
   // Initial state sync from URL / defaults
+  syncActiveMoQ(false);
   syncModeFromUrl(false);
   updateCheckout();
   if (hasMenuSelection) {
@@ -511,7 +548,9 @@ export function initPackageOrderController(): void {
 
   const basePrice = Number(root.dataset.basePrice) || 0;
   const packageName = root.dataset.packageName || '';
-  const minOrder = Number(root.dataset.minOrder) || 1;
+  const minOrder = Number(root.dataset.minOrder) || 20;
+  const minOrderWeekend = Number(root.dataset.minOrderWeekend) || 40;
+  const maxOrder = Number(root.dataset.maxOrder) || 500;
   const phone = root.dataset.phone || '';
   const hasMenuSelection = root.dataset.hasMenuSelection === 'true';
   const sideDishesMin = Number(root.dataset.sideDishesMin) || 0;
@@ -529,6 +568,8 @@ export function initPackageOrderController(): void {
     basePrice,
     packageName,
     minOrder,
+    minOrderWeekend,
+    maxOrder,
     phone,
     hasMenuSelection,
     sideDishesMin,

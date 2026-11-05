@@ -10,6 +10,8 @@ export interface Paket {
   nama: string;
   harga: number;
   minOrder: number;
+  minOrderWeekend?: number;
+  maxOrder?: number;
   badge?: string | null;
   kemasan: string;
   tags: string[];

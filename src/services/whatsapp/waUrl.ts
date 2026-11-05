@@ -4,7 +4,7 @@
  * dengan normalisasi nomor telepon format Indonesia.
  */
 
-import { normalizePhoneNumber } from '../../utils/whatsappFormatter';
+import { normalizePhoneNumber } from '../../utils/whatsappFormatter.ts';
 
 /**
  * Membangun URL tautan WhatsApp resmi lengkap dengan pesan URL-encoded.
@@ -24,6 +24,6 @@ export {
   buildSnackTemplateWaUrl,
   type SnackTemplateItem,
   type SnackTemplateData,
-} from '../../utils/whatsappFormatter';
+} from '../../utils/whatsappFormatter.ts';
 
 

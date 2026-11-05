@@ -6,7 +6,7 @@
 /**
  * Menghitung batas jumlah porsi yang valid berdasarkan batas minimum pemesanan (MoQ).
  */
-export function clampQuantity(rawQty: number | string, minOrder = 20, maxOrder = 10000): number {
+export function clampQuantity(rawQty: number | string, minOrder = 20, maxOrder = 500): number {
   const parsed = typeof rawQty === 'number' ? rawQty : parseInt(String(rawQty), 10);
   if (isNaN(parsed) || parsed < minOrder) return minOrder;
   if (parsed > maxOrder) return maxOrder;

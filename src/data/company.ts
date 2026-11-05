@@ -36,11 +36,14 @@ export interface Company {
   };
   ketentuan: {
     minBox: number;
+    minBoxWeekend?: number;
+    maxBox?: number;
     dpPersen: number;
     tenggat: string;
     tenggatBesar: string;
     areaAntar: string;
     areaAntarRingkas: string;
+    pelunasan?: string;
   };
   stats: {
     tahun: string;
@@ -81,11 +84,14 @@ export const company: Company = {
 
   ketentuan: {
     minBox: 20,
+    minBoxWeekend: 40,
+    maxBox: 500,
     dpPersen: 25,
     tenggat: "H-3",
     tenggatBesar: "H-7 untuk pesanan di atas 200 box",
     areaAntar: "Cirebon, Indramayu, Majalengka, dan Kuningan",
     areaAntarRingkas: "Ciayumajakuning",
+    pelunasan: "Pelunasan sisa tagihan dilakukan saat pesanan sampai di tempat pengantaran.",
   },
 
   stats: {

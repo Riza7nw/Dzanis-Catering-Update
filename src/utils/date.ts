@@ -44,3 +44,25 @@ export function isEventDateValid(selectedDateStr: string, minDaysAhead = 1): boo
   const minDate = new Date(`${minDateStr}T00:00:00`);
   return selected >= minDate;
 }
+
+/**
+ * Memeriksa apakah string tanggal (YYYY-MM-DD) jatuh pada akhir pekan (Sabtu atau Minggu).
+ */
+export function isWeekend(dateString: string): boolean {
+  if (!dateString) return false;
+  const cleanDate = dateString.trim().replace(/\//g, '-');
+  const safeDate = cleanDate.includes('T') ? new Date(cleanDate) : new Date(`${cleanDate}T00:00:00`);
+  if (isNaN(safeDate.getTime())) return false;
+  const day = safeDate.getDay();
+  return day === 0 || day === 6;
+}
+
+/**
+ * Mengembalikan batas minimum order berdasarkan tanggal acara.
+ * Default: Hari Kerja (Senin-Jumat) = 20 box, Akhir Pekan (Sabtu-Minggu) = 40 box.
+ */
+export function getMinOrderByDate(dateString?: string, defaultMin = 20, weekendMin = 40): number {
+  if (!dateString) return defaultMin;
+  return isWeekend(dateString) ? weekendMin : defaultMin;
+}
+

@@ -22,14 +22,15 @@ const { paket, minEventDateString } = Astro.props;
 
   <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
     <div class="sm:col-span-5">
-      <label for="portion-input" class="block text-sm font-bold uppercase tracking-wider text-neutral-800 mb-1.5">
-        Jumlah Porsi (Min. {paket.minOrder})
+      <label for="portion-input" class="block text-sm font-bold uppercase tracking-wider text-neutral-800 mb-1.5" id="portion-input-label">
+        Jumlah Porsi (Min. <span id="label-min-order">{paket.minOrder}</span>)
       </label>
       <div class="relative">
         <input
           type="number"
           id="portion-input"
           min={paket.minOrder}
+          max={paket.maxOrder || 500}
           step="1"
           value={paket.minOrder}
           class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-base sm:text-lg font-bold text-neutral-900 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none transition shadow-2xs"
@@ -38,6 +39,9 @@ const { paket, minEventDateString } = Astro.props;
           porsi
         </span>
       </div>
+      <p id="portion-limit-hint" class="text-xs text-neutral-500 mt-1">
+        Min. {paket.minOrder} box hari kerja / {paket.minOrderWeekend || 40} box akhir pekan (Maks. {paket.maxOrder || 500} box)
+      </p>
     </div>
 
     <div class="sm:col-span-7 rounded-2xl border border-neutral-200 bg-white p-3.5 sm:p-4 shadow-2xs flex flex-col justify-center">

@@ -3,8 +3,8 @@
  * 100% identik dengan format produksi `[slug].astro`.
  */
 
-import { formatIndonesianDate } from '../../utils/date';
-import { formatRupiahNumber } from '../../utils/currency';
+import { formatIndonesianDate } from '../../utils/date.ts';
+import { formatRupiahNumber } from '../../utils/currency.ts';
 
 export interface NasiKotakOrderData {
   packageName: string;
@@ -78,6 +78,7 @@ export function buildNasiKotakWhatsAppMessage(data: NasiKotakOrderData): string 
   const totalStr = formatRupiahNumber(data.total);
   lines.push(
     `Total estimasi: Rp ${totalStr}.`,
+    `Ketentuan: DP 25% saat konfirmasi pesanan, pelunasan sisa saat pesanan sampai di tempat pengantaran.`,
     `Mohon konfirmasi ketersediaan. Terima kasih!`
   );
 

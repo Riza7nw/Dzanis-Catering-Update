@@ -38,7 +38,10 @@ const minEventDateString = [
 ].join('-');
 
 const defaultMainMenu = paket.selectableMainMenus?.[0] || paket.menuUtama[0] || '';
-const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesSelectMin ?? 2) || paket.laukPendamping.slice(0, 2);
+const defaultSideDishes =
+  paket.canSelectMainMenu && paket.laukPendamping && paket.laukPendamping.length > 0
+    ? paket.laukPendamping.slice(0, paket.sideDishesSelectMax ?? 3)
+    : paket.laukPendamping;
 ---
 
 <BaseLayout
@@ -56,6 +59,8 @@ const defaultSideDishes = paket.selectableSideDishes?.slice(0, paket.sideDishesS
       data-base-price={paket.harga}
       data-package-name={formatNamaPaket(paket.nama)}
       data-min-order={paket.minOrder}
+      data-min-order-weekend={paket.minOrderWeekend || 40}
+      data-max-order={paket.maxOrder || 500}
       data-phone={waPhoneNumber}
       data-has-menu-selection={String(Boolean(paket.canSelectMainMenu))}
       data-side-dishes-min={paket.sideDishesSelectMin ?? 0}

@@ -13,6 +13,8 @@ import { buildOrderModalWhatsAppUrl } from '../services/whatsapp/orderModalMessa
 import { submitLead } from '../services/api/leadService';
 import { waPhoneNumber } from '../data/company';
 import { setFloatingWaSuppressed } from './floating-actions-controller';
+import { getMinOrderByDate, isWeekend } from '../utils/date';
+import { clampQuantity } from '../utils/pricing';
 import type { OrderModalPrefill } from '../types/order';
 import type { BackendLeadPayload } from '../types/api';
 
@@ -108,6 +110,57 @@ export function initOrderModalController(): void {
     eventDateInput.min = new Date().toISOString().split('T')[0];
   }
 
+  let activeMinOrder = 20;
+  let activeMinOrderWeekend = 40;
+  let activeMaxOrder = 500;
+
+  function syncModalMoQ(forcedPortion?: number): void {
+    if (!portionInput) return;
+    const dateVal = eventDateInput?.value;
+    const currentMin = getMinOrderByDate(dateVal, activeMinOrder, activeMinOrderWeekend);
+    portionInput.min = String(currentMin);
+    portionInput.max = String(activeMaxOrder);
+
+    if (portionMinHint) {
+      if (!dateVal) {
+        portionMinHint.textContent = `Minimal ${activeMinOrder} box (Hari Kerja) / ${activeMinOrderWeekend} box (Akhir Pekan), Maksimal ${activeMaxOrder} box`;
+      } else {
+        const isWk = isWeekend(dateVal);
+        const dayTypeLabel = isWk ? 'Akhir Pekan' : 'Hari Kerja';
+        portionMinHint.textContent = `Minimal ${currentMin} box (${dayTypeLabel}), Maksimal ${activeMaxOrder} box`;
+      }
+    }
+
+    if (forcedPortion !== undefined) {
+      portionInput.value = String(clampQuantity(forcedPortion, currentMin, activeMaxOrder));
+    } else {
+      const currentVal = parseInt(portionInput.value, 10);
+      if (isNaN(currentVal) || currentVal < currentMin) {
+        portionInput.value = String(currentMin);
+      } else if (currentVal > activeMaxOrder) {
+        portionInput.value = String(activeMaxOrder);
+      }
+    }
+  }
+
+  if (eventDateInput) {
+    const handleDateChange = () => {
+      syncModalMoQ();
+    };
+    eventDateInput.addEventListener('change', handleDateChange, { signal });
+    eventDateInput.addEventListener('input', handleDateChange, { signal });
+  }
+
+  if (portionInput) {
+    portionInput.addEventListener(
+      'blur',
+      () => {
+        syncModalMoQ();
+      },
+      { signal }
+    );
+  }
+
   // Listener untuk membuka modal dengan data prefill
   window.addEventListener(
     'open-order-modal',
@@ -116,7 +169,9 @@ export function initOrderModalController(): void {
       const details = e.detail?.customDetails || '';
       const portions = e.detail?.portionCount;
       const eventDate = e.detail?.eventDate;
-      const minOrder = e.detail?.minOrder;
+      activeMinOrder = e.detail?.minOrder || 20;
+      activeMinOrderWeekend = e.detail?.minOrderWeekend || 40;
+      activeMaxOrder = e.detail?.maxOrder || 500;
 
       if (displayPackage) displayPackage.textContent = pkg;
       if (inputPackage) inputPackage.value = pkg;
@@ -132,25 +187,11 @@ export function initOrderModalController(): void {
         }
       }
 
-      if (portionInput) {
-        if (minOrder) {
-          portionInput.min = String(minOrder);
-          if (portionMinHint) portionMinHint.textContent = `Minimal ${minOrder} box`;
-        } else {
-          portionInput.min = '20';
-          if (portionMinHint) portionMinHint.textContent = 'Minimal 20 box';
-        }
-
-        if (portions) {
-          portionInput.value = String(portions);
-        } else if (!portionInput.value || Number(portionInput.value) < Number(portionInput.min)) {
-          portionInput.value = portionInput.min;
-        }
-      }
-
       if (eventDate && eventDateInput) {
         eventDateInput.value = eventDate;
       }
+
+      syncModalMoQ(portions);
 
       if (!dialog.open) {
         if (addressInput) addressInput.value = '';
@@ -200,6 +241,9 @@ export function initOrderModalController(): void {
   dialog.addEventListener(
     'close',
     () => {
+      activeMinOrder = 20;
+      activeMinOrderWeekend = 40;
+      activeMaxOrder = 500;
       setFloatingWaSuppressed(false);
       window.dispatchEvent(new CustomEvent('order-modal-closed'));
     },
@@ -221,7 +265,9 @@ export function initOrderModalController(): void {
       const details = String(data.get('customDetails') || '').trim();
       const name = String(data.get('customerName') || '').trim();
       const date = String(data.get('eventDate') || '');
-      const count = Number(data.get('portionCount')) || 20;
+      const currentMin = getMinOrderByDate(date, activeMinOrder, activeMinOrderWeekend);
+      const rawCount = Number(data.get('portionCount')) || currentMin;
+      const count = clampQuantity(rawCount, currentMin, activeMaxOrder);
       const address = String(data.get('customerAddress') || '').trim();
       const lat = String(data.get('deliveryLat') || '').trim();
       const lng = String(data.get('deliveryLng') || '').trim();

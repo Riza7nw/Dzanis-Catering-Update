@@ -5,7 +5,7 @@
  */
 
 import type { BackendLeadPayload, BackendLeadResponse } from '../../types/api';
-import { getApiBaseUrl, getCommonApiHeaders } from './apiConfig';
+import { getApiBaseUrl, getCommonApiHeaders } from './apiConfig.ts';
 
 /**
  * Mengirimkan data lead pemesanan ke backend secara non-blocking.

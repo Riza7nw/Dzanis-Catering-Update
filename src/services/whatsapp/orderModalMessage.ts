@@ -3,7 +3,8 @@
  * 100% identik dengan format produksi `OrderModal.astro`.
  */
 
-import { buildWhatsAppUrl } from './waUrl';
+import { formatIndonesianDate } from '../../utils/date.ts';
+import { buildWhatsAppUrl } from './waUrl.ts';
 
 export interface OrderModalMessageData {
   packageName: string;
@@ -24,7 +25,7 @@ export function buildOrderModalWhatsAppMessage(data: OrderModalMessageData): str
   const pkg = data.packageName || "Snack Box Dzanis";
   const details = (data.customDetails || "").trim();
   const count = data.portionCount || 20;
-  const date = data.eventDate || "-";
+  const date = data.eventDate ? (formatIndonesianDate(data.eventDate) || data.eventDate) : "-";
   const name = data.customerName || "-";
   const address = (data.customerAddress || "").trim();
   const lat = (data.deliveryLat || "").trim();
@@ -51,7 +52,10 @@ export function buildOrderModalWhatsAppMessage(data: OrderModalMessageData): str
     lines.push(`- Titik Peta: https://www.google.com/maps?q=${lat},${lng}`);
   }
 
-  lines.push(`- Catatan: ${notes || "-"}`);
+  lines.push(
+    `- Catatan: ${notes || "-"}`,
+    `- Ketentuan: DP 25% saat konfirmasi pesanan, pelunasan sisa saat pesanan sampai di tempat pengantaran.`
+  );
 
   return lines.join("\n");
 }

@@ -7,7 +7,8 @@ export type Faq = {
 export const faqs: Faq[] = [
   {
     question: "Berapa minimal pesanan?",
-    answer: "Minimal 20 box, berlaku untuk nasi kotak maupun snack box.",
+    answer:
+      "Minimal 20 box untuk hari kerja (Senin–Jumat) dan 40 box untuk akhir pekan (Sabtu–Minggu), dengan batas maksimal pemesanan via web 500 box. Berlaku untuk nasi kotak maupun snack box.",
   },
   {
     question: "Berapa hari sebelum acara harus pesan?",
@@ -22,6 +23,6 @@ export const faqs: Faq[] = [
   {
     question: "Bagaimana cara pembayarannya?",
     answer:
-      "DP 25% saat pesanan dikonfirmasi, sisanya dilunasi ketika pesanan diantar.",
+      "DP 25% saat pesanan dikonfirmasi, dan sisa pelunasan dibayarkan saat pesanan sampai di tempat pengantaran.",
   },
 ];

@@ -131,11 +131,12 @@ const { phoneNumber = waPhoneNumber } = Astro.props;
             name="portionCount"
             required
             min="20"
+            max="500"
             value="20"
             class="mt-1.5 w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none"
           />
           <span id="portion-min-hint" class="mt-1 block text-xs text-neutral-900">
-            Minimal 20 box
+            Minimal 20 box (Hari Kerja) / 40 box (Akhir Pekan), Maksimal 500 box
           </span>
         </div>
       </div>

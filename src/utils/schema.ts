@@ -3,10 +3,10 @@
  * Sesuai pedoman Google Rich Results untuk FoodEstablishment dan Product.
  */
 
-import { company, waPhoneNumber } from '../data/company';
-import { DAFTAR_PAKET, type Paket, formatNamaPaket } from '../data/paket';
-import { DAFTAR_LAYANAN_LAIN } from '../data/layananLain';
-import { snackRingkasan } from '../data/snack';
+import { company, waPhoneNumber } from '../data/company.ts';
+import { DAFTAR_PAKET, type Paket, formatNamaPaket } from '../data/paket.ts';
+import { DAFTAR_LAYANAN_LAIN } from '../data/layananLain.ts';
+import { snackRingkasan } from '../data/snack.ts';
 
 export const DEFAULT_SITE_URL = "https://dzanis-catering-update.vercel.app";
 
@@ -110,6 +110,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
               eligibleQuantity: {
                 "@type": "QuantitativeValue",
                 minValue: item.minOrder,
+                maxValue: item.maxOrder || 500,
                 unitText: "Box"
               }
             }
@@ -134,6 +135,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
                 eligibleQuantity: {
                   "@type": "QuantitativeValue",
                   minValue: 20,
+                  maxValue: 500,
                   unitText: "Box"
                 }
               }
@@ -188,6 +190,7 @@ export function generateProductSchema(paket: Paket, siteUrl: string = DEFAULT_SI
       eligibleQuantity: {
         "@type": "QuantitativeValue",
         minValue: paket.minOrder,
+        maxValue: paket.maxOrder || 500,
         unitText: "Box"
       },
       seller: {

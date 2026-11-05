@@ -20,6 +20,8 @@ export interface BackendPackageDto {
   harga?: number;
   min_pax?: number;
   minOrder?: number;
+  minOrderWeekend?: number;
+  maxOrder?: number;
   badge?: string | null;
   description?: string;
   deskripsi?: string;

@@ -167,7 +167,9 @@ const { paket, defaultMainMenu, defaultSideDishes } = Astro.props;
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="block text-sm font-bold text-neutral-900">
-                🥗 Pilih {paket.sideDishesSelectMin}-{paket.sideDishesSelectMax} Lauk Pendamping
+                🥗 {paket.sideDishesSelectMin === paket.sideDishesSelectMax
+                  ? `Pilih ${paket.sideDishesSelectMin} Lauk Pendamping`
+                  : `Pilih ${paket.sideDishesSelectMin}-${paket.sideDishesSelectMax} Lauk Pendamping`}
               </span>
               <span class="text-sm font-medium text-neutral-500" id="side-count" aria-live="polite">
                 {defaultSideDishes.length} / {paket.sideDishesSelectMax} pilihan
@@ -189,7 +191,7 @@ const { paket, defaultMainMenu, defaultSideDishes } = Astro.props;
                       class="w-4 h-4 cursor-pointer accent-accent"
                       data-min={paket.sideDishesSelectMin}
                       data-max={paket.sideDishesSelectMax}
-                      checked={idx < (paket.sideDishesSelectMin ?? 2)}
+                      checked={defaultSideDishes.includes(dish)}
                     />
                     <span class="text-sm font-medium text-neutral-800 group-hover:text-accent-700 transition">
                       {dish}
@@ -199,7 +201,9 @@ const { paket, defaultMainMenu, defaultSideDishes } = Astro.props;
               })}
             </div>
             <p class="text-sm text-neutral-500 mt-3">
-              Pilih minimal {paket.sideDishesSelectMin} dan maksimal {paket.sideDishesSelectMax} lauk pendamping.
+              {paket.sideDishesSelectMin === paket.sideDishesSelectMax
+                ? `Pilih ${paket.sideDishesSelectMin} lauk pendamping.`
+                : `Pilih minimal ${paket.sideDishesSelectMin} dan maksimal ${paket.sideDishesSelectMax} lauk pendamping.`}
             </p>
           </div>
 
