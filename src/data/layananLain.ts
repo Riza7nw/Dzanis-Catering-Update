@@ -1,5 +1,5 @@
 /**
- * Data Layer: Layanan Lain (Prasmanan, Food Cart, Acara & Pernikahan)
+ * Data Layer: Layanan Prasmanan Kantor & Acara
  * Mendefinisikan interface LayananLain dan koleksi DAFTAR_LAYANAN_LAIN.
  */
 
@@ -18,6 +18,7 @@ export interface LayananLain {
   menuHighlight: string[];
   foto: string;
   fotoAlt: string;
+  galeri?: { src: string; alt: string }[];
 }
 
 export const DAFTAR_LAYANAN_LAIN: LayananLain[] = [
@@ -25,16 +26,15 @@ export const DAFTAR_LAYANAN_LAIN: LayananLain[] = [
     id: "prasmanan-kantor",
     slug: "prasmanan-kantor",
     nama: "Prasmanan Kantor",
-    badge: null,
+    badge: "Layanan Acara & Rapat",
     headlineHarga: "Rp 45.000",
     satuanHarga: "/ pax",
     minOrder: "Min. 50 pax",
     deskripsi:
-      "Menu prasmanan lengkap untuk rapat kerja, pelatihan, seminar, dan syukuran kantor.",
+      "Solusi prasmanan siap saji higienis dan praktis untuk rapat kerja, pelatihan, seminar, gathering, dan syukuran kantor.",
     fasilitas: [
       "Meja & Pemanas (Chafing Dish)",
       "Piring Keramik & Sendok Garpu",
-      "1 Staff Waiter Stand-by",
     ],
     menuHighlight: [
       "Nasi Putih & Nasi Goreng Mentega",
@@ -45,55 +45,15 @@ export const DAFTAR_LAYANAN_LAIN: LayananLain[] = [
     ],
     foto: "/images/layanan/prasmanan-kantor.webp",
     fotoAlt: "Layanan Prasmanan Kantor Dzanis Catering Majalengka",
-  },
-  {
-    id: "booth-food-cart",
-    slug: "booth-food-cart",
-    nama: "Booth / Food Cart",
-    badge: "POPULER UNTUK BAZAR",
-    headlineHarga: "Rp 3.500.000",
-    satuanHarga: "/ stall (200 porsi)",
-    minOrder: "Min. 1 Booth",
-    deskripsi:
-      "Gerai makanan live-serving untuk memeriahkan festival, bazar, ulang tahun, dan gathering komunitas.",
-    fasilitas: [
-      "1 Unit Gerobak Kayu Tematik",
-      "1 Staff Operator Siap Saji (3-4 Jam)",
-      "Mangkok / Paper Bowl Ramah Lingkungan",
+    galeri: [
+      {
+        src: "/images/layanan/prasmanan-kantor.webp",
+        alt: "Dokumentasi Menu Prasmanan Meja Rapat Dzanis Catering",
+      },
+      {
+        src: "/images/layanan/prasmanan-kantor-2.webp",
+        alt: "Dokumentasi Sajian Prasmanan Siap Saji Dzanis Catering",
+      },
     ],
-    menuHighlight: [
-      "Bakso Sapi Malang Komplit",
-      "Siomay Bandung Bumbu Kacang",
-      "Zuppa Soup Hangat Puff Pastry",
-      "Dimsum Kukus 4 Varian",
-    ],
-    foto: "/images/layanan/food-cart.webp",
-    fotoAlt: "Booth dan Food Cart Live Serving Dzanis Catering Ciayumajakuning",
-  },
-  {
-    id: "catering-acara-pernikahan",
-    slug: "catering-acara-pernikahan",
-    nama: "Catering Acara & Pernikahan",
-    badge: null,
-    headlineHarga: "Rp 75.000",
-    satuanHarga: "/ pax",
-    minOrder: "Min. 200 pax",
-    deskripsi:
-      "Layanan boga komprehensif untuk resepsi pernikahan, akad nikah, lamaran, dan syukuran keluarga besar.",
-    fasilitas: [
-      "Setup Dekorasi Meja Buffet",
-      "Peralatan Makan Lengkap & Steril",
-      "Tim Waiter & Runner Berseragam",
-      "Gratis Food Tasting (4 Pax)",
-    ],
-    menuHighlight: [
-      "Nasi Liwet Wangi / Biryani",
-      "Daging Rendang Empuk / Bistik Sapi",
-      "Ayam Suwir Bali / Kodok",
-      "Kakap Asam Manis Segar",
-      "Dessert Bar & Es Tradisional",
-    ],
-    foto: "/images/layanan/wedding-catering.webp",
-    fotoAlt: "Layanan Katering Acara dan Resepsi Pernikahan Dzanis Catering Majalengka",
   },
 ];

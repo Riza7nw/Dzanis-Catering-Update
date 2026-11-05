@@ -144,8 +144,8 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
         },
         {
           "@type": "MenuSection",
-          name: "Layanan Prasmanan & Acara",
-          description: "Layanan prasmanan kantor, booth food cart live-serving, dan catering acara & pernikahan.",
+          name: "Layanan Prasmanan Kantor",
+          description: "Layanan prasmanan kantor higienis dan praktis untuk rapat kerja, pelatihan, dan syukuran kantor.",
           url: `${site}/#layanan`,
           hasMenuItem: DAFTAR_LAYANAN_LAIN.map((item) => ({
             "@type": "MenuItem",
