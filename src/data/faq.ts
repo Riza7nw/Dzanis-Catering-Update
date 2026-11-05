@@ -22,6 +22,6 @@ export const faqs: Faq[] = [
   {
     question: "Bagaimana cara pembayarannya?",
     answer:
-      "DP 50% saat pesanan dikonfirmasi, sisanya dilunasi ketika pesanan diantar.",
+      "DP 25% saat pesanan dikonfirmasi, sisanya dilunasi ketika pesanan diantar.",
   },
 ];

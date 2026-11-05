@@ -81,7 +81,7 @@ export const company: Company = {
 
   ketentuan: {
     minBox: 20,
-    dpPersen: 50,
+    dpPersen: 25,
     tenggat: "H-3",
     tenggatBesar: "H-7 untuk pesanan di atas 200 box",
     areaAntar: "Cirebon, Indramayu, Majalengka, dan Kuningan",

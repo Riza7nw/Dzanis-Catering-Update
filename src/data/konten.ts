@@ -22,10 +22,10 @@ export const langkah: Langkah[] = [
       "Jumlah box, tanggal acara, jam antar, dan alamat lengkap via WhatsApp.",
   },
   {
-    judul: "Konfirmasi & DP 50%",
+    judul: "Konfirmasi & DP 25%",
     judulRingkas: "Konfirmasi & DP",
     deskripsi:
-      "Kami kirim rincian harga, pesanan terkunci setelah DP 50% masuk.",
+      "Kami kirim rincian harga, pesanan terkunci setelah DP 25% masuk.",
   },
   {
     judul: "Diantar hari acara",
