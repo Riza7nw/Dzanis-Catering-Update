@@ -57,11 +57,8 @@ const menuKatalog = await getMenuCatalog();
             foto = '/' + foto;
           }
           if (foto.startsWith('/uploads/')) {
-            const apiBase = import.meta.env.PUBLIC_API_URL || 'https://alkalize-rewire-scruffy.ngrok-free.dev';
+            const apiBase = import.meta.env.PUBLIC_API_URL || '';
             foto = `${apiBase}${foto}`;
-          }
-          if (foto.includes('ngrok')) {
-            foto += (foto.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=true';
           }
           const fotoAlt = formatNamaPaket(paket.alt || paket.fotoAlt || rawNama);
           const deskripsi = paket.deskripsi || paket.deskripsiSingkat || paket.deskripsi_singkat || paket.description || '';
@@ -525,24 +522,15 @@ const menuKatalog = await getMenuCatalog();
   // Sinkronisasi katalog paket menu jika API URL dikonfigurasi
   (async function() {
     try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const queryApi = urlParams.get('apiUrl');
       const hostname = window.location.hostname;
       const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
       const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-      const apiUrl = queryApi || publicApiUrl || (
-        isLocal
-          ? defaultLocalApi
-          : 'https://alkalize-rewire-scruffy.ngrok-free.dev'
-      );
+      const apiUrl = publicApiUrl || (isLocal ? defaultLocalApi : '');
       if (!apiUrl) return;
 
       console.log('[Dzanis Menu] Menghubungi API menu:', apiUrl);
       const res = await fetch(`${apiUrl}/api/menu`, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-          'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' }
       });
       if (!res.ok) {
         console.warn('[Dzanis Menu] API menu tidak merespon OK:', res.status);
@@ -566,23 +554,19 @@ const menuKatalog = await getMenuCatalog();
       const grid = document.getElementById('paket-grid');
       if (!grid) return;
 
+      // Data API wajib di-escape sebelum masuk innerHTML (mencegah script sisipan tampil ke semua pengunjung)
+      const HTML_ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' };
+      const esc = (value) => String(value ?? '').replace(/[&<>"'`]/g, (c) => HTML_ESC[c]);
+
       const resolvePhotoUrl = (img) => {
         if (!img) return '/images/menu/paket-20k.webp';
         let target = String(img).trim();
-        if (target.startsWith('data:')) return target;
-        if (target.startsWith('http://') || target.startsWith('https://')) {
-          if (target.includes('ngrok')) {
-            target += (target.includes('?') ? '&' : '?') + 'ngrok-skip-browser-warning=true';
-          }
-          return target;
-        }
+        if (target.startsWith('data:')) return target.startsWith('data:image/') ? target : '/images/menu/paket-20k.webp';
+        if (target.startsWith('http://') || target.startsWith('https://')) return target;
         if (target.startsWith('uploads/')) {
           target = '/' + target;
         }
         if (target.startsWith('/uploads/')) {
-          if (apiUrl && apiUrl.includes('ngrok')) {
-            return `${apiUrl}${target}${target.includes('?') ? '&' : '?'}ngrok-skip-browser-warning=true`;
-          }
           if (apiUrl) {
             return `${apiUrl}${target}`;
           }
@@ -609,14 +593,14 @@ const menuKatalog = await getMenuCatalog();
           <div
             role="group"
             aria-roledescription="slide"
-            aria-label="${nama} (${idx + 1} dari ${packages.length})"
+            aria-label="${esc(nama)} (${idx + 1} dari ${packages.length})"
             class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md select-none"
           >
             <!-- Top Image with Badge -->
             <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
               <img
-                src="${foto}"
-                alt="${nama}"
+                src="${esc(foto)}"
+                alt="${esc(nama)}"
                 loading="${idx === 0 ? 'eager' : 'lazy'}"
                 ${idx === 0 ? 'fetchpriority="high"' : ''}
                 width="600"
@@ -624,11 +608,11 @@ const menuKatalog = await getMenuCatalog();
                 decoding="async"
                 draggable="false"
                 class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
-                onerror="if(!this.dataset.retryLocal && this.src.includes('/uploads/')){this.dataset.retryLocal='true';this.src='${rawImg}';}else{this.onerror=null;this.src='/images/menu/paket-20k.webp';}"
+                onerror="this.onerror=null;this.src='/images/menu/paket-20k.webp';"
               />
               ${badge ? `
                 <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
-                  ${badge}
+                  ${esc(badge)}
                 </span>
               ` : ''}
             </div>
@@ -638,10 +622,10 @@ const menuKatalog = await getMenuCatalog();
               <!-- Title & Description -->
               <div class="mb-3">
                 <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
-                  ${nama}
+                  ${esc(nama)}
                 </h3>
                 <p class="text-xs md:text-sm text-neutral-900 line-clamp-2 leading-relaxed">
-                  ${deskripsi}
+                  ${esc(deskripsi)}
                 </p>
               </div>
 
@@ -661,7 +645,7 @@ const menuKatalog = await getMenuCatalog();
               <div class="flex flex-wrap gap-1.5 mb-4">
                 ${tags.map(tag => `
                   <span class="inline-flex items-center rounded-full bg-white text-neutral-900 border border-neutral-300 font-medium px-2.5 py-0.5 text-xs">
-                    ✓ ${tag}
+                    ✓ ${esc(tag)}
                   </span>
                 `).join('')}
               </div>
@@ -672,7 +656,7 @@ const menuKatalog = await getMenuCatalog();
                 ${items.slice(0, 4).map(item => `
                   <p class="text-xs text-neutral-900 flex items-start gap-1.5 leading-snug">
                     <span class="text-[#C04A27] font-bold flex-none">•</span>
-                    <span>${item}</span>
+                    <span>${esc(item)}</span>
                   </p>
                 `).join('')}
                 ${items.length > 4 ? `
@@ -688,7 +672,7 @@ const menuKatalog = await getMenuCatalog();
                   <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
                 </summary>
                 <ul class="mt-2 space-y-1 text-xs text-neutral-900 pl-2">
-                  ${laukPendamping.map(lauk => `<li>• ${lauk}</li>`).join('')}
+                  ${laukPendamping.map(lauk => `<li>• ${esc(lauk)}</li>`).join('')}
                 </ul>
               </details>
               ` : ''}
@@ -696,8 +680,8 @@ const menuKatalog = await getMenuCatalog();
               <!-- Actions -->
               <div class="mt-auto pt-3 border-t border-neutral-100">
                 <a
-                  href="/paket/${slug}"
-                  aria-label="Detail Lengkap ${nama}"
+                  href="/paket/${encodeURIComponent(slug)}"
+                  aria-label="Detail Lengkap ${esc(nama)}"
                   class="block w-full text-center py-2.5 px-4 rounded-full border border-[#C04A27] text-[#C04A27] text-xs font-semibold hover:bg-orange-50 transition"
                 >
                   Detail Lengkap
@@ -705,7 +689,7 @@ const menuKatalog = await getMenuCatalog();
                 <button
                   type="button"
                   data-order-trigger
-                  data-package-name="${nama}"
+                  data-package-name="${esc(nama)}"
                   data-price="${harga}"
                   class="w-full mt-2 py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition cursor-pointer"
                 >

@@ -98,6 +98,7 @@ export function normalizePackage(dto: BackendPackageDto, fallbackList: Paket[] =
 export async function getMenuCatalog(): Promise<Paket[]> {
   try {
     const apiBase = getApiBaseUrl();
+    if (!apiBase) throw new Error('Backend API belum dikonfigurasi (PUBLIC_API_URL)');
     const res = await fetch(`${apiBase}/api/menu`, {
       headers: getCommonApiHeaders(),
       signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
@@ -155,6 +156,7 @@ export async function getPackageBySlug(slug: string): Promise<Paket | undefined>
 export async function getSnackTemplates(): Promise<SnackTemplatePackage[]> {
   try {
     const apiBase = getApiBaseUrl();
+    if (!apiBase) throw new Error('Backend API belum dikonfigurasi (PUBLIC_API_URL)');
     const res = await fetch(`${apiBase}/api/menu`, {
       headers: getCommonApiHeaders(),
       signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),

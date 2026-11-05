@@ -113,6 +113,10 @@ const defaultCertificates = await getShowcaseCertificates();
   let currentPage = 0;
   let totalPages = Math.max(1, Math.ceil(certList.length / pageSize));
 
+  // Data sertifikat berasal dari API: escape sebelum masuk innerHTML
+  const HTML_ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' };
+  const esc = (value) => String(value ?? '').replace(/[&<>"'`]/g, (c) => HTML_ESC[c]);
+
   // Render Seluruh Halaman Slide
   function renderSlides() {
     pageSize = getPageSize();
@@ -129,23 +133,23 @@ const defaultCertificates = await getShowcaseCertificates();
             <div class="bg-surface border border-divider rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition duration-200">
               <div>
                 <div class="flex items-center justify-between text-xs mb-2">
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-accent-2-200 text-accent-2-900 tracking-wider uppercase">${cert.badge || 'RESMI'}</span>
-                  <span class="text-neutral-700 text-xs font-medium">${cert.date || '-'}</span>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-accent-2-200 text-accent-2-900 tracking-wider uppercase">${esc(cert.badge || 'RESMI')}</span>
+                  <span class="text-neutral-700 text-xs font-medium">${esc(cert.date || '-')}</span>
                 </div>
-                <h3 class="font-heading font-bold text-text text-base sm:text-lg mt-3 leading-snug">${cert.title}</h3>
-                <p class="text-xs text-neutral-600 font-mono mt-1">No. ${cert.no}</p>
+                <h3 class="font-heading font-bold text-text text-base sm:text-lg mt-3 leading-snug">${esc(cert.title)}</h3>
+                <p class="text-xs text-neutral-600 font-mono mt-1">No. ${esc(cert.no)}</p>
               </div>
 
               <div class="flex items-center justify-between pt-5 mt-5 border-t border-divider text-xs">
                 <span class="font-bold text-neutral-600 text-[11px] tracking-wider uppercase">DOKUMEN TERVERIFIKASI</span>
                 <button 
                   type="button"
-                  data-view-doc="${cert.docUrl || '/images/brand/halal-cert.png'}"
-                  data-view-title="${cert.title}"
-                  data-view-issuer="${cert.issuer || ''}"
-                  data-view-no="${cert.no || ''}"
-                  data-view-date="${cert.date || ''}"
-                  data-view-badge="${cert.badge || 'RESMI'}"
+                  data-view-doc="${esc(cert.docUrl || '/images/brand/halal-cert.png')}"
+                  data-view-title="${esc(cert.title)}"
+                  data-view-issuer="${esc(cert.issuer || '')}"
+                  data-view-no="${esc(cert.no || '')}"
+                  data-view-date="${esc(cert.date || '')}"
+                  data-view-badge="${esc(cert.badge || 'RESMI')}"
                   class="btn-view-cert text-accent-900 font-bold hover:underline flex items-center gap-1.5 transition cursor-pointer">
                   <span>Lihat Dokumen Asli</span>
                   <span>&rarr;</span>

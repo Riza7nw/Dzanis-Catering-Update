@@ -209,6 +209,7 @@ function normalizeCertDto(dto: BackendCertDto, index = 0): ShowcaseCertificateIt
 export async function getCertifications(): Promise<(ShowcaseCertificateItem & LegalCardItem)[]> {
   try {
     const apiBase = getApiBaseUrl();
+    if (!apiBase) throw new Error('Backend API belum dikonfigurasi (PUBLIC_API_URL)');
     const res = await fetch(`${apiBase}/api/certifications?active=true`, {
       headers: getCommonApiHeaders(),
       signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),

@@ -14,6 +14,9 @@ import { getApiBaseUrl, getCommonApiHeaders } from './apiConfig.ts';
  */
 export async function submitLead(payload: BackendLeadPayload): Promise<BackendLeadResponse> {
   const apiBase = getApiBaseUrl();
+  if (!apiBase) {
+    return { success: false, message: 'Backend tidak dikonfigurasi, inquiry langsung diteruskan ke WhatsApp' };
+  }
   const endpoint = `${apiBase}/api/leads`;
 
   try {

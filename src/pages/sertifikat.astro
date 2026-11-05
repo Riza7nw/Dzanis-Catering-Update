@@ -50,21 +50,14 @@ const [showcaseCerts, legalDocs] = await Promise.all([
   <script is:inline define:vars={{ publicApiUrl }}>
     (async function syncDynamicCerts() {
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const queryApi = urlParams.get('apiUrl');
         const hostname = window.location.hostname;
         const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
         const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-        const apiUrl = queryApi || publicApiUrl || (
-          isLocal ? defaultLocalApi : 'https://alkalize-rewire-scruffy.ngrok-free.dev'
-        );
+        const apiUrl = publicApiUrl || (isLocal ? defaultLocalApi : '');
         if (!apiUrl) return;
 
         const res = await fetch(`${apiUrl}/api/certifications?active=true`, {
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-            'Accept': 'application/json'
-          }
+          headers: { 'Accept': 'application/json' }
         });
         if (!res.ok) return;
 
