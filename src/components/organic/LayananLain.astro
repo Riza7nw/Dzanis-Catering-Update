@@ -27,54 +27,54 @@ const waUrl = buildServiceInquiryUrl(serviceName, phone);
     <!-- Spotlight Showcase Container (2-Column Grid on Desktop) -->
     <div class="bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden p-6 sm:p-8 lg:p-10">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        <!-- Visual Column (5 Cols) -->
-        <div class="lg:col-span-5 relative flex flex-col">
-          <div class="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-surface shadow-inner">
-            <img
-              id="prasmanan-main-img"
-              src={item.foto}
-              alt={item.fotoAlt}
-              loading="lazy"
-              width="767"
-              height="1024"
-              decoding="async"
-              class="h-full w-full object-cover transition-opacity duration-300"
-            />
+        <!-- Visual Column: Double Window Pane Layout (6 Cols) -->
+        <div class="lg:col-span-6 relative flex flex-col">
+          <!-- Window Pane Frame (Bingkai Jendela Kolase) -->
+          <div class="relative bg-neutral-100/90 rounded-2xl p-2 sm:p-2.5 border border-neutral-200/80 shadow-inner">
             {item.badge && (
-              <span class="absolute top-3.5 left-3.5 rounded-full bg-accent-700 px-3 py-1 font-heading text-[11px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
+              <span class="absolute top-4 left-4 z-10 rounded-full bg-accent-700 px-3 py-1 font-heading text-[11px] tracking-[0.05em] text-white font-bold uppercase shadow-md">
                 {item.badge}
               </span>
             )}
-          </div>
-
-          <!-- Thumbnail Gallery Selector -->
-          {item.galeri && item.galeri.length > 1 && (
-            <div class="flex items-center gap-3 mt-3.5">
-              <div class="flex gap-2">
-                {item.galeri.map((g, idx) => (
-                  <button
-                    type="button"
-                    class={`prasmanan-thumb-btn group relative size-14 sm:size-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 cursor-pointer touch-manipulation focus-visible:outline-2 focus-visible:outline-accent-700 ${idx === 0 ? 'border-accent-700 ring-2 ring-accent-700/20' : 'border-neutral-200 opacity-70 hover:opacity-100'}`}
-                    data-src={g.src}
-                    data-alt={g.alt}
-                    aria-label={`Tampilkan dokumentasi prasmanan meja ${idx + 1}`}
-                  >
-                    <img
-                      src={g.src}
-                      alt={g.alt}
-                      width="64"
-                      height="64"
-                      class="h-full w-full object-cover pointer-events-none"
-                      loading="lazy"
-                    />
-                  </button>
-                ))}
+            
+            <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
+              <!-- Window Pane 1 (Jendela Kiri) -->
+              <div class="group relative aspect-[3/4] overflow-hidden rounded-xl bg-surface shadow-xs">
+                <img
+                  src="/images/layanan/prasmanan-kantor.webp"
+                  alt="Dokumentasi Setup Prasmanan Kantor Meja 1 Dzanis Catering"
+                  loading="lazy"
+                  width="767"
+                  height="1024"
+                  decoding="async"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 sm:p-2.5">
+                  <span class="inline-block text-[10px] sm:text-[11px] font-semibold text-white tracking-wide">
+                    Setup Sajian A
+                  </span>
+                </div>
               </div>
-              <span class="text-[11px] text-neutral-500 leading-tight">
-                Pilihan dokumentasi setup prasmanan siap santap
-              </span>
+
+              <!-- Window Pane 2 (Jendela Kanan) -->
+              <div class="group relative aspect-[3/4] overflow-hidden rounded-xl bg-surface shadow-xs">
+                <img
+                  src="/images/layanan/prasmanan-kantor-2.webp"
+                  alt="Dokumentasi Setup Prasmanan Kantor Meja 2 Dzanis Catering"
+                  loading="lazy"
+                  width="767"
+                  height="1024"
+                  decoding="async"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 sm:p-2.5">
+                  <span class="inline-block text-[10px] sm:text-[11px] font-semibold text-white tracking-wide">
+                    Setup Sajian B
+                  </span>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
 
           <!-- Sub-caption Reassurance -->
           <p class="text-xs text-neutral-500 mt-3 text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5">
@@ -85,8 +85,8 @@ const waUrl = buildServiceInquiryUrl(serviceName, phone);
           </p>
         </div>
 
-        <!-- Detail Information Column (7 Cols) -->
-        <div class="lg:col-span-7 flex flex-col justify-between">
+        <!-- Detail Information Column (6 Cols) -->
+        <div class="lg:col-span-6 flex flex-col justify-between">
           <div>
             <div class="flex flex-wrap items-baseline gap-3 mb-2">
               <h3 class="font-heading text-2xl sm:text-3xl font-bold text-neutral-900">
@@ -169,41 +169,3 @@ const waUrl = buildServiceInquiryUrl(serviceName, phone);
     </div>
   </div>
 </section>
-
-<script>
-  function initPrasmananGallery() {
-    const mainImg = document.getElementById('prasmanan-main-img') as HTMLImageElement | null;
-    const thumbBtns = document.querySelectorAll('.prasmanan-thumb-btn');
-
-    if (!mainImg || thumbBtns.length === 0) return;
-
-    thumbBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const src = btn.getAttribute('data-src');
-        const alt = btn.getAttribute('data-alt');
-        if (!src) return;
-
-        // Smooth swap
-        mainImg.style.opacity = '0.7';
-        setTimeout(() => {
-          mainImg.src = src;
-          if (alt) mainImg.alt = alt;
-          mainImg.style.opacity = '1';
-        }, 120);
-
-        // Update active rings
-        thumbBtns.forEach((b) => {
-          b.classList.remove('border-accent-700', 'ring-2', 'ring-accent-700/20');
-          b.classList.add('border-neutral-200', 'opacity-70');
-        });
-
-        btn.classList.remove('border-neutral-200', 'opacity-70');
-        btn.classList.add('border-accent-700', 'ring-2', 'ring-accent-700/20');
-      });
-    });
-  }
-
-  // Support initial load and Astro View Transitions if any
-  initPrasmananGallery();
-  document.addEventListener('astro:page-load', initPrasmananGallery);
-</script>
