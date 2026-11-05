@@ -171,16 +171,22 @@ export function initSnackBoxPage(): (() => void) | null {
       { signal }
     );
 
-    function recalculate(): { selectedItems: string[]; subtotal: number; total: number } {
+    interface SelectedSnackItem {
+      nama: string;
+      harga: number;
+    }
+
+    function recalculate(): { selectedItems: SelectedSnackItem[]; subtotal: number; total: number } {
       let subtotal = 0;
-      const selectedItems: string[] = [];
+      const selectedItems: SelectedSnackItem[] = [];
       const categoryCounts: Record<string, number> = {};
 
       checkboxes.forEach((cb) => {
         if (cb.checked) {
           const price = Number(cb.dataset.price || 0);
+          const name = cb.dataset.nama || cb.value;
           subtotal += price;
-          selectedItems.push(cb.dataset.nama || cb.value);
+          selectedItems.push({ nama: name, harga: price });
 
           const cat = cb.dataset.kategori || '';
           if (cat) {
@@ -301,16 +307,30 @@ export function initSnackBoxPage(): (() => void) | null {
     orderBtn?.addEventListener(
       'click',
       () => {
-        const { selectedItems } = recalculate();
+        if (boxInput) {
+          let val = parseInt(boxInput.value, 10);
+          if (isNaN(val) || val < minBoxes) {
+            val = minBoxes;
+          }
+          boxCount = val;
+          syncBoxUI();
+        }
+
+        const { selectedItems, subtotal, total } = recalculate();
         if (selectedItems.length === 0) return;
 
         const packageName = buildSnackBoxPackageName(selectedItems.length);
-        const customDetails = buildSnackBoxCustomDetails(selectedItems);
+        const customDetails = buildSnackBoxCustomDetails(selectedItems, {
+          subtotal,
+          total,
+          boxCount,
+        });
 
         const modalPayload: OrderModalPrefill = {
           packageName,
           portionCount: boxCount,
           customDetails,
+          minOrder: minBoxes,
         };
 
         window.dispatchEvent(

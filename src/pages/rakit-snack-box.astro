@@ -3,10 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/organic/Navbar.astro';
 import RakitSnackBox from '../components/organic/RakitSnackBox.astro';
 import Footer from '../components/organic/Footer.astro';
-import { snackRingkasan } from '../data/snack';
+import { snackRingkasan, formatRupiah } from '../data/snack';
 
 const title = "Rakit Snack Box Sendiri — Dzanis Catering";
-const description = `Susun sendiri isi snack box dari ${snackRingkasan.totalPilihan} pilihan jajanan mulai Rp${snackRingkasan.hargaTermurah}. Harga box langsung terhitung transparan, pesanan dikirim lewat WhatsApp.`;
+const description = `Susun sendiri isi snack box dari ${snackRingkasan.totalPilihan} pilihan jajanan mulai ${formatRupiah(snackRingkasan.hargaTermurah)}. Harga box langsung terhitung transparan, pesanan dikirim lewat WhatsApp.`;
 ---
 
 <BaseLayout title={title} description={description}>
