@@ -125,15 +125,12 @@ export const DAFTAR_PAKET: Paket[] = [
     ],
     foto: "/images/menu/paket-23k.webp",
     fotoAlt: "Layanan katering prasmanan dan nasi boks Dzanis Catering Ciayumajakuning",
-    // Menu selection: 1 Main Menu, 3 Side Dishes dari POOL_LAUK_23K
-    canSelectMainMenu: true,
-    selectableMainMenus: [
-      "Ayam Bakar",
-      "Ayam Goreng",
-    ],
-    selectableSideDishes: POOL_LAUK_23K,
-    sideDishesSelectMin: 3,
-    sideDishesSelectMax: 3,
+    // Fixed Bundling (Zero racik karena harga < 25.000)
+    canSelectMainMenu: false,
+    selectableMainMenus: [],
+    selectableSideDishes: [],
+    sideDishesSelectMin: 0,
+    sideDishesSelectMax: 0,
     ringkas:
       "Nasi putih · olahan ayam · 3 lauk pendamping pilihan · buah pisang · sambal · kerupuk",
     populer: true,

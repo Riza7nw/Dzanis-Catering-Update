@@ -62,6 +62,22 @@ export function normalizePackage(dto: BackendPackageDto, fallbackList: Paket[] =
   const pelengkap = matchedLocal?.pelengkap || ['Nasi Putih Pulen', 'Kerupuk Renyah'];
   const tags = matchedLocal?.tags || (flatItems.length > 0 ? flatItems.slice(0, 3) : ['Nasi Pulen', 'Higienis']);
 
+  // Aturan SSOT: paket harga >= 25.000 mendapatkan fitur racik, harga < 25.000 tidak mendapatkan (fixed bundling).
+  // Sumber lauk dari Opsi B: item-item yang diketikkan admin di database.
+  const canSelectMainMenu = harga >= 25000;
+  const selectableMainMenus = canSelectMainMenu
+    ? (matchedLocal?.selectableMainMenus && matchedLocal.selectableMainMenus.length > 0
+        ? matchedLocal.selectableMainMenus
+        : (menuUtama.length > 0 ? menuUtama : [rawNama]))
+    : [];
+  const selectableSideDishes = canSelectMainMenu
+    ? (matchedLocal?.selectableSideDishes && matchedLocal.selectableSideDishes.length > 0
+        ? matchedLocal.selectableSideDishes
+        : (laukPendamping.length > 0 ? laukPendamping : flatItems))
+    : [];
+  const sideDishesSelectMin = matchedLocal?.sideDishesSelectMin ?? (canSelectMainMenu ? Math.min(1, selectableSideDishes.length) : 0);
+  const sideDishesSelectMax = matchedLocal?.sideDishesSelectMax ?? (canSelectMainMenu ? Math.max(1, selectableSideDishes.length) : 0);
+
   return {
     id: dto.id || matchedLocal?.id || `paket-${slug}`,
     slug,
@@ -81,11 +97,11 @@ export function normalizePackage(dto: BackendPackageDto, fallbackList: Paket[] =
     pelengkap,
     foto,
     fotoAlt: matchedLocal?.fotoAlt || rawNama,
-    canSelectMainMenu: matchedLocal?.canSelectMainMenu ?? false,
-    selectableMainMenus: matchedLocal?.selectableMainMenus || menuUtama,
-    selectableSideDishes: matchedLocal?.selectableSideDishes || laukPendamping,
-    sideDishesSelectMin: matchedLocal?.sideDishesSelectMin ?? 2,
-    sideDishesSelectMax: matchedLocal?.sideDishesSelectMax ?? 3,
+    canSelectMainMenu,
+    selectableMainMenus,
+    selectableSideDishes,
+    sideDishesSelectMin,
+    sideDishesSelectMax,
     ringkas: matchedLocal?.ringkas,
     populer: matchedLocal?.populer ?? Boolean(dto.badge?.toLowerCase().includes('favorit')),
   };

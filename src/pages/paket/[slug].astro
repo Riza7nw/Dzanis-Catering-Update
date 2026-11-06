@@ -57,7 +57,7 @@ const { paket } = Astro.props;
 const catalog = await getMenuCatalog();
 const backendPkg = catalog.find((p) => p.slug === paket.slug || p.id === paket.id);
 
-const activePaket: Paket = backendPkg
+const rawActivePaket: Paket = backendPkg
   ? {
       ...paket,
       nama: backendPkg.nama || paket.nama,
@@ -68,8 +68,33 @@ const activePaket: Paket = backendPkg
       minOrder: backendPkg.minOrder || paket.minOrder,
       menuUtama: backendPkg.menuUtama && backendPkg.menuUtama.length > 0 ? backendPkg.menuUtama : paket.menuUtama,
       laukPendamping: backendPkg.laukPendamping && backendPkg.laukPendamping.length > 0 ? backendPkg.laukPendamping : paket.laukPendamping,
+      selectableMainMenus: backendPkg.selectableMainMenus || paket.selectableMainMenus,
+      selectableSideDishes: backendPkg.selectableSideDishes || paket.selectableSideDishes,
     }
   : paket;
+
+// Aturan SSOT: jika harga >= 25.000 maka terdapat opsi Pilihan Menu Sajian (Racik Menu Sendiri)
+// Jika harga < 25.000 maka tidak mendapatkannya (fixed bundling).
+const hasRacikFeature = rawActivePaket.harga >= 25000;
+const selectableMain = hasRacikFeature
+  ? (rawActivePaket.selectableMainMenus && rawActivePaket.selectableMainMenus.length > 0
+      ? rawActivePaket.selectableMainMenus
+      : (rawActivePaket.menuUtama.length > 0 ? rawActivePaket.menuUtama : [formatNamaPaket(rawActivePaket.nama)]))
+  : [];
+const selectableSides = hasRacikFeature
+  ? (rawActivePaket.selectableSideDishes && rawActivePaket.selectableSideDishes.length > 0
+      ? rawActivePaket.selectableSideDishes
+      : rawActivePaket.laukPendamping)
+  : [];
+
+const activePaket: Paket = {
+  ...rawActivePaket,
+  canSelectMainMenu: hasRacikFeature,
+  selectableMainMenus: selectableMain,
+  selectableSideDishes: selectableSides,
+  sideDishesSelectMin: hasRacikFeature ? Math.min(1, selectableSides.length) : 0,
+  sideDishesSelectMax: hasRacikFeature ? Math.max(1, selectableSides.length) : 0,
+};
 
 const pageTitle = `${formatNamaPaket(activePaket.nama)} | Dzanis Catering`;
 const pageDescription = activePaket.deskripsiSingkat;

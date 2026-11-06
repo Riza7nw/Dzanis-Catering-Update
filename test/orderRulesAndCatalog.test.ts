@@ -58,13 +58,12 @@ test('SSOT DAFTAR_PAKET: contains exactly 4 packages with correct properties', (
   assert.equal(p23k.minOrder, 20);
   assert.equal(p23k.minOrderWeekend, 40);
   assert.equal(p23k.maxOrder, 500);
-  assert.equal(p23k.canSelectMainMenu, true);
-  assert.equal(p23k.sideDishesSelectMin, 3);
-  assert.equal(p23k.sideDishesSelectMax, 3);
-  assert.deepEqual(p23k.selectableSideDishes, POOL_LAUK_23K);
+  assert.equal(p23k.canSelectMainMenu, false);
+  assert.equal(p23k.sideDishesSelectMin, 0);
+  assert.equal(p23k.sideDishesSelectMax, 0);
+  assert.deepEqual(p23k.selectableSideDishes, []);
   assert.deepEqual(p23k.menuUtama, ['Ayam Bakar', 'Ayam Goreng']);
-  assert.deepEqual(p23k.selectableMainMenus, ['Ayam Bakar', 'Ayam Goreng']);
-  assert.equal(p23k.selectableMainMenus[0], 'Ayam Bakar');
+  assert.deepEqual(p23k.selectableMainMenus, []);
 
   // 3. Paket Spesial 25k
   const p25k = DAFTAR_PAKET.find((p) => p.slug === 'paket-spesial-25k');
@@ -331,30 +330,15 @@ test('Static Built HTML: contains large order callout notices with touch targets
   assert.ok(snackHtml.includes('id="snack-builder-wa-admin-link"'));
 });
 
-test('Static Built HTML: paket-favorit-23k contains simplified Ayam Bakar & Ayam Goreng with default checked radio', () => {
+test('Static Built HTML: paket-favorit-23k is fixed bundling without racik section (harga < 25.000)', () => {
   const distDir = path.resolve('dist');
   assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
 
   const p23kHtml = fs.readFileSync(path.join(distDir, 'paket/paket-favorit-23k/index.html'), 'utf-8');
-  assert.ok(p23kHtml.includes('data-default-main-menu="Ayam Bakar"'), 'Default main menu attribute must be Ayam Bakar');
-  assert.ok(p23kHtml.includes('value="Ayam Bakar"'), 'Must contain radio option for Ayam Bakar');
-  assert.ok(p23kHtml.includes('value="Ayam Goreng"'), 'Must contain radio option for Ayam Goreng');
-  // Check that Ayam Bakar radio input specifically has checked attribute and Ayam Goreng does not
-  assert.match(
-    p23kHtml,
-    /<input[^>]*value="Ayam Bakar"[^>]*checked[^>]*>/,
-    'Ayam Bakar radio input must have the checked attribute'
-  );
-  assert.doesNotMatch(
-    p23kHtml,
-    /<input[^>]*value="Ayam Goreng"[^>]*checked[^>]*>/,
-    'Ayam Goreng radio input must NOT have the checked attribute by default'
-  );
-  assert.ok(!p23kHtml.includes('Ayam Bakar Madu'), 'Must not contain old Ayam Bakar Madu');
-  assert.ok(!p23kHtml.includes('Ayam Goreng Lengkuas'), 'Must not contain old Ayam Goreng Lengkuas');
+  assert.ok(!p23kHtml.includes('id="section-pilihan-menu"'), 'Must not contain racik menu for price < 25k');
 });
 
-test('Real headless Chrome: /paket/paket-favorit-23k default radio selection (Ayam Bakar), dynamic switch to Ayam Goreng, and OrderModal prefill', async () => {
+test('Real headless Chrome: /paket/paket-spesial-25k default selection, dynamic switch to Ayam Rica Kemangi, and OrderModal prefill', async () => {
   const distDir = path.resolve('dist');
   assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
 
@@ -383,13 +367,13 @@ test('Real headless Chrome: /paket/paket-favorit-23k default radio selection (Ay
 
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const port = (server.address() as AddressInfo).port;
-  const baseUrl = `http://127.0.0.1:${port}/paket/paket-favorit-23k/`;
+  const baseUrl = `http://127.0.0.1:${port}/paket/paket-spesial-25k/`;
 
   const chromeDebugPort = port + 1000;
   const chrome = spawn('google-chrome', [
     '--headless=new',
     `--remote-debugging-port=${chromeDebugPort}`,
-    `--user-data-dir=/tmp/chrome-test-p23k-${port}`,
+    `--user-data-dir=/tmp/chrome-test-p25k-${port}`,
     '--window-size=375,812',
     baseUrl,
   ]);
@@ -399,12 +383,12 @@ test('Real headless Chrome: /paket/paket-favorit-23k default radio selection (Ay
   try {
     const listRes = await fetch(`http://127.0.0.1:${chromeDebugPort}/json`);
     const tabs = await listRes.json();
-    const targetTab = tabs.find((t: any) => t.url.includes('paket-favorit-23k')) || tabs[0];
+    const targetTab = tabs.find((t: any) => t.url.includes('paket-spesial-25k')) || tabs[0];
     const ws = new WebSocket(targetTab.webSocketDebuggerUrl);
 
     const testResult = await new Promise<any>((resolve, reject) => {
       const timeoutId = setTimeout(() => {
-        reject(new Error('Headless Chrome test for paket-favorit-23k timed out after 8s'));
+        reject(new Error('Headless Chrome test for paket-spesial-25k timed out after 8s'));
       }, 8000);
 
       ws.onopen = () => {
@@ -442,16 +426,16 @@ test('Real headless Chrome: /paket/paket-favorit-23k default radio selection (Ay
                   const isCustomOpen = customCollapsible ? customCollapsible.getAttribute('data-buka') === 'true' : false;
                   const summaryMainInitial = document.getElementById('menu-summary-main')?.textContent?.trim() || '';
 
-                  // 3. Select Ayam Goreng
-                  const radioAyamGoreng = document.querySelector('input[name="main-menu"][value="Ayam Goreng"]');
-                  let switchedToGoreng = false;
-                  if (radioAyamGoreng) {
-                    radioAyamGoreng.checked = true;
-                    radioAyamGoreng.dispatchEvent(new Event('change', { bubbles: true }));
-                    switchedToGoreng = radioAyamGoreng.checked;
+                  // 3. Select Ayam Rica Kemangi
+                  const radioAyamRica = document.querySelector('input[name="main-menu"][value="Ayam Rica Kemangi"]');
+                  let switchedToRica = false;
+                  if (radioAyamRica) {
+                    radioAyamRica.checked = true;
+                    radioAyamRica.dispatchEvent(new Event('change', { bubbles: true }));
+                    switchedToRica = radioAyamRica.checked;
                   }
 
-                  const summaryMainAfterGoreng = document.getElementById('menu-summary-main')?.textContent?.trim() || '';
+                  const summaryMainAfterRica = document.getElementById('menu-summary-main')?.textContent?.trim() || '';
                   const customWaMessage = waCheckoutBtn && waCheckoutBtn.dataset ? waCheckoutBtn.dataset.waMessage || '' : '';
 
                   // 4. Click Checkout to open OrderModal and inspect prefill
@@ -476,8 +460,8 @@ test('Real headless Chrome: /paket/paket-favorit-23k default radio selection (Ay
                     defaultWaMessage,
                     isCustomOpen,
                     summaryMainInitial,
-                    switchedToGoreng,
-                    summaryMainAfterGoreng,
+                    switchedToRica,
+                    summaryMainAfterRica,
                     customWaMessage,
                     isModalOpen,
                     modalCustomDetails,
@@ -515,28 +499,26 @@ test('Real headless Chrome: /paket/paket-favorit-23k default radio selection (Ay
     });
 
     // 1. Initial State Assertions
-    assert.ok(testResult.defaultPresetText.includes('Menu Utama: Ayam Bakar'), 'Default preset box must show Menu Utama: Ayam Bakar');
-    assert.equal(testResult.initialRadioValue, 'Ayam Bakar', 'Initial checked radio value must be Ayam Bakar');
-    assert.ok(testResult.defaultWaMessage.includes('Menu Utama: Ayam Bakar'), 'Default WA message must contain Menu Utama: Ayam Bakar');
-    assert.ok(!testResult.defaultWaMessage.includes('Ayam Bakar Madu'), 'Must not contain legacy Ayam Bakar Madu');
+    assert.ok(testResult.defaultPresetText.includes('Menu Utama: Rolade Daging Sapi Olahan'), 'Default preset box must show Menu Utama: Rolade Daging Sapi Olahan');
+    assert.equal(testResult.initialRadioValue, 'Rolade Daging Sapi Olahan', 'Initial checked radio value must be Rolade Daging Sapi Olahan');
+    assert.ok(testResult.defaultWaMessage.includes('Menu Utama: Rolade Daging Sapi Olahan'), 'Default WA message must contain Menu Utama: Rolade Daging Sapi Olahan');
 
     // 2. Custom Mode Assertions
     assert.equal(testResult.isCustomOpen, true, 'Collapsible custom menu must open on click');
-    assert.ok(testResult.summaryMainInitial.includes('Ayam Bakar'), 'Custom summary initial menu must be Ayam Bakar');
+    assert.ok(testResult.summaryMainInitial.includes('Rolade Daging Sapi Olahan'), 'Custom summary initial menu must be Rolade Daging Sapi Olahan');
 
-    // 3. Selection of Ayam Goreng Assertions
-    assert.equal(testResult.switchedToGoreng, true, 'Ayam Goreng radio button must be checkable');
-    assert.ok(testResult.summaryMainAfterGoreng.includes('Ayam Goreng'), 'Summary must update to Ayam Goreng');
-    assert.ok(testResult.customWaMessage.includes('Menu Utama: Ayam Goreng'), 'Custom WA message must reflect Menu Utama: Ayam Goreng');
-    assert.ok(!testResult.customWaMessage.includes('Menu Utama: Ayam Bakar'), 'Custom WA message must not reflect Ayam Bakar after switching');
+    // 3. Selection of Ayam Rica Kemangi Assertions
+    assert.equal(testResult.switchedToRica, true, 'Ayam Rica Kemangi radio button must be checkable');
+    assert.ok(testResult.summaryMainAfterRica.includes('Ayam Rica Kemangi'), 'Summary must update to Ayam Rica Kemangi');
+    assert.ok(testResult.customWaMessage.includes('Menu Utama: Ayam Rica Kemangi'), 'Custom WA message must reflect Menu Utama: Ayam Rica Kemangi');
 
     // 4. Modal Prefill Assertions
     assert.equal(testResult.isModalOpen, true, 'OrderModal must open on waCheckoutBtn click');
-    assert.ok(testResult.modalCustomDetails.includes('Ayam Goreng'), 'OrderModal custom details must be prefilled with Ayam Goreng');
+    assert.ok(testResult.modalCustomDetails.includes('Ayam Rica Kemangi'), 'OrderModal custom details must be prefilled with Ayam Rica Kemangi');
 
     // 5. Reset to Default Mode Assertions
     assert.equal(testResult.isCustomClosed, true, 'Collapsible must close when switching back to default mode');
-    assert.ok(testResult.revertedWaMessage.includes('Menu Utama: Ayam Bakar'), 'Reverted WA message must contain Menu Utama: Ayam Bakar');
+    assert.ok(testResult.revertedWaMessage.includes('Menu Utama: Rolade Daging Sapi Olahan'), 'Reverted WA message must contain Menu Utama: Rolade Daging Sapi Olahan');
   } finally {
     chrome.kill();
     server.close();
