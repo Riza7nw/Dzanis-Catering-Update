@@ -115,15 +115,15 @@ export async function getMenuCatalog(): Promise<Paket[]> {
           ? data.data
           : [];
 
-        // Filter paket khusus kategori Nasi Kotak
-        const nasiKotakDtos = rawPackages.filter((p) => {
-          if (!p.category) return true; // jika kategori tidak ditentukan, anggap nasi kotak
+        // Filter paket katering (selain Snack Box yang memiliki seksi tersendiri di #snack)
+        const cateringDtos = rawPackages.filter((p) => {
+          if (!p.category) return true;
           const cat = p.category.toLowerCase();
-          return cat.includes('nasi') || cat.includes('kotak') || cat.includes('box');
+          return !cat.includes('snack');
         });
 
         // Kembalikan murni data dari backend (bila kosong, kembalikan array kosong [])
-        return nasiKotakDtos.map((dto) => normalizePackage(dto, DAFTAR_PAKET));
+        return cateringDtos.map((dto) => normalizePackage(dto, DAFTAR_PAKET));
       }
     }
   } catch (err) {

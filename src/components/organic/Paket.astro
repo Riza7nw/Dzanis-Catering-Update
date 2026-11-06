@@ -587,14 +587,14 @@ const menuKatalog = await getMenuCatalog();
         ? data
         : (Array.isArray(data.packages) ? data.packages : (Array.isArray(data.data) ? data.data : []));
 
-      // Filter paket kategori nasi kotak
+      // Filter paket katering (selain snack box yang punya seksi tersendiri di #snack)
       const packages = rawPackages.filter((p) => {
         if (!p.category) return true;
         const cat = String(p.category).toLowerCase();
-        return cat.includes('nasi') || cat.includes('kotak') || cat.includes('box');
+        return !cat.includes('snack');
       });
 
-      console.log('[Dzanis Menu] Menerima data paket nasi kotak:', packages.length, 'paket');
+      console.log('[Dzanis Menu] Menerima data paket katering:', packages.length, 'paket');
 
       const grid = document.getElementById('paket-grid');
       const prevBtn = document.getElementById('paket-prev');
