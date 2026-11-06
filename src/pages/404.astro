@@ -1,0 +1,357 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/organic/Navbar.astro';
+import Footer from '../components/organic/Footer.astro';
+import { waPhoneNumber } from '../data/company';
+
+const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
+---
+
+<BaseLayout
+  title="Memuat Menu... | Dzanis Catering"
+  description="Layanan katering higienis dan lezat Dzanis Catering Majalengka."
+>
+  <Navbar />
+
+  <main id="konten" class="bg-bg w-full max-w-full min-w-0 flex-1 overflow-x-clip min-h-[60vh] flex flex-col justify-center">
+    <!-- 1. State: Dynamic Package Resolver (Aktif jika URL adalah /paket/<slug>) -->
+    <div id="dynamic-package-container" class="hidden w-full">
+      <!-- Loading Skeleton State -->
+      <div id="dynamic-package-loading" class="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-14 flex flex-col items-center justify-center text-center">
+        <div class="size-12 rounded-full border-4 border-accent/20 border-t-accent animate-spin mb-4"></div>
+        <h2 class="font-heading text-lg font-bold text-neutral-900">Memuat Rincian Paket...</h2>
+        <p class="text-sm text-neutral-600 mt-1">Mengambil data paket terbaru langsung dari dapur Dzanis Catering.</p>
+      </div>
+
+      <!-- Live Rendered Package Container -->
+      <div id="dynamic-package-content" class="hidden"></div>
+    </div>
+
+    <!-- 2. State: Standard 404 Not Found (Jika bukan /paket/ atau menu benar-benar tidak ada di database) -->
+    <div id="standard-404-view" class="hidden mx-auto max-w-[1280px] px-4 py-20 sm:px-6 lg:px-14 text-center">
+      <div class="size-20 rounded-full bg-accent/10 text-accent mx-auto mb-6 flex items-center justify-center">
+        <svg class="size-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <span class="inline-block px-3 py-1 rounded-full bg-neutral-200 text-neutral-700 text-xs font-bold uppercase tracking-wider mb-3">
+        Error 404
+      </span>
+      <h1 class="font-heading text-3xl sm:text-4xl font-bold text-neutral-900 tracking-tight mb-3">
+        Halaman Tidak Ditemukan
+      </h1>
+      <p class="text-sm sm:text-base text-neutral-600 max-w-md mx-auto mb-8 leading-relaxed">
+        Maaf, halaman atau menu yang Anda cari tidak tersedia atau mungkin telah diperbarui oleh dapur kami.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <a
+          href="/#paket"
+          class="btn btn-primary text-sm font-semibold inline-flex items-center gap-2 px-6 py-3"
+        >
+          <span>Lihat Katalog Paket</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+        <a
+          href="/"
+          class="btn btn-secondary text-sm font-semibold px-6 py-3"
+        >
+          Kembali ke Beranda
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<script is:inline define:vars={{ publicApiUrl, waPhoneNumber }}>
+  (async function resolvePackageOr404() {
+    const pathname = window.location.pathname.replace(/\/$/, '');
+    const segments = pathname.split('/').filter(Boolean);
+    const isPackageRoute = segments.length >= 2 && segments[0] === 'paket';
+    const slug = isPackageRoute ? segments[1] : '';
+
+    const dynamicContainer = document.getElementById('dynamic-package-container');
+    const dynamicLoading = document.getElementById('dynamic-package-loading');
+    const dynamicContent = document.getElementById('dynamic-package-content');
+    const standard404 = document.getElementById('standard-404-view');
+
+    if (!isPackageRoute || !slug) {
+      if (standard404) standard404.classList.remove('hidden');
+      return;
+    }
+
+    if (dynamicContainer) dynamicContainer.classList.remove('hidden');
+
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryApi = urlParams.get('apiUrl');
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
+      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
+      const apiUrl = queryApi || publicApiUrl || (
+        isLocal
+          ? defaultLocalApi
+          : 'https://alkalize-rewire-scruffy.ngrok-free.dev'
+      );
+
+      const res = await fetch(`${apiUrl}/api/menu`, {
+        headers: { 'ngrok-skip-browser-warning': 'true', 'Accept': 'application/json' }
+      });
+      if (!res.ok) throw new Error('API Respon Gagal: ' + res.status);
+
+      const data = await res.json();
+      const packages = Array.isArray(data)
+        ? data
+        : (Array.isArray(data?.packages) ? data.packages : (Array.isArray(data?.data) ? data.data : []));
+
+      const pkg = packages.find((p) => p.slug === slug || p.id === slug || (p.name && p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug));
+
+      if (!pkg) {
+        // Menu benar-benar tidak ada di database backend
+        if (dynamicLoading) dynamicLoading.classList.add('hidden');
+        if (standard404) standard404.classList.remove('hidden');
+        return;
+      }
+
+      // Format data paket
+      const rawNama = pkg.name || pkg.nama || 'Paket Katering';
+      const nama = rawNama.replace(/\s*\d+K$/i, '').trim();
+      const harga = Number(pkg.price_per_pax || pkg.harga || 0);
+      const minOrder = Number(pkg.min_pax || pkg.minOrder || 20);
+      const minOrderWeekend = 40;
+      const deskripsi = pkg.description || pkg.deskripsiSingkat || 'Sajian lezat berkualitas dari dapur Dzanis Catering Majalengka.';
+      const badge = pkg.badge || (pkg.category ? pkg.category : 'Favorit');
+      
+      let rawImg = pkg.image || pkg.foto || '/images/menu/hero-nasi-kotak.jpg';
+      if (rawImg.startsWith('uploads/')) rawImg = '/' + rawImg;
+      if (rawImg.startsWith('/uploads/')) rawImg = `${apiUrl}${rawImg}`;
+
+      let items = [];
+      if (Array.isArray(pkg.items)) items = pkg.items;
+      else if (typeof pkg.items === 'string') {
+        try { items = JSON.parse(pkg.items); } catch { items = pkg.items.split(/[\n,]+/).map(s => s.trim()).filter(Boolean); }
+      }
+      if (items.length === 0) items = ['Olahan Ayam Istimewa', 'Nasi Putih Pulen', 'Lauk Pendamping Pilihan', 'Sambal & Lalapan'];
+
+
+      document.title = `${nama} | Dzanis Catering`;
+
+      if (dynamicLoading) dynamicLoading.classList.add('hidden');
+      if (dynamicContent) {
+        dynamicContent.classList.remove('hidden');
+        dynamicContent.innerHTML = `
+          <div
+            id="package-detail-root"
+            data-base-price="${harga}"
+            data-package-name="${nama}"
+            data-min-order="${minOrder}"
+            data-min-order-weekend="${minOrderWeekend}"
+            data-max-order="500"
+            data-phone="${waPhoneNumber}"
+            class="mx-auto max-w-[1280px] px-4 pt-6 sm:pt-8 lg:pt-10 pb-12 sm:pb-16 lg:pb-20 sm:px-6 lg:px-14 select-text"
+          >
+            <div class="mb-6">
+              <a
+                href="/#paket"
+                class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-900 transition-colors"
+              >
+                <span aria-hidden="true">&larr;</span>
+                <span>Kembali ke Daftar Paket</span>
+              </a>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-x-12 lg:gap-y-8 items-start">
+              <!-- Header & Price -->
+              <div class="lg:col-span-7 lg:col-start-6 lg:row-start-1">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                  <span class="rounded-full bg-accent-2-200 text-accent-2-900 px-3 py-0.5 text-sm font-semibold">
+                    Katering Higienis
+                  </span>
+                  ${badge ? `
+                    <span class="rounded-full bg-accent/10 text-accent px-3 py-0.5 text-sm font-bold uppercase tracking-wider">
+                      ${badge}
+                    </span>
+                  ` : ''}
+                </div>
+
+                <h1 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight">
+                  ${nama}
+                </h1>
+
+                <div class="mt-3 flex items-baseline gap-2">
+                  <span class="font-heading text-xl text-neutral-500 font-semibold">Rp</span>
+                  <span class="font-heading text-3xl sm:text-4xl font-bold text-accent-700 leading-none">
+                    ${harga.toLocaleString('id-ID')}
+                  </span>
+                  <span class="text-sm font-medium text-neutral-600">/ porsi</span>
+                </div>
+
+                <p class="mt-4 text-sm sm:text-base text-neutral-900 leading-relaxed">
+                  ${deskripsi}
+                </p>
+
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                  <div class="rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm">
+                    <span class="block text-[13px] font-semibold uppercase tracking-wider text-neutral-500">Kemasan</span>
+                    <span class="mt-0.5 block text-sm font-bold text-neutral-900">Box Bento Sekat 4</span>
+                  </div>
+                  <div class="rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm">
+                    <span class="block text-[13px] font-semibold uppercase tracking-wider text-neutral-500">Minimum Order</span>
+                    <span class="mt-0.5 block text-sm font-bold text-neutral-900">${minOrder} box (Hari Kerja) / ${minOrderWeekend} box (Akhir Pekan)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Foto Menu -->
+              <div class="lg:col-span-5 lg:col-start-1 lg:row-start-1">
+                <div class="relative overflow-hidden rounded-3xl bg-neutral-100 border border-neutral-200 shadow-md aspect-[4/3] group">
+                  <img
+                    src="${rawImg}"
+                    alt="${nama}"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onerror="this.onerror=null;this.src='/images/menu/hero-nasi-kotak.jpg';"
+                  />
+                  ${badge ? `
+                    <span class="absolute top-4 left-4 z-10 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+                      ${badge}
+                    </span>
+                  ` : ''}
+                </div>
+              </div>
+
+              <!-- Komposisi & Ketentuan Pemesanan -->
+              <div class="lg:col-span-5 lg:col-start-1 lg:row-start-2 flex flex-col gap-6">
+                <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-2xs">
+                  <h3 class="font-heading text-sm font-bold uppercase tracking-wider text-neutral-900 mb-3">
+                    Komposisi & Menu Bawaan
+                  </h3>
+                  <ul class="space-y-2 text-sm text-neutral-900">
+                    ${items.map(item => `
+                      <li class="flex items-start gap-2">
+                        <span class="text-accent font-bold">•</span>
+                        <span>${item}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
+
+                <div class="rounded-2xl border border-neutral-200/90 bg-surface/60 p-5 text-neutral-800">
+                  <h3 class="font-heading text-sm font-bold text-neutral-900 mb-3 uppercase tracking-wide">
+                    Ketentuan Pemesanan
+                  </h3>
+                  <ul class="space-y-2 text-sm leading-relaxed text-neutral-900">
+                    <li class="flex items-start gap-2"><span class="text-accent font-bold">✓</span><span><strong>Cutoff H-2 / H-3:</strong> Disarankan memesan minimal H-3 agar persiapan dapur optimal.</span></li>
+                    <li class="flex items-start gap-2"><span class="text-accent font-bold">✓</span><span><strong>100% Halal:</strong> Dapur higienis rumahan khas Majalengka.</span></li>
+                    <li class="flex items-start gap-2"><span class="text-accent font-bold">✓</span><span><strong>Area Antar:</strong> Melayani Ciayumajakuning (Cirebon, Indramayu, Majalengka, Kuningan).</span></li>
+                    <li class="flex items-start gap-2"><span class="text-accent font-bold">✓</span><span><strong>Pembayaran:</strong> DP 25% saat konfirmasi, pelunasan saat pesanan tiba.</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Kalkulator Porsi & Order WhatsApp -->
+              <div class="lg:col-span-7 lg:col-start-6 lg:row-start-2 flex flex-col gap-6">
+                <div class="rounded-3xl border border-neutral-200/90 bg-white p-6 sm:p-7 shadow-sm">
+                  <h3 class="font-heading text-lg font-bold text-neutral-900 mb-1">
+                    Kalkulator Porsi & Pemesanan
+                  </h3>
+                  <p class="text-xs sm:text-sm text-neutral-600 mb-6">
+                    Tentukan jumlah porsi untuk menghitung estimasi biaya dan membuat format pesan WhatsApp otomatis.
+                  </p>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end mb-6">
+                    <div>
+                      <label for="dyn-portion-input" class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-2">
+                        Jumlah Porsi (Min. ${minOrder})
+                      </label>
+                      <div class="flex items-center gap-2">
+                        <button type="button" id="dyn-btn-minus" class="size-11 rounded-xl bg-surface border border-neutral-200 font-bold text-neutral-700 hover:bg-neutral-200 transition">-</button>
+                        <input
+                          type="number"
+                          id="dyn-portion-input"
+                          value="${minOrder}"
+                          min="${minOrder}"
+                          max="500"
+                          class="h-11 flex-1 text-center font-heading text-lg font-bold rounded-xl border border-neutral-300 focus:border-accent focus:ring-1 focus:ring-accent outline-none"
+                        />
+                        <button type="button" id="dyn-btn-plus" class="size-11 rounded-xl bg-surface border border-neutral-200 font-bold text-neutral-700 hover:bg-neutral-200 transition">+</button>
+                      </div>
+                    </div>
+
+                    <div class="rounded-xl bg-surface/80 p-3.5 border border-neutral-200/80">
+                      <span class="block text-[11px] font-bold uppercase tracking-wider text-neutral-500">Estimasi Total Biaya</span>
+                      <span id="dyn-total-display" class="block font-heading text-2xl font-bold text-accent-700 mt-0.5">
+                        Rp ${(minOrder * harga).toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="mb-6">
+                    <label for="dyn-event-date" class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-2">
+                      Tanggal Acara
+                    </label>
+                    <input
+                      type="date"
+                      id="dyn-event-date"
+                      class="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none"
+                    />
+                  </div>
+
+                  <a
+                    id="dyn-btn-wa"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-primary w-full py-4 text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-2xl shadow-md hover:shadow-lg transition-all"
+                  >
+                    <span>Pesan Sekarang via WhatsApp</span>
+                    <span aria-hidden="true">&rarr;</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Interactive Calculator Logic
+        const pInput = document.getElementById('dyn-portion-input');
+        const bMinus = document.getElementById('dyn-btn-minus');
+        const bPlus = document.getElementById('dyn-btn-plus');
+        const totalDisp = document.getElementById('dyn-total-display');
+        const dateInput = document.getElementById('dyn-event-date');
+        const btnWa = document.getElementById('dyn-btn-wa');
+
+        function updateDynamicOrder() {
+          let qty = parseInt(pInput.value, 10);
+          if (isNaN(qty) || qty < minOrder) qty = minOrder;
+          if (qty > 500) qty = 500;
+          pInput.value = qty;
+
+          const total = qty * harga;
+          totalDisp.textContent = `Rp ${total.toLocaleString('id-ID')}`;
+
+          const tgl = dateInput.value || '(Belum ditentukan)';
+          const text = `Halo Dzanis Catering, saya ingin memesan:\n\n*Paket:* ${nama}\n*Harga:* Rp ${harga.toLocaleString('id-ID')} / porsi\n*Jumlah Porsi:* ${qty} box\n*Total Estimasi:* Rp ${total.toLocaleString('id-ID')}\n*Tanggal Acara:* ${tgl}\n\nMohon informasi ketersediaan tanggal dan konfirmasi pesanannya. Terima kasih!`;
+          btnWa.href = `https://wa.me/${waPhoneNumber}?text=${encodeURIComponent(text)}`;
+        }
+
+        bMinus.onclick = () => { pInput.value = Math.max(minOrder, parseInt(pInput.value || minOrder, 10) - 5); updateDynamicOrder(); };
+        bPlus.onclick = () => { pInput.value = Math.min(500, parseInt(pInput.value || minOrder, 10) + 5); updateDynamicOrder(); };
+        pInput.oninput = updateDynamicOrder;
+        dateInput.onchange = updateDynamicOrder;
+
+        // Set minimal tanggal esok hari
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateInput.min = tomorrow.toISOString().split('T')[0];
+        dateInput.value = dateInput.min;
+
+        updateDynamicOrder();
+      }
+    } catch (err) {
+      console.error('[Dzanis 404 Resolver] Gagal memuat paket dinamis:', err);
+      if (dynamicLoading) dynamicLoading.classList.add('hidden');
+      if (standard404) standard404.classList.remove('hidden');
+    }
+  })();
+</script>
