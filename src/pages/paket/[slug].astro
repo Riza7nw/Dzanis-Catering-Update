@@ -11,6 +11,7 @@ import PackageOrderBar from '../../components/paket/PackageOrderBar.astro';
 import { DAFTAR_PAKET, type Paket, formatNamaPaket } from '../../data/paket';
 import { waPhoneNumber } from '../../data/company';
 import { generateProductSchema } from '../../utils/schema';
+import { getMenuCatalog } from '../../services/api/menuService';
 
 export async function getStaticPaths() {
   return DAFTAR_PAKET.map((paket) => ({
@@ -25,9 +26,27 @@ interface Props {
 
 const { paket } = Astro.props;
 
-const pageTitle = `${formatNamaPaket(paket.nama)} | Dzanis Catering`;
-const pageDescription = paket.deskripsiSingkat;
-const productSchema = generateProductSchema(paket);
+// Ambil pembaruan terkini dari database jika backend online (harga, nama, badge, foto, items)
+const catalog = await getMenuCatalog();
+const backendPkg = catalog.find((p) => p.slug === paket.slug || p.id === paket.id);
+
+const activePaket: Paket = backendPkg
+  ? {
+      ...paket,
+      nama: backendPkg.nama || paket.nama,
+      harga: backendPkg.harga || paket.harga,
+      badge: backendPkg.badge !== undefined ? backendPkg.badge : paket.badge,
+      foto: backendPkg.foto || paket.foto,
+      deskripsiSingkat: backendPkg.deskripsiSingkat || paket.deskripsiSingkat,
+      minOrder: backendPkg.minOrder || paket.minOrder,
+      menuUtama: backendPkg.menuUtama && backendPkg.menuUtama.length > 0 ? backendPkg.menuUtama : paket.menuUtama,
+      laukPendamping: backendPkg.laukPendamping && backendPkg.laukPendamping.length > 0 ? backendPkg.laukPendamping : paket.laukPendamping,
+    }
+  : paket;
+
+const pageTitle = `${formatNamaPaket(activePaket.nama)} | Dzanis Catering`;
+const pageDescription = activePaket.deskripsiSingkat;
+const productSchema = generateProductSchema(activePaket);
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -37,11 +56,11 @@ const minEventDateString = [
   String(tomorrow.getDate()).padStart(2, '0'),
 ].join('-');
 
-const defaultMainMenu = paket.selectableMainMenus?.[0] || paket.menuUtama[0] || '';
+const defaultMainMenu = activePaket.selectableMainMenus?.[0] || activePaket.menuUtama[0] || '';
 const defaultSideDishes =
-  paket.canSelectMainMenu && paket.laukPendamping && paket.laukPendamping.length > 0
-    ? paket.laukPendamping.slice(0, paket.sideDishesSelectMax ?? 3)
-    : paket.laukPendamping;
+  activePaket.canSelectMainMenu && activePaket.laukPendamping && activePaket.laukPendamping.length > 0
+    ? activePaket.laukPendamping.slice(0, activePaket.sideDishesSelectMax ?? 3)
+    : activePaket.laukPendamping;
 ---
 
 <BaseLayout
@@ -56,15 +75,15 @@ const defaultSideDishes =
     <!-- Main Detail Section -->
     <div
       id="package-detail-root"
-      data-base-price={paket.harga}
-      data-package-name={formatNamaPaket(paket.nama)}
-      data-min-order={paket.minOrder}
-      data-min-order-weekend={paket.minOrderWeekend || 40}
-      data-max-order={paket.maxOrder || 500}
+      data-base-price={activePaket.harga}
+      data-package-name={formatNamaPaket(activePaket.nama)}
+      data-min-order={activePaket.minOrder}
+      data-min-order-weekend={activePaket.minOrderWeekend || 40}
+      data-max-order={activePaket.maxOrder || 500}
       data-phone={waPhoneNumber}
-      data-has-menu-selection={String(Boolean(paket.canSelectMainMenu))}
-      data-side-dishes-min={paket.sideDishesSelectMin ?? 0}
-      data-side-dishes-max={paket.sideDishesSelectMax ?? 0}
+      data-has-menu-selection={String(Boolean(activePaket.canSelectMainMenu))}
+      data-side-dishes-min={activePaket.sideDishesSelectMin ?? 0}
+      data-side-dishes-max={activePaket.sideDishesSelectMax ?? 0}
       data-default-main-menu={defaultMainMenu}
       data-default-side-dishes={JSON.stringify(defaultSideDishes)}
       data-min-event-date={minEventDateString}
@@ -81,23 +100,23 @@ const defaultSideDishes =
       </div>
 
       <!-- Scalable Package Selector (Trigger Button with Bottom Sheet / Dropdown) -->
-      <PackageSelector currentPaket={paket} />
+      <PackageSelector currentPaket={activePaket} packages={catalog.length > 0 ? catalog : DAFTAR_PAKET} />
 
       <!-- Responsive Breakdown: Mobile (Stacked: Tulisan -> Gambar -> Specs -> Form) & Desktop (2-Column Berjejeran) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-x-12 lg:gap-y-8 items-start">
-        <PackageHeader paket={paket} />
-        <PackageGallery paket={paket} />
-        <PackageAccordion paket={paket} />
+        <PackageHeader paket={activePaket} />
+        <PackageGallery paket={activePaket} />
+        <PackageAccordion paket={activePaket} />
 
         <!-- 4. Interactive Form, Menu Selection & Calculator (Mobile: 4th / Desktop: Right Column Row 2) -->
         <div class="lg:col-span-7 lg:col-start-6 lg:row-start-2 flex flex-col gap-8">
           <PackageMenuCustomizer
-            paket={paket}
+            paket={activePaket}
             defaultMainMenu={defaultMainMenu}
             defaultSideDishes={defaultSideDishes}
           />
           <PackageOrderBar
-            paket={paket}
+            paket={activePaket}
             minEventDateString={minEventDateString}
           />
         </div>
@@ -111,4 +130,57 @@ const defaultSideDishes =
 <script>
   import { initPackageOrderController } from '../../scripts/package-order-controller';
   initPackageOrderController();
+</script>
+
+<script is:inline>
+  // Dynamic Real-time Client Sync dengan Database Backend (/api/menu)
+  (async function syncPackageDetailWithApi() {
+    try {
+      const root = document.getElementById('package-detail-root');
+      if (!root) return;
+      const pathname = window.location.pathname.replace(/\/$/, '');
+      const slug = pathname.split('/').pop();
+      if (!slug) return;
+
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
+      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
+      const queryApi = (new URLSearchParams(window.location.search)).get('apiUrl');
+      const apiUrl = queryApi || (isLocal ? defaultLocalApi : 'https://alkalize-rewire-scruffy.ngrok-free.dev');
+      if (!apiUrl) return;
+
+      const res = await fetch(`${apiUrl}/api/menu`, {
+        headers: { 'ngrok-skip-browser-warning': 'true', 'Accept': 'application/json' }
+      });
+      if (!res.ok) return;
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) return;
+
+      const data = await res.json();
+      const packages = Array.isArray(data)
+        ? data
+        : (Array.isArray(data?.packages) ? data.packages : (Array.isArray(data?.data) ? data.data : []));
+
+      const livePkg = packages.find((p) => p.slug === slug || p.id === slug || (p.name && p.name.toLowerCase().includes(slug.replace(/-/g, ' '))));
+      if (!livePkg) return;
+
+      const newPrice = Number(livePkg.price_per_pax || livePkg.harga);
+      if (newPrice && !isNaN(newPrice) && newPrice > 0) {
+        root.dataset.basePrice = String(newPrice);
+        const priceEls = document.querySelectorAll('.package-live-price');
+        priceEls.forEach((el) => {
+          el.textContent = newPrice.toLocaleString('id-ID');
+        });
+
+        // Trigger input event to recalculate portion total
+        const portionInput = document.getElementById('portion-input');
+        if (portionInput) {
+          portionInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+    } catch (err) {
+      console.warn('[Dzanis Detail] Sinkronisasi harga runtime terlewat:', err);
+    }
+  })();
 </script>
