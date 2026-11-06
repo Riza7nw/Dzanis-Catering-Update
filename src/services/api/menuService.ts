@@ -122,16 +122,16 @@ export async function getMenuCatalog(): Promise<Paket[]> {
           return cat.includes('nasi') || cat.includes('kotak') || cat.includes('box');
         });
 
-        if (nasiKotakDtos.length > 0) {
-          return nasiKotakDtos.map((dto) => normalizePackage(dto, DAFTAR_PAKET));
-        }
+        // Kembalikan murni data dari backend (bila kosong, kembalikan array kosong [])
+        return nasiKotakDtos.map((dto) => normalizePackage(dto, DAFTAR_PAKET));
       }
     }
   } catch (err) {
-    // Fallback cadangan senyap saat build/client offline agar Astro build tidak pernah gagal
+    // Fallback cadangan senyap HANYA saat network offline / server down agar build tidak fatal error
     if (import.meta.env?.DEV) {
       console.warn('[menuService] Backend offline, menggunakan fallback SSOT DAFTAR_PAKET:', (err as Error)?.message || err);
     }
+    return DAFTAR_PAKET;
   }
 
   return DAFTAR_PAKET;
@@ -174,38 +174,41 @@ export async function getSnackTemplates(): Promise<SnackTemplatePackage[]> {
         String(p.category || '').toLowerCase().includes('snack')
       );
 
-      if (snackDtos.length > 0) {
-        return snackDtos.map((p) => {
-          let slots: SnackSlot[] = [];
-          if (p.custom_slots) {
-            slots = typeof p.custom_slots === 'string' ? JSON.parse(p.custom_slots) : p.custom_slots;
-          } else if (Array.isArray(p.items)) {
-            slots = p.items.map((it: string, idx: number) => ({
-              name: `Slot ${idx + 1}`,
-              default_item: it,
-              options: it,
-            }));
-          }
+      // Kembalikan murni data dari backend (bila kosong, kembalikan array kosong [])
+      return snackDtos.map((p) => {
+        let slots: SnackSlot[] = [];
+        if (p.custom_slots) {
+          slots = typeof p.custom_slots === 'string' ? JSON.parse(p.custom_slots) : p.custom_slots;
+        } else if (Array.isArray(p.items)) {
+          slots = p.items.map((it: string, idx: number) => ({
+            name: `Slot ${idx + 1}`,
+            default_item: it,
+            options: it,
+          }));
+        }
 
-          return {
-            id: p.id || p.slug || 'snack-pkg',
-            slug: p.slug || p.id || 'snack-pkg',
-            name: p.name || 'Paket Snack Box',
-            category: p.category || 'Snack Box',
-            price_per_pax: Number(p.price_per_pax || p.harga || 15000),
-            min_pax: Number(p.min_pax || p.minOrder || 20),
-            badge: p.badge || 'Snack',
-            description: p.description || p.deskripsi || '',
-            image: p.image || p.foto || '/images/menu/snack-puding.webp',
-            foto: p.foto || p.image || '/images/menu/snack-puding.webp',
-            items: Array.isArray(p.items) ? p.items : [],
-            custom_slots: slots,
-          };
-        });
-      }
+        return {
+          id: p.id || p.slug || 'snack-pkg',
+          slug: p.slug || p.id || 'snack-pkg',
+          name: p.name || 'Paket Snack Box',
+          category: p.category || 'Snack Box',
+          price_per_pax: Number(p.price_per_pax || p.harga || 15000),
+          min_pax: Number(p.min_pax || p.minOrder || 20),
+          badge: p.badge || 'Snack',
+          description: p.description || p.deskripsi || '',
+          image: p.image || p.foto || '/images/menu/snack-puding.webp',
+          foto: p.foto || p.image || '/images/menu/snack-puding.webp',
+          items: Array.isArray(p.items) ? p.items : [],
+          custom_slots: slots,
+        };
+      });
     }
-  } catch {
-    // Fallback ke defaultSnackTemplates
+  } catch (err) {
+    // Fallback cadangan senyap HANYA saat network offline / server down
+    if (import.meta.env?.DEV) {
+      console.warn('[menuService] Backend offline untuk template snack:', (err as Error)?.message || err);
+    }
+    return defaultSnackTemplates;
   }
 
   return defaultSnackTemplates;

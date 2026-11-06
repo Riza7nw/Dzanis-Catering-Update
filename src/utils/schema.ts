@@ -31,10 +31,11 @@ export const webSiteSchema = generateWebSiteSchema();
  * Menghasilkan JSON-LD schema FoodEstablishment dengan nested Menu (hasMenu)
  * untuk halaman utama (index.astro).
  */
-export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_URL) {
+export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_URL, menuItems?: Paket[]) {
   const site = siteUrl.replace(/\/$/, '');
   const cleanPhone = waPhoneNumber.replace(/\D/g, '');
   const formattedPhone = cleanPhone.startsWith('62') ? `+${cleanPhone}` : `+62${cleanPhone}`;
+  const nasiKotakItems = menuItems !== undefined ? menuItems : DAFTAR_PAKET;
 
   return {
     "@context": "https://schema.org",
@@ -95,7 +96,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
           "@type": "MenuSection",
           name: "Paket Nasi Kotak",
           description: "Pilihan paket nasi kotak higienis lengkap dengan alat makan steril untuk berbagai acara di Ciayumajakuning.",
-          hasMenuItem: DAFTAR_PAKET.map((item) => ({
+          hasMenuItem: nasiKotakItems.map((item) => ({
             "@type": "MenuItem",
             name: formatNamaPaket(item.nama),
             description: item.deskripsiSingkat,

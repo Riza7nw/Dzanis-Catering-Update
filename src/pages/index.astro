@@ -10,9 +10,11 @@ import CaraPesan from '../components/organic/CaraPesan.astro';
 import Faq from '../components/organic/Faq.astro';
 import CtaBesar from '../components/organic/CtaBesar.astro';
 import Footer from '../components/organic/Footer.astro';
-import { generateFoodEstablishmentSchema } from '../utils/schema';
+import { generateFoodEstablishmentSchema, DEFAULT_SITE_URL } from '../utils/schema';
+import { getMenuCatalog } from '../services/api/menuService';
 
-const schema = generateFoodEstablishmentSchema();
+const menuKatalog = await getMenuCatalog();
+const schema = generateFoodEstablishmentSchema(DEFAULT_SITE_URL, menuKatalog);
 ---
 
 <BaseLayout
