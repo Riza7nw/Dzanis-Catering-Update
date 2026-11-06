@@ -83,7 +83,10 @@ const menuKatalog = await getMenuCatalog();
             foto = '/' + foto;
           }
           if (foto.startsWith('/uploads/')) {
-            const apiBase = import.meta.env.PUBLIC_API_URL || 'https://alkalize-rewire-scruffy.ngrok-free.dev';
+            const rawApiBase = import.meta.env.PUBLIC_API_URL || 'https://dzaniez-back.ethiodeploy.app';
+            const apiBase = (rawApiBase && !rawApiBase.includes('localhost') && rawApiBase.startsWith('http://'))
+              ? rawApiBase.replace(/^http:\/\//i, 'https://')
+              : rawApiBase;
             foto = `${apiBase}${foto}`;
           }
           if (foto.includes('ngrok')) {
@@ -557,11 +560,14 @@ const menuKatalog = await getMenuCatalog();
       const hostname = window.location.hostname;
       const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
       const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-      const apiUrl = queryApi || publicApiUrl || (
+      const rawApiUrl = queryApi || publicApiUrl || (
         isLocal
           ? defaultLocalApi
-          : 'https://alkalize-rewire-scruffy.ngrok-free.dev'
+          : 'https://dzaniez-back.ethiodeploy.app'
       );
+      const apiUrl = (rawApiUrl && !isLocal && rawApiUrl.startsWith('http://'))
+        ? rawApiUrl.replace(/^http:\/\//i, 'https://')
+        : rawApiUrl;
       if (!apiUrl) return;
 
       console.log('[Dzanis Menu] Menghubungi API menu:', apiUrl);

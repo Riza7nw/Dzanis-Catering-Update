@@ -55,9 +55,12 @@ const [showcaseCerts, legalDocs] = await Promise.all([
         const hostname = window.location.hostname;
         const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
         const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-        const apiUrl = queryApi || publicApiUrl || (
-          isLocal ? defaultLocalApi : 'https://alkalize-rewire-scruffy.ngrok-free.dev'
+        const rawApiUrl = queryApi || publicApiUrl || (
+          isLocal ? defaultLocalApi : 'https://dzaniez-back.ethiodeploy.app'
         );
+        const apiUrl = (rawApiUrl && !isLocal && rawApiUrl.startsWith('http://'))
+          ? rawApiUrl.replace(/^http:\/\//i, 'https://')
+          : rawApiUrl;
         if (!apiUrl) return;
 
         const res = await fetch(`${apiUrl}/api/certifications?active=true`, {

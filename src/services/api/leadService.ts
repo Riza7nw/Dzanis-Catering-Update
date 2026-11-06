@@ -6,9 +6,10 @@
 
 import type { BackendLeadPayload, BackendLeadResponse } from '../../types/api';
 import { getApiBaseUrl, getCommonApiHeaders } from './apiConfig.ts';
+import { createBridgeSecurityHeaders } from '../../utils/securityBridge.ts';
 
 /**
- * Mengirimkan data lead pemesanan ke backend secara non-blocking.
+ * Mengirimkan data lead pemesanan ke backend secara non-blocking dengan proteksi kriptografis.
  * Jika backend sedang offline, fungsi ini gagal secara diam (silent-fail)
  * agar tidak menghalangi proses pengalihan ke WhatsApp.
  */
@@ -17,10 +18,12 @@ export async function submitLead(payload: BackendLeadPayload): Promise<BackendLe
   const endpoint = `${apiBase}/api/leads`;
 
   try {
+    const securityHeaders = await createBridgeSecurityHeaders(payload as unknown as Record<string, unknown>);
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         ...getCommonApiHeaders(),
+        ...securityHeaders,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
