@@ -47,35 +47,35 @@ export const LAYANAN_PRASMANAN_SSOT: LayananPrasmananData = {
   deskripsi:
     "Solusi jamuan prasmanan higienis siap saji untuk rapat kerja, seminar, syukuran, dan resepsi di Majalengka & sekitarnya.",
   harga: "Rp 45.000",
-  satuanHarga: "/ pax",
+  satuanHarga: "/ porsi",
   minOrder: "Min. 50 Pax",
   fasilitas: [
     "Meja & Pemanas (Chafing Dish)",
     "Piring Keramik & Sendok Garpu",
-    "Tenaga Waiter / Setup",
+    "Tenaga Waiter & Setup Standby",
   ],
   menuPopuler: [
     "Gurame Asam Manis",
-    "Ayam Kampung Pilihan",
-    "Sayuran & Tumisan",
-    "Sambal & Lalapan Segar",
+    "Ayam Kampung (Opor / Goreng)",
+    "Sayuran & Tumisan Segar",
+    "Sambal & Lalapan Tradisional",
   ],
-  catatanMenu: "Pilihan menu fleksibel & dapat dikustomisasi sesuai anggaran acara",
+  catatanMenu: "Menu fleksibel dapat dikustomisasi",
   gallery: [
     {
       foto: "/images/layanan/prasmanan-kantor.webp",
-      alt: "Setup Rapat Kantor Dzanis Catering Majalengka",
-      label: "Setup Rapat Kantor",
+      alt: "Setup Meja Prasmanan Kantor Dzanis Catering",
+      label: "Setup Meja Kantor & Rapat",
       sublabel: "Rapat & Corporate Gathering",
     },
     {
       foto: "/images/layanan/wedding-catering.webp",
-      alt: "Setup Resepsi / Acara Dzanis Catering",
-      label: "Setup Resepsi / Acara",
+      alt: "Setup Buffet Acara Dzanis Catering",
+      label: "Setup Meja Resepsi & Acara",
       sublabel: "Resepsi & Syukuran Keluarga",
     },
   ],
-  captionEditorial: "Dokumentasi setup meja saji higienis & chafing dish Dzanis",
+  captionEditorial: "Peralatan steril & pemanas siap saji di lokasi",
   waPreFilledMessage:
     "Halo Dzanis Catering, saya ingin konsultasi paket prasmanan (min. 50 pax) untuk acara...",
 };
