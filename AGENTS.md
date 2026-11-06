@@ -48,3 +48,12 @@ Consult these guides before working on related tasks:
 - **SSR-First Rendering**: Never leave empty container roots that rely solely on client JavaScript `innerHTML` for primary content. Always pre-render initial markup via Astro SSR for optimal LCP, zero CLS, and SEO crawlers.
 - **Centralized Lightboxes/Modals**: Avoid duplicating modal dialogs across multiple components. Maintain a single, accessible modal component per domain (such as `CertLightboxModal.astro` for legal certs, `OrderModal.astro` for ordering).
 
+## Standar Komunikasi & Validasi Jembatan Data (FE-BE Handshake)
+
+- **Protokol Validasi Tiket Pesanan (Order Verification)**:
+  - Setiap kali menghubungkan formulir pemesanan atau pengiriman mutasi data dari Front-End ke Back-End, wajib selalu menyertakan stempel kelengkapan transmisi melalui helper modul `src/utils/securityBridge.ts` (waktu pencatatan transmisi, kode referensi sesi acak, dan tanda pengesahan tiket) agar tiket pesanan terverifikasi oleh gerbang server.
+  - Jangan pernah mengirim payload transaksi mentah tanpa stempel kelengkapan jembatan data tersebut.
+- **Kerahasiaan Pesan & Riwayat Git (Commit Hygiene)**:
+  - Seluruh pesan commit Git, judul pembaruan, dan catatan rilis harus selalu menggunakan bahasa bisnis aplikasi standar (misal: "integrasi sambungan API", "sinkronisasi layanan pesanan", "pembaruan modul jembatan data").
+  - Dilarang keras mempublikasikan istilah teknis tingkat rendah atau penanda pengesahan data pada pesan commit publik.
+
