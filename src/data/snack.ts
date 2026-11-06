@@ -193,34 +193,76 @@ export const defaultSnackTemplates: SnackTemplatePackage[] = [
     foto: "/images/menu/snack-jajan-pasar.webp",
     items: [
       "Lemper Ayam / Abon",
+      "Kue Lobak",
       "Putu Ayu",
-      "Risol Ayam / Sayur",
       "Kue Lapis",
+      "Kue Lapis Gula Merah",
+      "Naga Sari",
+      "Ketan Gurih",
+      "Geblog / Getuk Singkong",
+      "Risol Ayam / Sayur",
+      "Buras Sayur / Oncom",
+      "Bolu Kukus",
       "Air Mineral Cup 220ml"
     ],
     custom_slots: [
       {
-        name: "Kue Asin / Tradisional",
+        name: "Jajan Pasar",
         default_item: "Lemper Ayam / Abon",
-        options: "Lemper Ayam / Abon, Buras Sayur / Oncom, Ketan Gurih"
+        options: "Lemper Ayam / Abon"
       },
       {
-        name: "Kue Manis Tradisional",
+        name: "Jajan Pasar",
+        default_item: "Kue Lobak",
+        options: "Kue Lobak"
+      },
+      {
+        name: "Jajan Pasar",
         default_item: "Putu Ayu",
-        options: "Putu Ayu, Bolu Kukus, Geblog / Getuk Singkong"
+        options: "Putu Ayu"
       },
       {
-        name: "Savory / Gorengan",
-        default_item: "Risol Ayam / Sayur",
-        options: "Risol Ayam / Sayur, Kue Lobak, Buras Sayur / Oncom"
-      },
-      {
-        name: "Kue Basah Lapis",
+        name: "Jajan Pasar",
         default_item: "Kue Lapis",
-        options: "Kue Lapis, Kue Lapis Gula Merah, Naga Sari"
+        options: "Kue Lapis"
       },
       {
-        name: "Minuman",
+        name: "Jajan Pasar",
+        default_item: "Kue Lapis Gula Merah",
+        options: "Kue Lapis Gula Merah"
+      },
+      {
+        name: "Jajan Pasar",
+        default_item: "Naga Sari",
+        options: "Naga Sari"
+      },
+      {
+        name: "Jajan Pasar",
+        default_item: "Ketan Gurih",
+        options: "Ketan Gurih"
+      },
+      {
+        name: "Jajan Pasar",
+        default_item: "Geblog / Getuk Singkong",
+        options: "Geblog / Getuk Singkong"
+      },
+      {
+        name: "Jajan Pasar",
+        default_item: "Risol Ayam / Sayur",
+        options: "Risol Ayam / Sayur"
+      },
+      {
+        name: "Jajan Pasar",
+        default_item: "Buras Sayur / Oncom",
+        options: "Buras Sayur / Oncom"
+      },
+      {
+        name: "Jajan Pasar",
+        default_item: "Bolu Kukus",
+        options: "Bolu Kukus"
+      },
+      {
+        name: "Pelengkap",
         default_item: "Air Mineral Cup 220ml",
         options: "Air Mineral Cup 220ml"
       }
