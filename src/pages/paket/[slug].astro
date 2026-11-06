@@ -14,7 +14,34 @@ import { generateProductSchema } from '../../utils/schema';
 import { getMenuCatalog } from '../../services/api/menuService';
 
 export async function getStaticPaths() {
-  return DAFTAR_PAKET.map((paket) => ({
+  const catalog = await getMenuCatalog();
+  const allPackagesMap = new Map<string, Paket>();
+
+  // 1. Base master packages
+  for (const p of DAFTAR_PAKET) {
+    allPackagesMap.set(p.slug, p);
+  }
+
+  // 2. Overlay & sertakan paket baru dari database backend
+  for (const p of catalog) {
+    if (!p.slug) continue;
+    const existing = allPackagesMap.get(p.slug);
+    if (existing) {
+      allPackagesMap.set(p.slug, {
+        ...existing,
+        nama: p.nama || existing.nama,
+        harga: p.harga || existing.harga,
+        badge: p.badge !== undefined ? p.badge : existing.badge,
+        foto: p.foto || existing.foto,
+        deskripsiSingkat: p.deskripsiSingkat || existing.deskripsiSingkat,
+        minOrder: p.minOrder || existing.minOrder,
+      });
+    } else {
+      allPackagesMap.set(p.slug, p);
+    }
+  }
+
+  return Array.from(allPackagesMap.values()).map((paket) => ({
     params: { slug: paket.slug },
     props: { paket },
   }));
