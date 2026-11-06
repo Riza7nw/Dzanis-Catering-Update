@@ -21,9 +21,15 @@ export function normalizePhoneNumber(rawPhone: string, fallbackPhone = waPhoneNu
 /**
  * Helper untuk Layanan Lain: Menghasilkan URL WhatsApp konsultasi layanan.
  */
-export function buildServiceInquiryUrl(serviceName: string, phone: string = waPhoneNumber): string {
+export function buildServiceInquiryUrl(
+  serviceName: string,
+  phone: string = waPhoneNumber,
+  customMessage?: string
+): string {
   const cleanPhone = normalizePhoneNumber(phone);
-  const pesan = `Halo Dzanis Catering, saya ingin konsultasi mengenai layanan *${serviceName}* untuk rencana acara saya. Boleh minta info katalog paket dan pricelist lengkapnya? Terima kasih.`;
+  const pesan =
+    customMessage?.trim() ||
+    `Halo Dzanis Catering, saya ingin konsultasi mengenai layanan *${serviceName}* untuk rencana acara saya. Boleh minta info katalog paket dan pricelist lengkapnya? Terima kasih.`;
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(pesan)}`;
 }
 

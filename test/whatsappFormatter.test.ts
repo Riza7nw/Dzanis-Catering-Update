@@ -29,6 +29,15 @@ test('buildServiceInquiryUrl supports custom phone numbers and special character
   assert.ok(decoded.includes('*Booth & Food Cart (Festival / Acara)*'));
 });
 
+test('buildServiceInquiryUrl supports pre-filled custom message', () => {
+  const customMsg = 'Halo Dzanis Catering, saya ingin konsultasi paket prasmanan (min. 50 pax) untuk acara...';
+  const url = buildServiceInquiryUrl('Prasmanan', undefined, customMsg);
+
+  assert.ok(url.startsWith('https://wa.me/6281324383858?text='));
+  const decoded = decodeURIComponent(url.split('text=')[1]);
+  assert.equal(decoded, customMsg);
+});
+
 test('buildServiceInquiryUrl and buildSnackTemplateWaUrl normalize domestic and formatted phone numbers', () => {
   const serviceUrl1 = buildServiceInquiryUrl('Nasi Kotak', '0813-2438-3858');
   assert.ok(serviceUrl1.startsWith('https://wa.me/6281324383858?text='));

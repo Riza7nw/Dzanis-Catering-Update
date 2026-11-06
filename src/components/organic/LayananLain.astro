@@ -1,178 +1,154 @@
 ---
-import { DAFTAR_LAYANAN_LAIN } from '../../data/layananLain';
+import { LAYANAN_PRASMANAN_SSOT } from '../../data/layananLain';
 import { waPhoneNumber } from '../../data/company';
 import { buildServiceInquiryUrl } from '../../utils/whatsappFormatter';
 
-const item = DAFTAR_LAYANAN_LAIN[0];
+const data = LAYANAN_PRASMANAN_SSOT;
 const phone = waPhoneNumber;
-const serviceName = item.title || item.nama;
-const waUrl = buildServiceInquiryUrl(serviceName, phone);
+const waUrl = buildServiceInquiryUrl(
+  'Prasmanan',
+  phone,
+  data.waPreFilledMessage
+);
 ---
 
 <section id="layanan" class="py-14 md:py-20 bg-surface/30">
   <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-14">
-    <!-- Header Seksi -->
-    <div class="flex flex-col gap-2 max-w-2xl mb-8 md:mb-12">
-      <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-accent-700">
-        Layanan Khusus
-      </span>
-      <h2 class="font-serif font-bold tracking-wide text-3xl md:text-5xl text-neutral-900 uppercase">
-        Layanan Prasmanan
-      </h2>
-      <p class="text-sm md:text-base text-neutral-800 leading-relaxed">
-        Solusi jamuan makan prasmanan siap saji higienis dan praktis untuk rapat kerja, pelatihan, seminar, maupun syukuran kantor Anda.
-      </p>
-    </div>
-
-    <!-- Spotlight Showcase Container (2-Column Grid on Desktop) -->
-    <div class="bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden p-6 sm:p-8 lg:p-10">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        <!-- Visual Column: Double Window Pane Layout (6 Cols) -->
-        <div class="lg:col-span-6 relative flex flex-col">
-          <!-- Window Pane Frame (Bingkai Jendela Kolase) -->
-          <div class="relative bg-neutral-100/90 rounded-2xl p-2 sm:p-2.5 border border-neutral-200/80 shadow-inner">
-            {item.badge && (
-              <span class="absolute top-4 left-4 z-10 rounded-full bg-accent-700 px-3 py-1 font-heading text-[11px] tracking-[0.05em] text-white font-bold uppercase shadow-md">
-                {item.badge}
-              </span>
-            )}
-            
-            <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
-              <!-- Window Pane 1 (Jendela Kiri) -->
-              <div class="group relative aspect-[3/4] overflow-hidden rounded-xl bg-surface shadow-xs">
-                <img
-                  src="/images/layanan/prasmanan-kantor.webp"
-                  alt="Dokumentasi Setup Prasmanan Kantor Meja 1 Dzanis Catering"
-                  loading="lazy"
-                  width="767"
-                  height="1024"
-                  decoding="async"
-                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 sm:p-2.5">
-                  <span class="inline-block text-[10px] sm:text-[11px] font-semibold text-white tracking-wide">
-                    Setup Sajian A
-                  </span>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <!-- Kolom Kiri: Visual Gallery - Split-Frame Editorial (5 kolom di desktop) -->
+      <div class="lg:col-span-5 w-full">
+        <div class="rounded-2xl overflow-hidden shadow-sm border border-stone-200/60 bg-white p-3 sm:p-4">
+          <!-- Kolase 2 foto berdampingan secara statis -->
+          <div class="grid grid-cols-2 gap-2 sm:gap-3">
+            {data.gallery.map((item) => (
+              <div class="group relative flex flex-col overflow-hidden rounded-xl bg-surface">
+                <div class="aspect-[4/3] w-full overflow-hidden">
+                  <img
+                    src={item.foto}
+                    alt={item.alt}
+                    loading="lazy"
+                    decoding="async"
+                    width="400"
+                    height="300"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div class="p-2 sm:p-2.5 bg-white">
+                  <p class="text-[11px] sm:text-xs font-semibold text-neutral-900 tracking-tight leading-snug">
+                    {item.label}
+                  </p>
+                  <p class="text-[10px] sm:text-[11px] text-neutral-500 leading-tight mt-0.5">
+                    {item.sublabel}
+                  </p>
                 </div>
               </div>
-
-              <!-- Window Pane 2 (Jendela Kanan) -->
-              <div class="group relative aspect-[3/4] overflow-hidden rounded-xl bg-surface shadow-xs">
-                <img
-                  src="/images/layanan/prasmanan-kantor-2.webp"
-                  alt="Dokumentasi Setup Prasmanan Kantor Meja 2 Dzanis Catering"
-                  loading="lazy"
-                  width="767"
-                  height="1024"
-                  decoding="async"
-                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 sm:p-2.5">
-                  <span class="inline-block text-[10px] sm:text-[11px] font-semibold text-white tracking-wide">
-                    Setup Sajian B
-                  </span>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          <!-- Sub-caption Reassurance -->
-          <p class="text-xs text-neutral-500 mt-3 text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5">
-            <svg class="size-4 text-emerald-600 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
-            </svg>
-            <span>Peralatan & pemanas bersih, steril, dan siap saji di lokasi.</span>
-          </p>
+          <!-- Subtitel editorial di bagian bawah frame gabungan -->
+          <div class="mt-3 pt-3 border-t border-neutral-100 flex items-center justify-between gap-2 px-1">
+            <div class="flex items-center gap-1.5 text-neutral-500 text-[11px] sm:text-xs">
+              <svg class="size-3.5 text-accent flex-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+              <span class="italic text-neutral-600">{data.captionEditorial}</span>
+            </div>
+            <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider flex-none hidden sm:inline-block">
+              Live Serving
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Content & Pricing Matrix (7 kolom di desktop) -->
+      <div class="lg:col-span-7 flex flex-col gap-4 sm:gap-5 w-full">
+        <!-- Eyebrow & Heading -->
+        <div>
+          <span class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-accent-700/90 block mb-1.5">
+            {data.eyebrow}
+          </span>
+          <h2 class="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-neutral-900 leading-tight">
+            {data.heading}
+          </h2>
         </div>
 
-        <!-- Detail Information Column (6 Cols) -->
-        <div class="lg:col-span-6 flex flex-col justify-between">
+        <!-- Value Proposition (maks 2 baris) -->
+        <p class="text-sm sm:text-base text-neutral-700 leading-relaxed max-w-xl">
+          {data.deskripsi}
+        </p>
+
+        <!-- Price & Minimum Order Block -->
+        <div class="flex flex-wrap items-baseline gap-3 py-1">
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-neutral-500">Mulai</span>
+            <span class="font-heading text-3xl sm:text-4xl font-bold text-neutral-900 tracking-tight leading-none">
+              {data.harga}
+            </span>
+            <span class="text-sm text-neutral-600 font-medium">{data.satuanHarga}</span>
+          </div>
+          <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border border-neutral-300 text-neutral-700 bg-white/90 shadow-2xs">
+            {data.minOrder}
+          </div>
+        </div>
+
+        <!-- Fasilitas & Pilihan Menu (Clean Dual Grid) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-2 border-t border-neutral-200/70">
+          <!-- Sub-blok 1: Fasilitas Termasuk -->
           <div>
-            <div class="flex flex-wrap items-baseline gap-3 mb-2">
-              <h3 class="font-heading text-2xl sm:text-3xl font-bold text-neutral-900">
-                {item.nama}
-              </h3>
-            </div>
-            
-            <p class="text-sm sm:text-base text-neutral-700 leading-relaxed mb-6">
-              {item.deskripsi}
-            </p>
-
-            <!-- Pricing & MOQ Cardlet -->
-            <div class="bg-surface/50 rounded-2xl p-4 sm:p-5 border border-neutral-200/60 mb-6 flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <span class="text-xs text-neutral-500 block font-medium">Biaya Mulai:</span>
-                <p class="flex items-baseline gap-1 text-neutral-900 mt-0.5">
-                  <span class="text-2xl sm:text-3xl font-bold font-heading text-accent-700">
-                    {item.headlineHarga}
-                  </span>
-                  <span class="text-xs sm:text-sm text-neutral-500 font-normal">
-                    {item.satuanHarga}
-                  </span>
-                </p>
-              </div>
-              <div class="sm:text-right">
-                <span class="text-xs text-neutral-500 block font-medium">Ketentuan:</span>
-                <span class="inline-block bg-white text-neutral-800 border border-neutral-300 font-semibold text-xs sm:text-sm px-3.5 py-1.5 rounded-full mt-0.5 shadow-2xs">
-                  {item.minOrder}
-                </span>
-              </div>
-            </div>
-
-            <!-- Facilities Grid -->
-            <div class="mb-6">
-              <span class="block text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2.5">
-                Fasilitas Termasuk:
-              </span>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {item.fasilitas.map((f) => (
-                  <div class="flex items-center gap-2.5 bg-neutral-50 p-2.5 rounded-xl border border-neutral-200/60 text-xs sm:text-sm text-neutral-800">
-                    <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-accent-700/10 text-accent-700 text-xs font-bold">✓</span>
-                    <span class="font-medium">{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <!-- Menu Highlights (Pills) -->
-            <div class="mb-8">
-              <span class="block text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2.5">
-                Contoh Pilihan Menu:
-              </span>
-              <div class="flex flex-wrap gap-2">
-                {item.menuHighlight.map((m) => {
-                  const isCustom = m.startsWith('+');
-                  return (
-                    <span
-                      class={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs border ${
-                        isCustom
-                          ? 'bg-accent-700/10 text-accent-700 font-semibold border-accent-700/30'
-                          : 'bg-surface text-neutral-800 border-neutral-200/60'
-                      }`}
-                    >
-                      {isCustom ? '✨ ' : '• '}{m}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2.5 flex items-center gap-1.5">
+              <span class="size-1.5 rounded-full bg-accent inline-block"></span>
+              Fasilitas Termasuk
+            </h3>
+            <ul class="space-y-2 text-xs sm:text-[13px] text-neutral-800">
+              {data.fasilitas.map((f) => (
+                <li class="flex items-start gap-2">
+                  <svg class="size-4 text-accent flex-none mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                  </svg>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <!-- Primary CTA Button: WhatsApp -->
+          <!-- Sub-blok 2: Contoh Menu Populer -->
           <div>
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Konsultasi paket ${item.nama} via WhatsApp`}
-              class="inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center gap-2 text-center py-3.5 px-7 rounded-full bg-accent-900 hover:bg-accent-700 text-bg text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer touch-manipulation focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700"
-            >
-              <svg class="size-4 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 016.988 2.896 9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-              </svg>
-              <span>Konsultasi Prasmanan via WhatsApp</span>
-            </a>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2.5 flex items-center gap-1.5">
+              <span class="size-1.5 rounded-full bg-accent inline-block"></span>
+              Contoh Menu Populer
+            </h3>
+            <ul class="space-y-2 text-xs sm:text-[13px] text-neutral-800">
+              {data.menuPopuler.map((m) => (
+                <li class="flex items-start gap-2">
+                  <span class="text-accent font-bold flex-none leading-none mt-0.5">•</span>
+                  <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+            {data.catatanMenu && (
+              <p class="text-[11px] text-neutral-500 italic mt-2.5 leading-snug">
+                * {data.catatanMenu}
+              </p>
+            )}
           </div>
+        </div>
+
+        <!-- Single Action CTA Button -->
+        <div class="pt-3">
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Konsultasi paket prasmanan via WhatsApp"
+            class="inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center gap-2.5 px-7 py-3 rounded-full bg-accent hover:bg-accent-700 text-bg text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer touch-manipulation focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700"
+          >
+            <svg class="size-4.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 016.988 2.896 9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            <span>Konsultasi Prasmanan via WhatsApp</span>
+          </a>
         </div>
       </div>
     </div>
