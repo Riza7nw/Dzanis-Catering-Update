@@ -19,7 +19,7 @@ test('SSOT LAYANAN_PRASMANAN_SSOT contains complete clean editorial structure', 
   assert.ok(LAYANAN_PRASMANAN_SSOT.waPreFilledMessage.includes('min. 50 pax'));
 });
 
-test('Built dist/index.html contains Layanan Prasmanan section with anti-slop specification', () => {
+test('Built dist/index.html contains Layanan Prasmanan section with design system alignment', () => {
   const indexPath = path.resolve('dist/index.html');
   assert.ok(fs.existsSync(indexPath), 'dist/index.html should exist');
   const html = fs.readFileSync(indexPath, 'utf-8');
@@ -27,22 +27,28 @@ test('Built dist/index.html contains Layanan Prasmanan section with anti-slop sp
   // 1. Anchor validity
   assert.ok(html.includes('id="layanan"'), 'Anchor #layanan must be preserved');
 
-  // 2. Eyebrow and heading
+  // 2. Eyebrow, heading, and subtitle (outside card)
   assert.ok(html.includes('LAYANAN KHUSUS'), 'Should render eyebrow text');
   assert.ok(
     html.includes('Layanan Prasmanan Kantor &amp; Acara') ||
     html.includes('Layanan Prasmanan Kantor & Acara'),
     'Should render heading'
   );
+  assert.ok(
+    html.includes('Solusi jamuan prasmanan higienis siap saji'),
+    'Should render subtitle outside card'
+  );
 
-  // 3. Split-frame gallery
+  // 3. Main surface card & internal grid
+  assert.ok(
+    html.includes('Prasmanan Lengkap &amp; Siap Saji') ||
+    html.includes('Prasmanan Lengkap & Siap Saji'),
+    'Should render card inner header'
+  );
   assert.ok(html.includes('/images/layanan/prasmanan-kantor.webp'), 'Gallery must include prasmanan-kantor');
   assert.ok(html.includes('/images/layanan/wedding-catering.webp'), 'Gallery must include wedding-catering');
-  assert.ok(
-    html.includes('Dokumentasi setup meja saji higienis &amp; chafing dish Dzanis') ||
-    html.includes('Dokumentasi setup meja saji higienis & chafing dish Dzanis'),
-    'Should render editorial caption'
-  );
+  assert.ok(html.includes('Setup Rapat Kantor'), 'Should render photo label 1');
+  assert.ok(html.includes('Setup Resepsi / Acara'), 'Should render photo label 2');
 
   // 4. Price & MoQ
   assert.ok(html.includes('Rp 45.000'), 'Should render price Rp 45.000');
@@ -56,7 +62,7 @@ test('Built dist/index.html contains Layanan Prasmanan section with anti-slop sp
     'Should list tableware in facilities'
   );
   assert.ok(html.includes('Gurame Asam Manis'), 'Should list Gurame Asam Manis in popular menu');
-  assert.ok(html.includes('Ayam Kampung'), 'Should list Ayam Kampung in popular menu');
+  assert.ok(html.includes('Ayam Kampung Pilihan'), 'Should list Ayam Kampung Pilihan in popular menu');
 
   // 6. Pre-filled WhatsApp CTA
   assert.ok(html.includes('https://wa.me/6281324383858?text='), 'Should use SSOT WhatsApp link');
