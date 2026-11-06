@@ -135,7 +135,7 @@ const { paket, defaultMainMenu, defaultSideDishes } = Astro.props;
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="block text-sm font-bold text-neutral-900">
-                🍗 Pilih Menu Utama
+                Pilih Menu Utama
               </span>
               <span class="text-[13px] text-neutral-500">Pilih 1 menu</span>
             </div>
@@ -167,7 +167,7 @@ const { paket, defaultMainMenu, defaultSideDishes } = Astro.props;
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="block text-sm font-bold text-neutral-900">
-                🥗 {paket.sideDishesSelectMin === paket.sideDishesSelectMax
+                {paket.sideDishesSelectMin === paket.sideDishesSelectMax
                   ? `Pilih ${paket.sideDishesSelectMin} Lauk Pendamping`
                   : `Pilih ${paket.sideDishesSelectMin}-${paket.sideDishesSelectMax} Lauk Pendamping`}
               </span>
