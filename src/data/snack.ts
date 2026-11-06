@@ -187,37 +187,37 @@ export const defaultSnackTemplates: SnackTemplatePackage[] = [
     category: "Snack Box",
     price_per_pax: 15000,
     min_pax: 25,
-    badge: "Kue Basah",
-    description: "Kombinasi kue tradisional manis dan gurih istimewa berbalut daun pisang higienis.",
+    badge: "Kue Tradisional",
+    description: "Kombinasi aneka jajan pasar tradisional manis dan gurih pilihan favorit nusantara.",
     image: "/images/menu/snack-jajan-pasar.webp",
     foto: "/images/menu/snack-jajan-pasar.webp",
     items: [
-      "Lemper Ayam Bakar Gurih",
-      "Kue Putu Ayu Kelapa Parut Manis",
-      "Pastel Sayur Telur Gurih Krispi",
-      "Kue Lapis Legit Tradisional",
+      "Lemper Ayam / Abon",
+      "Putu Ayu",
+      "Risol Ayam / Sayur",
+      "Kue Lapis",
       "Air Mineral Cup 220ml"
     ],
     custom_slots: [
       {
         name: "Kue Asin / Tradisional",
-        default_item: "Lemper Ayam Bakar Gurih",
-        options: "Lemper Ayam Bakar Gurih, Buras, Semar Mendem"
+        default_item: "Lemper Ayam / Abon",
+        options: "Lemper Ayam / Abon, Buras Sayur / Oncom, Ketan Gurih"
       },
       {
-        name: "Kue Manis Kukus",
-        default_item: "Kue Putu Ayu Kelapa Parut Manis",
-        options: "Kue Putu Ayu Kelapa Parut Manis, Bolu Kukus Gula Merah, Nona Manis"
+        name: "Kue Manis Tradisional",
+        default_item: "Putu Ayu",
+        options: "Putu Ayu, Bolu Kukus, Geblog / Getuk Singkong"
       },
       {
-        name: "Gorengan / Pastel",
-        default_item: "Pastel Sayur Telur Gurih Krispi",
-        options: "Pastel Sayur Telur Gurih Krispi, Risoles Sayur, Martabak"
+        name: "Savory / Gorengan",
+        default_item: "Risol Ayam / Sayur",
+        options: "Risol Ayam / Sayur, Kue Lobak, Buras Sayur / Oncom"
       },
       {
         name: "Kue Basah Lapis",
-        default_item: "Kue Lapis Legit Tradisional",
-        options: "Kue Lapis Legit Tradisional, Kue Talam, Cantik Manis"
+        default_item: "Kue Lapis",
+        options: "Kue Lapis, Kue Lapis Gula Merah, Naga Sari"
       },
       {
         name: "Minuman",
