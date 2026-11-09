@@ -552,55 +552,11 @@ const menuKatalog = await getMenuCatalog();
     carouselInstance = initPaketCarousel();
   }
 
-  // Sinkronisasi katalog paket menu jika API URL dikonfigurasi
+  // Sinkronisasi katalog paket menu dengan Stale-While-Revalidate (SWR) cache
   (async function() {
     try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const queryApi = urlParams.get('apiUrl');
-      const hostname = window.location.hostname;
-      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
-      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-      const rawApiUrl = queryApi || publicApiUrl || (
-        isLocal
-          ? defaultLocalApi
-          : 'https://dzaniez-back.ethiodeploy.app'
-      );
-      const apiUrl = (rawApiUrl && !isLocal && rawApiUrl.startsWith('http://'))
-        ? rawApiUrl.replace(/^http:\/\//i, 'https://')
-        : rawApiUrl;
-      if (!apiUrl) return;
-
-      console.log('[Dzanis Menu] Menghubungi API menu:', apiUrl);
-      const res = await fetch(`${apiUrl}/api/menu`, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-          'Accept': 'application/json'
-        }
-      });
-      if (!res.ok) {
-        console.warn('[Dzanis Menu] API menu tidak merespon OK:', res.status);
-        return;
-      }
-
-      const contentType = res.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        console.warn('[Dzanis Menu] Respons API bukan JSON:', contentType);
-        return;
-      }
-
-      const data = await res.json();
-      const rawPackages = Array.isArray(data)
-        ? data
-        : (Array.isArray(data.packages) ? data.packages : (Array.isArray(data.data) ? data.data : []));
-
-      // Filter paket katering (selain snack box yang punya seksi tersendiri di #snack)
-      const packages = rawPackages.filter((p) => {
-        if (!p.category) return true;
-        const cat = String(p.category).toLowerCase();
-        return !cat.includes('snack');
-      });
-
-      console.log('[Dzanis Menu] Menerima data paket katering:', packages.length, 'paket');
+      const MENU_CACHE_KEY = 'dzanis_menu_cache_v1';
+      const MENU_CACHE_TTL = 5 * 60 * 1000; // 5 menit
 
       const grid = document.getElementById('paket-grid');
       const prevBtn = document.getElementById('paket-prev');
@@ -608,40 +564,7 @@ const menuKatalog = await getMenuCatalog();
       const dotsContainer = document.getElementById('paket-dots');
       if (!grid) return;
 
-      if (packages.length === 0) {
-        grid.innerHTML = `
-          <div class="w-full py-12 px-6 rounded-3xl bg-white border border-neutral-200/80 shadow-sm text-center flex flex-col items-center justify-center select-text">
-            <div class="size-14 rounded-full bg-orange-50 text-[#C04A27] mb-3 flex items-center justify-center">
-              <svg class="size-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
-              Katalog Menu Sedang Diperbarui
-            </h3>
-            <p class="text-sm text-neutral-600 max-w-md mb-5 leading-relaxed">
-              Saat ini daftar paket nasi kotak sedang ditata oleh dapur kami. Anda dapat langsung berkonsultasi dan memesan menu kustom melalui WhatsApp.
-            </p>
-            <a
-              href="${waKonsultasiUrl || 'https://wa.me/6285726331579'}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition shadow-xs"
-            >
-              <span>Konsultasi Menu Kustom</span>
-              <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </a>
-          </div>
-        `;
-        if (prevBtn) prevBtn.classList.add('opacity-0', 'pointer-events-none');
-        if (nextBtn) nextBtn.classList.add('opacity-0', 'pointer-events-none');
-        if (dotsContainer) dotsContainer.classList.add('hidden');
-        return;
-      }
-
-      const resolvePhotoUrl = (img) => {
+      const resolvePhotoUrl = (img, apiUrl) => {
         if (!img) return '/images/menu/paket-20k.webp';
         let target = String(img).trim();
         if (target.startsWith('data:')) return target;
@@ -666,136 +589,261 @@ const menuKatalog = await getMenuCatalog();
         return target;
       };
 
-      grid.innerHTML = packages.map((p, idx) => {
-        const rawNama = p.name || p.nama || p.title || 'Paket Menu';
-        const nama = rawNama.replace(/\s*\d+K$/i, '').trim();
-        const harga = Number(p.price_per_pax || p.harga || p.price || 0);
-        const slug = p.slug || (p.id ? String(p.id) : 'paket');
-        const rawImg = p.image || p.foto || p.gambar || '';
-        const foto = resolvePhotoUrl(rawImg);
-        const deskripsi = p.description || p.deskripsiSingkat || p.deskripsi_singkat || p.deskripsi || 'Pilihan menu lezat higienis Dzanis Catering.';
-        const isPopular = p.isPopular || p.is_popular || p.populer;
-        const badge = p.badge || (isPopular ? 'FAVORIT' : (p.category ? p.category : null));
-        const items = Array.isArray(p.items) ? p.items : (p.menuUtama || p.menu_utama || []);
-        const laukPendamping = Array.isArray(p.laukPendamping) ? p.laukPendamping : (p.lauk_pendamping || []);
-        const tags = Array.isArray(p.tags) ? p.tags : (Array.isArray(p.badges) ? p.badges : (Array.isArray(items) ? items.slice(0, 3) : []));
+      const renderKateringPackages = (packages, apiUrl) => {
+        if (!grid) return;
 
-        return `
-          <div
-            role="group"
-            aria-roledescription="slide"
-            aria-label="${nama} (${idx + 1} dari ${packages.length})"
-            class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md select-none"
-          >
-            <!-- Top Image with Badge -->
-            <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
-              <img
-                src="${foto}"
-                alt="${nama}"
-                loading="${idx === 0 ? 'eager' : 'lazy'}"
-                ${idx === 0 ? 'fetchpriority="high"' : ''}
-                width="600"
-                height="450"
-                decoding="async"
-                draggable="false"
-                class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
-                onerror="if(!this.dataset.retryLocal && this.src.includes('/uploads/')){this.dataset.retryLocal='true';this.src='${rawImg}';}else{this.onerror=null;this.src='/images/menu/paket-20k.webp';}"
-              />
-              ${badge ? `
-                <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
-                  ${badge}
-                </span>
-              ` : ''}
+        if (packages.length === 0) {
+          const emptyHash = 'empty_state';
+          if (grid.dataset.renderedHash === emptyHash) return;
+          grid.dataset.renderedHash = emptyHash;
+
+          grid.innerHTML = `
+            <div class="w-full py-12 px-6 rounded-3xl bg-white border border-neutral-200/80 shadow-sm text-center flex flex-col items-center justify-center select-text">
+              <div class="size-14 rounded-full bg-orange-50 text-[#C04A27] mb-3 flex items-center justify-center">
+                <svg class="size-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
+                Katalog Menu Sedang Diperbarui
+              </h3>
+              <p class="text-sm text-neutral-600 max-w-md mb-5 leading-relaxed">
+                Saat ini daftar paket nasi kotak sedang ditata oleh dapur kami. Anda dapat langsung berkonsultasi dan memesan menu kustom melalui WhatsApp.
+              </p>
+              <a
+                href="${waKonsultasiUrl || 'https://wa.me/6285726331579'}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition shadow-xs"
+              >
+                <span>Konsultasi Menu Kustom</span>
+                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
             </div>
+          `;
+          if (prevBtn) prevBtn.classList.add('opacity-0', 'pointer-events-none');
+          if (nextBtn) nextBtn.classList.add('opacity-0', 'pointer-events-none');
+          if (dotsContainer) dotsContainer.classList.add('hidden');
+          return;
+        }
 
-            <!-- Card Content -->
-            <div class="p-5 md:p-6 flex flex-1 flex-col">
-              <!-- Title & Description -->
-              <div class="mb-3">
-                <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
-                  ${nama}
-                </h3>
-                <p class="text-xs md:text-sm text-neutral-900 line-clamp-2 leading-relaxed">
-                  ${deskripsi}
-                </p>
-              </div>
+        const dataFingerprint = JSON.stringify(packages.map(p => [p.id, p.name, p.price_per_pax || p.harga, p.image || p.foto]));
+        if (grid.dataset.renderedHash === dataFingerprint) {
+          return; // Konten sudah identik, cegah re-render dan flicker UI
+        }
+        grid.dataset.renderedHash = dataFingerprint;
 
-              <!-- Price Display -->
-              <div class="mb-3">
-                <p class="flex items-baseline gap-1">
-                  <span class="text-xs font-semibold text-neutral-500">Rp</span>
-                  <span class="text-2xl font-bold font-heading text-neutral-900">
-                    ${harga.toLocaleString('id-ID')}
+        grid.innerHTML = packages.map((p, idx) => {
+          const rawNama = p.name || p.nama || p.title || 'Paket Menu';
+          const nama = rawNama.replace(/\s*\d+K$/i, '').trim();
+          const harga = Number(p.price_per_pax || p.harga || p.price || 0);
+          const slug = p.slug || (p.id ? String(p.id) : 'paket');
+          const rawImg = p.image || p.foto || p.gambar || '';
+          const foto = resolvePhotoUrl(rawImg, apiUrl);
+          const deskripsi = p.description || p.deskripsiSingkat || p.deskripsi_singkat || p.deskripsi || 'Pilihan menu lezat higienis Dzanis Catering.';
+          const isPopular = p.isPopular || p.is_popular || p.populer;
+          const badge = p.badge || (isPopular ? 'FAVORIT' : (p.category ? p.category : null));
+          const items = Array.isArray(p.items) ? p.items : (p.menuUtama || p.menu_utama || []);
+          const laukPendamping = Array.isArray(p.laukPendamping) ? p.laukPendamping : (p.lauk_pendamping || []);
+          const tags = Array.isArray(p.tags) ? p.tags : (Array.isArray(p.badges) ? p.badges : (Array.isArray(items) ? items.slice(0, 3) : []));
+
+          return `
+            <div
+              role="group"
+              aria-roledescription="slide"
+              aria-label="${nama} (${idx + 1} dari ${packages.length})"
+              class="w-full md:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] shrink-0 snap-start bg-white rounded-3xl border border-neutral-200/80 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md select-none"
+            >
+              <!-- Top Image with Badge -->
+              <div class="relative aspect-[16/10] w-full overflow-hidden bg-surface">
+                <img
+                  src="${foto}"
+                  alt="${nama}"
+                  loading="${idx === 0 ? 'eager' : 'lazy'}"
+                  ${idx === 0 ? 'fetchpriority="high"' : ''}
+                  width="600"
+                  height="450"
+                  decoding="async"
+                  draggable="false"
+                  class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
+                  onerror="if(!this.dataset.retryLocal && this.src.includes('/uploads/')){this.dataset.retryLocal='true';this.src='${rawImg}';}else{this.onerror=null;this.src='/images/menu/paket-20k.webp';}"
+                />
+                ${badge ? `
+                  <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
+                    ${badge}
                   </span>
-                  <span class="text-xs text-neutral-500 font-medium">/ box</span>
-                </p>
-              </div>
-
-              <!-- Tags Pill List (Badge Komposisi Menu) -->
-              ${tags && tags.length > 0 ? `
-              <div class="flex flex-wrap gap-1.5 mb-4">
-                ${tags.map(tag => `
-                  <span class="inline-flex items-center rounded-full bg-white text-neutral-900 border border-neutral-300 font-medium px-2.5 py-0.5 text-xs">
-                    ✓ ${tag}
-                  </span>
-                `).join('')}
-              </div>
-              ` : ''}
-
-              <!-- Menu Items Preview -->
-              <div class="space-y-1 mb-4">
-                ${items.slice(0, 4).map(item => `
-                  <p class="text-xs text-neutral-900 flex items-start gap-1.5 leading-snug">
-                    <span class="text-[#C04A27] font-bold flex-none">•</span>
-                    <span>${item}</span>
-                  </p>
-                `).join('')}
-                ${items.length > 4 ? `
-                  <p class="text-[11px] text-neutral-900 italic pl-3">+ ${items.length - 4} lauk lainnya</p>
                 ` : ''}
               </div>
 
-              <!-- Native Accordion for Lauk Pendamping (Zero JS) -->
-              ${laukPendamping && laukPendamping.length > 0 ? `
-              <details class="group border-t border-neutral-100 pt-3 mt-auto">
-                <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
-                  <span>Lauk pendamping (${laukPendamping.length})</span>
-                  <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
-                </summary>
-                <ul class="mt-2 space-y-1 text-xs text-neutral-900 pl-2">
-                  ${laukPendamping.map(lauk => `<li>• ${lauk}</li>`).join('')}
-                </ul>
-              </details>
-              ` : ''}
+              <!-- Card Content -->
+              <div class="p-5 md:p-6 flex flex-1 flex-col">
+                <!-- Title & Description -->
+                <div class="mb-3">
+                  <h3 class="font-heading text-xl font-bold text-neutral-900 mb-1">
+                    ${nama}
+                  </h3>
+                  <p class="text-xs md:text-sm text-neutral-900 line-clamp-2 leading-relaxed">
+                    ${deskripsi}
+                  </p>
+                </div>
 
-              <!-- Actions -->
-              <div class="mt-auto pt-3 border-t border-neutral-100">
-                <a
-                  href="/paket/${slug}"
-                  aria-label="Detail Lengkap ${nama}"
-                  class="block w-full text-center py-2.5 px-4 rounded-full border border-[#C04A27] text-[#C04A27] text-xs font-semibold hover:bg-orange-50 transition"
-                >
-                  Detail Lengkap
-                </a>
-                <button
-                  type="button"
-                  data-order-trigger
-                  data-package-name="${nama}"
-                  data-price="${harga}"
-                  class="w-full mt-2 py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition cursor-pointer"
-                >
-                  Pesan Paket Ini
-                </button>
+                <!-- Price Display -->
+                <div class="mb-3">
+                  <p class="flex items-baseline gap-1">
+                    <span class="text-xs font-semibold text-neutral-500">Rp</span>
+                    <span class="text-2xl font-bold font-heading text-neutral-900">
+                      ${harga.toLocaleString('id-ID')}
+                    </span>
+                    <span class="text-xs text-neutral-500 font-medium">/ box</span>
+                  </p>
+                </div>
+
+                <!-- Tags Pill List (Badge Komposisi Menu) -->
+                ${tags && tags.length > 0 ? `
+                <div class="flex flex-wrap gap-1.5 mb-4">
+                  ${tags.map(tag => `
+                    <span class="inline-flex items-center rounded-full bg-white text-neutral-900 border border-neutral-300 font-medium px-2.5 py-0.5 text-xs">
+                      ✓ ${tag}
+                    </span>
+                  `).join('')}
+                </div>
+                ` : ''}
+
+                <!-- Menu Items Preview -->
+                <div class="space-y-1 mb-4">
+                  ${items.slice(0, 4).map(item => `
+                    <p class="text-xs text-neutral-900 flex items-start gap-1.5 leading-snug">
+                      <span class="text-[#C04A27] font-bold flex-none">•</span>
+                      <span>${item}</span>
+                    </p>
+                  `).join('')}
+                  ${items.length > 4 ? `
+                    <p class="text-[11px] text-neutral-900 italic pl-3">+ ${items.length - 4} lauk lainnya</p>
+                  ` : ''}
+                </div>
+
+                <!-- Native Accordion for Lauk Pendamping (Zero JS) -->
+                ${laukPendamping && laukPendamping.length > 0 ? `
+                <details class="group border-t border-neutral-100 pt-3 mt-auto">
+                  <summary class="flex justify-between items-center text-xs font-semibold text-[#C04A27] cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none focus-visible:outline-2 focus-visible:outline-accent-700">
+                    <span>Lauk pendamping (${laukPendamping.length})</span>
+                    <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
+                  </summary>
+                  <ul class="mt-2 space-y-1 text-xs text-neutral-900 pl-2">
+                    ${laukPendamping.map(lauk => `<li>• ${lauk}</li>`).join('')}
+                  </ul>
+                </details>
+                ` : ''}
+
+                <!-- Actions -->
+                <div class="mt-auto pt-3 border-t border-neutral-100">
+                  <a
+                    href="/paket/${slug}"
+                    aria-label="Detail Lengkap ${nama}"
+                    class="block w-full text-center py-2.5 px-4 rounded-full border border-[#C04A27] text-[#C04A27] text-xs font-semibold hover:bg-orange-50 transition"
+                  >
+                    Detail Lengkap
+                  </a>
+                  <button
+                    type="button"
+                    data-order-trigger
+                    data-package-name="${nama}"
+                    data-price="${harga}"
+                    class="w-full mt-2 py-3 px-4 rounded-full bg-[#C04A27] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#A63F20] transition cursor-pointer"
+                  >
+                    Pesan Paket Ini
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
 
-      // Refresh carousel setelah data API dimuat
-      if (carouselInstance) {
-        carouselInstance.refresh();
+        if (carouselInstance) {
+          carouselInstance.refresh();
+        }
+      };
+
+      const filterKatering = (rawPkgs) => {
+        return rawPkgs.filter((p) => {
+          if (!p.category) return true;
+          const cat = String(p.category).toLowerCase();
+          return !cat.includes('snack');
+        });
+      };
+
+      // 1. Coba render instan dari sessionStorage (Stale-While-Revalidate: 0ms render)
+      try {
+        const cachedRaw = sessionStorage.getItem(MENU_CACHE_KEY);
+        if (cachedRaw) {
+          const cachedObj = JSON.parse(cachedRaw);
+          if (Array.isArray(cachedObj?.data) && cachedObj.data.length > 0) {
+            const cachedKatering = filterKatering(cachedObj.data);
+            if (cachedKatering.length > 0) {
+              renderKateringPackages(cachedKatering);
+            }
+          }
+        }
+      } catch (cacheErr) {
+        // Abaikan jika storage disabled/quota
       }
+
+      // 2. Resolve target API URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryApi = urlParams.get('apiUrl');
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
+      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
+      const rawApiUrl = queryApi || publicApiUrl || (
+        isLocal
+          ? defaultLocalApi
+          : 'https://dzaniez-back.ethiodeploy.app'
+      );
+      const apiUrl = (rawApiUrl && !isLocal && rawApiUrl.startsWith('http://'))
+        ? rawApiUrl.replace(/^http:\/\//i, 'https://')
+        : rawApiUrl;
+      if (!apiUrl) return;
+
+      // 3. Request background ke API tanpa header non-standar (CORS Simple Request: zero preflight delay)
+      const fetchHeaders = {
+        'Accept': 'application/json'
+      };
+      if (apiUrl.includes('ngrok')) {
+        fetchHeaders['ngrok-skip-browser-warning'] = 'true';
+      }
+
+      const res = await fetch(`${apiUrl}/api/menu`, {
+        headers: fetchHeaders
+      });
+      if (!res.ok) {
+        console.warn('[Dzanis Menu] API menu tidak merespon OK:', res.status);
+        return;
+      }
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        console.warn('[Dzanis Menu] Respons API bukan JSON:', contentType);
+        return;
+      }
+
+      const data = await res.json();
+      const rawPackages = Array.isArray(data)
+        ? data
+        : (Array.isArray(data.packages) ? data.packages : (Array.isArray(data.data) ? data.data : []));
+
+      // Simpan ke cache sessionStorage untuk kunjungan berikutnya
+      try {
+        sessionStorage.setItem(MENU_CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          data: rawPackages
+        }));
+      } catch (saveErr) {}
+
+      // Filter paket katering & render hasil termutakhir
+      const packages = filterKatering(rawPackages);
+      renderKateringPackages(packages, apiUrl);
     } catch (err) {
       console.warn('[Dzanis Menu] Gagal sinkronisasi menu:', err);
     }

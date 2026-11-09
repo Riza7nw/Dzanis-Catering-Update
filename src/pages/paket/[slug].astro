@@ -185,15 +185,48 @@ const defaultSideDishes =
 </script>
 
 <script is:inline>
-  // Dynamic Real-time Client Sync dengan Database Backend (/api/menu)
+  // Dynamic Real-time Client Sync dengan Database Backend (/api/menu) & SWR Cache
   (async function syncPackageDetailWithApi() {
     try {
+      const MENU_CACHE_KEY = 'dzanis_menu_cache_v1';
       const root = document.getElementById('package-detail-root');
       if (!root) return;
       const pathname = window.location.pathname.replace(/\/$/, '');
       const slug = pathname.split('/').pop();
       if (!slug) return;
 
+      const applyPackagePrice = (packages) => {
+        const livePkg = packages.find((p) => p.slug === slug || p.id === slug || (p.name && p.name.toLowerCase().includes(slug.replace(/-/g, ' '))));
+        if (!livePkg) return;
+
+        const newPrice = Number(livePkg.price_per_pax || livePkg.harga);
+        if (newPrice && !isNaN(newPrice) && newPrice > 0 && root.dataset.basePrice !== String(newPrice)) {
+          root.dataset.basePrice = String(newPrice);
+          const priceEls = document.querySelectorAll('.package-live-price');
+          priceEls.forEach((el) => {
+            el.textContent = newPrice.toLocaleString('id-ID');
+          });
+
+          // Trigger input event to recalculate portion total
+          const portionInput = document.getElementById('portion-input');
+          if (portionInput) {
+            portionInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+      };
+
+      // 1. Instant Cache Price Sync (0ms)
+      try {
+        const cachedRaw = sessionStorage.getItem(MENU_CACHE_KEY);
+        if (cachedRaw) {
+          const cachedObj = JSON.parse(cachedRaw);
+          if (Array.isArray(cachedObj?.data) && cachedObj.data.length > 0) {
+            applyPackagePrice(cachedObj.data);
+          }
+        }
+      } catch (cacheErr) {}
+
+      // 2. Fetch fresh data in background (zero CORS preflight lag)
       const hostname = window.location.hostname;
       const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
       const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
@@ -204,8 +237,13 @@ const defaultSideDishes =
         : rawApiUrl;
       if (!apiUrl) return;
 
+      const fetchHeaders = { 'Accept': 'application/json' };
+      if (apiUrl.includes('ngrok')) {
+        fetchHeaders['ngrok-skip-browser-warning'] = 'true';
+      }
+
       const res = await fetch(`${apiUrl}/api/menu`, {
-        headers: { 'ngrok-skip-browser-warning': 'true', 'Accept': 'application/json' }
+        headers: fetchHeaders
       });
       if (!res.ok) return;
 
@@ -217,23 +255,15 @@ const defaultSideDishes =
         ? data
         : (Array.isArray(data?.packages) ? data.packages : (Array.isArray(data?.data) ? data.data : []));
 
-      const livePkg = packages.find((p) => p.slug === slug || p.id === slug || (p.name && p.name.toLowerCase().includes(slug.replace(/-/g, ' '))));
-      if (!livePkg) return;
+      // Update cache
+      try {
+        sessionStorage.setItem(MENU_CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          data: packages
+        }));
+      } catch (saveErr) {}
 
-      const newPrice = Number(livePkg.price_per_pax || livePkg.harga);
-      if (newPrice && !isNaN(newPrice) && newPrice > 0) {
-        root.dataset.basePrice = String(newPrice);
-        const priceEls = document.querySelectorAll('.package-live-price');
-        priceEls.forEach((el) => {
-          el.textContent = newPrice.toLocaleString('id-ID');
-        });
-
-        // Trigger input event to recalculate portion total
-        const portionInput = document.getElementById('portion-input');
-        if (portionInput) {
-          portionInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      }
+      applyPackagePrice(packages);
     } catch (err) {
       console.warn('[Dzanis Detail] Sinkronisasi harga runtime terlewat:', err);
     }

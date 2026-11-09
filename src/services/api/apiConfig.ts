@@ -66,11 +66,16 @@ export function getApiBaseUrl(): string {
 }
 
 /**
- * Default header untuk bypass browser warning ngrok pada testing tunnel.
+ * Default header untuk API request:
+ * Menghindari header kustom non-standar pada produksi agar tidak memicu CORS Preflight (OPTIONS) ganda.
+ * Header ngrok hanya disematkan jika URL target terdeteksi domain ngrok.
  */
-export function getCommonApiHeaders(): HeadersInit {
-  return {
+export function getCommonApiHeaders(targetUrl?: string): HeadersInit {
+  const headers: Record<string, string> = {
     'Accept': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
   };
+  if (targetUrl && targetUrl.includes('ngrok')) {
+    headers['ngrok-skip-browser-warning'] = 'true';
+  }
+  return headers;
 }

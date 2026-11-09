@@ -98,8 +98,13 @@ const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
         ? rawApiUrl.replace(/^http:\/\//i, 'https://')
         : rawApiUrl;
 
+      const fetchHeaders = { 'Accept': 'application/json' };
+      if (apiUrl.includes('ngrok')) {
+        fetchHeaders['ngrok-skip-browser-warning'] = 'true';
+      }
+
       const res = await fetch(`${apiUrl}/api/menu`, {
-        headers: { 'ngrok-skip-browser-warning': 'true', 'Accept': 'application/json' }
+        headers: fetchHeaders
       });
       if (!res.ok) throw new Error('API Respon Gagal: ' + res.status);
 
