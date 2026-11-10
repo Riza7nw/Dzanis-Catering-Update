@@ -24,6 +24,8 @@ export interface Paket {
   foto: string;
   fotoAlt?: string;
   // Menu selection configuration
+  can_customize?: boolean;
+  main_dish?: string | string[];
   canSelectMainMenu?: boolean;
   selectableMainMenus?: string[];
   selectableSideDishes?: string[];

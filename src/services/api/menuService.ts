@@ -56,25 +56,50 @@ export function normalizePackage(dto: BackendPackageDto, fallbackList: Paket[] =
     }
   }
 
-  const menuUtama = matchedLocal?.menuUtama || (flatItems.length > 0 ? flatItems.slice(0, 2) : ['Menu Utama Pilihan']);
-  const laukPendamping = matchedLocal?.laukPendamping || (flatItems.length > 2 ? flatItems.slice(2) : []);
+  // Parse main_dish jika dikirimkan oleh backend (bisa berupa teks koma atau array)
+  let parsedMainDishes: string[] = [];
+  if (Array.isArray(dto.main_dish)) {
+    parsedMainDishes = dto.main_dish.map(s => String(s).trim()).filter(Boolean);
+  } else if (typeof dto.main_dish === 'string' && dto.main_dish.trim()) {
+    parsedMainDishes = dto.main_dish.split(/[\n,]+/).map(s => s.trim().replace(/^[•\-\*.]\s*/, '')).filter(Boolean);
+  }
+
+  const menuUtama = parsedMainDishes.length > 0
+    ? parsedMainDishes
+    : (matchedLocal?.menuUtama || (flatItems.length > 0 ? flatItems.slice(0, 2) : ['Menu Utama Pilihan']));
+
+  const derivedSideDishes = flatItems.filter(item => {
+    const trimmed = item.trim();
+    return !parsedMainDishes.includes(trimmed);
+  });
+
+  const laukPendamping = matchedLocal?.laukPendamping || (derivedSideDishes.length > 0 ? derivedSideDishes : (flatItems.length > 2 ? flatItems.slice(2) : []));
   const sambalLalapan = matchedLocal?.sambalLalapan || ['Sambal Terasi Matang', 'Lalapan Timun Segar'];
   const pelengkap = matchedLocal?.pelengkap || ['Nasi Putih Pulen', 'Kerupuk Renyah'];
   const tags = matchedLocal?.tags || (flatItems.length > 0 ? flatItems.slice(0, 3) : ['Nasi Pulen', 'Higienis']);
 
-  // Aturan SSOT: paket harga >= 25.000 mendapatkan fitur racik, harga < 25.000 tidak mendapatkan (fixed bundling).
-  // Sumber lauk dari Opsi B: item-item yang diketikkan admin di database.
-  const canSelectMainMenu = harga >= 25000;
+  // Aturan Kontrol Racik Menu:
+  // 1. Prioritaskan pengaturan toggle eksplisit dari Admin/DB (`dto.can_customize`)
+  // 2. Fallback ke konfigurasi matchedLocal (paket lokal) jika ada
+  // 3. Fallback default: harga >= 25000
+  const canSelectMainMenu = dto.can_customize !== undefined
+    ? Boolean(dto.can_customize)
+    : (matchedLocal?.canSelectMainMenu !== undefined ? Boolean(matchedLocal.canSelectMainMenu) : harga >= 25000);
+
   const selectableMainMenus = canSelectMainMenu
-    ? (matchedLocal?.selectableMainMenus && matchedLocal.selectableMainMenus.length > 0
-        ? matchedLocal.selectableMainMenus
-        : (menuUtama.length > 0 ? menuUtama : [rawNama]))
+    ? (parsedMainDishes.length > 0
+        ? parsedMainDishes
+        : (matchedLocal?.selectableMainMenus && matchedLocal.selectableMainMenus.length > 0
+            ? matchedLocal.selectableMainMenus
+            : (menuUtama.length > 0 ? menuUtama : [rawNama])))
     : [];
+
   const selectableSideDishes = canSelectMainMenu
     ? (matchedLocal?.selectableSideDishes && matchedLocal.selectableSideDishes.length > 0
         ? matchedLocal.selectableSideDishes
         : (laukPendamping.length > 0 ? laukPendamping : flatItems))
     : [];
+
   const sideDishesSelectMin = matchedLocal?.sideDishesSelectMin ?? (canSelectMainMenu ? Math.min(1, selectableSideDishes.length) : 0);
   const sideDishesSelectMax = matchedLocal?.sideDishesSelectMax ?? (canSelectMainMenu ? Math.max(1, selectableSideDishes.length) : 0);
 

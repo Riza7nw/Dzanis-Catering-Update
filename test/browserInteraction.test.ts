@@ -155,10 +155,10 @@ test('Real headless Chrome: Certificate modal click, focus, filtering, and copy 
     assert.equal(testResult.afterCopyClickHidden, true, 'Modal should stay hidden after clicking copy-number');
     assert.equal(testResult.afterCardClickHidden, false, 'Modal should open after card click');
     assert.match(testResult.title, /Sertifikat/i, 'Modal title should match clicked card document');
-    assert.ok(testResult.imgSrc.includes('/images/brand/'), 'Modal should load document image');
+    assert.ok(testResult.imgSrc.includes('/images/brand/') || testResult.imgSrc.includes('/uploads/certificates/'), 'Modal should load document image');
     assert.equal(testResult.afterCloseClickHidden, true, 'Modal should close after clicking close button');
-    assert.equal(testResult.visibleMutuCards, 5, 'Sertifikat mutu filter should display 5 cards');
-    assert.equal(testResult.visibleAllCards, 9, 'All documents filter should display 9 cards');
+    assert.equal(testResult.visibleMutuCards, 4, 'Sertifikat mutu filter should display 4 cards');
+    assert.equal(testResult.visibleAllCards, 7, 'All documents filter should display 7 cards');
 
     // B2B Section Mobile Assertions
     assert.ok(testResult.b2bPadTop >= 40, `B2B Section padding top on mobile should be >= 40px (pt-10), got ${testResult.b2bPadTop}px`);

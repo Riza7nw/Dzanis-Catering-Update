@@ -64,14 +64,16 @@ const rawActivePaket: Paket = backendPkg
       minOrder: backendPkg.minOrder || paket.minOrder,
       menuUtama: backendPkg.menuUtama && backendPkg.menuUtama.length > 0 ? backendPkg.menuUtama : paket.menuUtama,
       laukPendamping: backendPkg.laukPendamping && backendPkg.laukPendamping.length > 0 ? backendPkg.laukPendamping : paket.laukPendamping,
+      canSelectMainMenu: backendPkg.canSelectMainMenu !== undefined ? backendPkg.canSelectMainMenu : paket.canSelectMainMenu,
       selectableMainMenus: backendPkg.selectableMainMenus || paket.selectableMainMenus,
       selectableSideDishes: backendPkg.selectableSideDishes || paket.selectableSideDishes,
+      sideDishesSelectMin: backendPkg.sideDishesSelectMin !== undefined ? backendPkg.sideDishesSelectMin : paket.sideDishesSelectMin,
+      sideDishesSelectMax: backendPkg.sideDishesSelectMax !== undefined ? backendPkg.sideDishesSelectMax : paket.sideDishesSelectMax,
     }
   : paket;
 
-// Aturan SSOT: jika harga >= 25.000 maka terdapat opsi Pilihan Menu Sajian (Racik Menu Sendiri)
-// Jika harga < 25.000 maka tidak mendapatkannya (fixed bundling).
-const hasRacikFeature = rawActivePaket.harga >= 25000;
+// Kontrol Fitur Racik Menu diatur dinamis oleh Admin dari database (atau fallback konfigurasi paket)
+const hasRacikFeature = Boolean(rawActivePaket.canSelectMainMenu);
 const selectableMain = hasRacikFeature
   ? (rawActivePaket.selectableMainMenus && rawActivePaket.selectableMainMenus.length > 0
       ? rawActivePaket.selectableMainMenus
@@ -88,8 +90,8 @@ const activePaket: Paket = {
   canSelectMainMenu: hasRacikFeature,
   selectableMainMenus: selectableMain,
   selectableSideDishes: selectableSides,
-  sideDishesSelectMin: hasRacikFeature ? Math.min(1, selectableSides.length) : 0,
-  sideDishesSelectMax: hasRacikFeature ? Math.max(1, selectableSides.length) : 0,
+  sideDishesSelectMin: hasRacikFeature ? (rawActivePaket.sideDishesSelectMin ?? Math.min(1, selectableSides.length)) : 0,
+  sideDishesSelectMax: hasRacikFeature ? (rawActivePaket.sideDishesSelectMax ?? Math.max(1, selectableSides.length)) : 0,
 };
 
 const pageTitle = `${formatNamaPaket(activePaket.nama)} | Dzanis Catering`;

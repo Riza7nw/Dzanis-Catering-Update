@@ -29,6 +29,8 @@ export interface BackendPackageDto {
   image?: string;
   foto?: string;
   gambar?: string;
+  can_customize?: boolean | number;
+  main_dish?: string | string[];
   items?: string[] | string;
   menuUtama?: string[];
   laukPendamping?: string[];

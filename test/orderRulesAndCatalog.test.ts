@@ -58,12 +58,12 @@ test('SSOT DAFTAR_PAKET: contains exactly 4 packages with correct properties', (
   assert.equal(p23k.minOrder, 20);
   assert.equal(p23k.minOrderWeekend, 40);
   assert.equal(p23k.maxOrder, 500);
-  assert.equal(p23k.canSelectMainMenu, false);
-  assert.equal(p23k.sideDishesSelectMin, 0);
-  assert.equal(p23k.sideDishesSelectMax, 0);
-  assert.deepEqual(p23k.selectableSideDishes, []);
+  assert.equal(p23k.canSelectMainMenu, true);
+  assert.equal(p23k.sideDishesSelectMin, 3);
+  assert.equal(p23k.sideDishesSelectMax, 3);
+  assert.deepEqual(p23k.selectableSideDishes, POOL_LAUK_23K);
   assert.deepEqual(p23k.menuUtama, ['Ayam Bakar', 'Ayam Goreng']);
-  assert.deepEqual(p23k.selectableMainMenus, []);
+  assert.deepEqual(p23k.selectableMainMenus, ['Ayam Bakar', 'Ayam Goreng']);
 
   // 3. Paket Spesial 25k
   const p25k = DAFTAR_PAKET.find((p) => p.slug === 'paket-spesial-25k');
@@ -330,12 +330,19 @@ test('Static Built HTML: contains large order callout notices with touch targets
   assert.ok(snackHtml.includes('id="snack-builder-wa-admin-link"'));
 });
 
-test('Static Built HTML: paket-favorit-23k is fixed bundling without racik section (harga < 25.000)', () => {
+test('Static Built HTML: Kontrol Racik Menu oleh Admin (paket-23k aktif racik multi menu, paket-20k fixed)', () => {
   const distDir = path.resolve('dist');
   assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
 
+  // Paket 20K (Hemat): can_customize = false (fixed bundling tanpa section racik)
+  const p20kHtml = fs.readFileSync(path.join(distDir, 'paket/paket-hemat-20k/index.html'), 'utf-8');
+  assert.ok(!p20kHtml.includes('id="section-pilihan-menu"'), 'Paket 20k tidak boleh memiliki section racik menu saat can_customize nonaktif');
+
+  // Paket 23K (Favorit): can_customize = true (diaktifkan admin dengan 2 pilihan menu utama dipisahkan koma)
   const p23kHtml = fs.readFileSync(path.join(distDir, 'paket/paket-favorit-23k/index.html'), 'utf-8');
-  assert.ok(!p23kHtml.includes('id="section-pilihan-menu"'), 'Must not contain racik menu for price < 25k');
+  assert.ok(p23kHtml.includes('id="section-pilihan-menu"'), 'Paket 23k harus memiliki section racik menu saat diaktifkan admin');
+  assert.ok(p23kHtml.includes('value="Ayam Bakar"'), 'Paket 23k harus memiliki opsi menu utama Ayam Bakar');
+  assert.ok(p23kHtml.includes('value="Ayam Goreng"'), 'Paket 23k harus memiliki opsi menu utama Ayam Goreng');
 });
 
 test('Real headless Chrome: /paket/paket-spesial-25k default selection, dynamic switch to Ayam Rica Kemangi, and OrderModal prefill', async () => {
@@ -383,7 +390,8 @@ test('Real headless Chrome: /paket/paket-spesial-25k default selection, dynamic 
   try {
     const listRes = await fetch(`http://127.0.0.1:${chromeDebugPort}/json`);
     const tabs = await listRes.json();
-    const targetTab = tabs.find((t: any) => t.url.includes('paket-spesial-25k')) || tabs[0];
+    const pageTabs = tabs.filter((t: any) => t.type === 'page');
+    const targetTab = pageTabs.find((t: any) => t.url.includes('paket-spesial-25k')) || pageTabs[0] || tabs[0];
     const ws = new WebSocket(targetTab.webSocketDebuggerUrl);
 
     const testResult = await new Promise<any>((resolve, reject) => {
@@ -410,10 +418,13 @@ test('Real headless Chrome: /paket/paket-spesial-25k default selection, dynamic 
                   const waCheckoutBtn = document.getElementById('wa-checkout-btn');
                   const defaultWaMessage = waCheckoutBtn && waCheckoutBtn.dataset ? waCheckoutBtn.dataset.waMessage || '' : '';
 
-                  // Set a valid event date (H+2) to avoid date validation alert on checkout click
+                  window.alert = () => {};
+                  // Set a valid event date (H+7) to avoid date validation alert on checkout click
                   const eventDateInput = document.getElementById('event-date-input');
                   if (eventDateInput) {
-                    eventDateInput.value = '2026-11-09';
+                    const futureD = new Date();
+                    futureD.setDate(futureD.getDate() + 7);
+                    eventDateInput.value = futureD.toISOString().split('T')[0];
                     eventDateInput.dispatchEvent(new Event('input', { bubbles: true }));
                     eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
                   }
@@ -570,10 +581,15 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
   try {
     const listRes = await fetch(`http://127.0.0.1:${chromeDebugPort}/json`);
     const tabs = await listRes.json();
-    const targetTab = tabs.find((t: any) => t.url.includes('paket-ayam-kampung-28k')) || tabs[0];
+    const pageTabs = tabs.filter((t: any) => t.type === 'page');
+    const targetTab = pageTabs.find((t: any) => t.url.includes('paket-ayam-kampung-28k')) || pageTabs[0] || tabs[0];
     const ws = new WebSocket(targetTab.webSocketDebuggerUrl);
 
     const testResult = await new Promise<any>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Headless Chrome test for paket-ayam-kampung-28k timed out after 8s'));
+      }, 8000);
+
       ws.onopen = () => {
         ws.send(JSON.stringify({ id: 1, method: 'Runtime.enable' }));
         setTimeout(() => {
@@ -584,6 +600,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
               params: {
                 expression: `
                 (() => {
+                  window.alert = () => {};
                   const portionInput = document.getElementById('portion-input');
                   const labelMin = document.getElementById('label-min-order');
                   const subtotalDisplay = document.getElementById('subtotal-display');
@@ -596,8 +613,8 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const initialPortion = portionInput?.value;
                   const initialSubtotal = subtotalDisplay?.textContent?.trim();
 
-                  // 2. Change event date to Saturday (Weekend: 2026-11-07)
-                  eventDateInput.value = '2026-11-07';
+                  // 2. Change event date to Saturday (Weekend: 2026-11-14)
+                  eventDateInput.value = '2026-11-14';
                   eventDateInput.dispatchEvent(new Event('input', { bubbles: true }));
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -605,8 +622,8 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const weekendPortion = portionInput?.value;
                   const weekendSubtotal = subtotalDisplay?.textContent?.trim();
 
-                  // 3. Change event date to Monday (Weekday: 2026-11-09)
-                  eventDateInput.value = '2026-11-09';
+                  // 3. Change event date to Monday (Weekday: 2026-11-16)
+                  eventDateInput.value = '2026-11-16';
                   eventDateInput.dispatchEvent(new Event('input', { bubbles: true }));
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -641,7 +658,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const pkgNoticeHiddenOn40 = document.getElementById('package-large-order-notice')?.classList.contains('hidden');
 
                   // 4. Change back to Saturday and click waCheckoutBtn to open OrderModal
-                  eventDateInput.value = '2026-11-07';
+                  eventDateInput.value = '2026-11-14';
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
                   waCheckoutBtn.click();
 
@@ -653,7 +670,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   // 5. Inside OrderModal, change date from Saturday to Monday (Weekday)
                   const modalEventDateInput = document.getElementById('event-date');
                   const modalPortionInput = document.getElementById('portion-count');
-                  modalEventDateInput.value = '2026-11-09';
+                  modalEventDateInput.value = '2026-11-16';
                   modalEventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
                   const modalMinHintWeekday = document.getElementById('portion-min-hint')?.textContent?.trim();
@@ -745,6 +762,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
       ws.onmessage = (msg: any) => {
         const data = JSON.parse(msg.data.toString());
         if (data.id === 2) {
+          clearTimeout(timeoutId);
           if (data.result.exceptionDetails) {
             reject(new Error(JSON.stringify(data.result.exceptionDetails)));
           } else {
@@ -753,7 +771,10 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
         }
       };
 
-      ws.onerror = (err) => reject(err);
+      ws.onerror = (err) => {
+        clearTimeout(timeoutId);
+        reject(err);
+      };
     });
 
     // Assertions for Real Browser Behavior
@@ -784,7 +805,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
 
     // Modal Prefill & Open
     assert.equal(testResult.modalOpen, true, 'OrderModal must open when clicking waCheckoutBtn');
-    assert.equal(testResult.modalDateVal, '2026-11-07', 'OrderModal date must prefill with selected date');
+    assert.equal(testResult.modalDateVal, '2026-11-14', 'OrderModal date must prefill with selected date');
     assert.equal(testResult.modalPortionVal, '40', 'OrderModal portion must prefill with weekend 40');
     assert.ok(testResult.modalMinHintWeekend.includes('Akhir Pekan'), 'Modal hint must state Akhir Pekan on weekend date');
 
