@@ -4,10 +4,10 @@
  * normalisasi skema DTO ke domain Paket dan fallback offline penuh ke DAFTAR_PAKET.
  */
 
-import type { Paket, SnackTemplatePackage, SnackSlot } from '../../types/catalog';
-import type { BackendPackageDto } from '../../types/api';
+import type { Paket, SnackTemplatePackage, SnackSlot, SnackKategori } from '../../types/catalog';
+import type { BackendPackageDto, BackendSnackItemDto, BackendSnackResponse } from '../../types/api';
 import { DAFTAR_PAKET } from '../../data/paket.ts';
-import { defaultSnackTemplates } from '../../data/snack.ts';
+import { defaultSnackTemplates, snackKategori as fallbackSnackKategori } from '../../data/snack.ts';
 import { getApiBaseUrl, getCommonApiHeaders, DEFAULT_TIMEOUT_MS } from './apiConfig.ts';
 
 /**
@@ -262,4 +262,59 @@ export async function getSnackTemplates(): Promise<SnackTemplatePackage[]> {
   }
 
   return defaultSnackTemplates;
+}
+
+/**
+ * Mengambil katalog lengkap 51+ pilihan jajanan snack satuan dari backend API
+ * dengan pengelompokan per kategori dan fallback offline ke snackKategori lokal.
+ */
+export async function getSnackCatalog(): Promise<SnackKategori[]> {
+  try {
+    const apiBase = getApiBaseUrl();
+    const res = await fetch(`${apiBase}/api/snack-items`, {
+      headers: getCommonApiHeaders(),
+      signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
+    });
+
+    if (res.ok) {
+      const data: BackendSnackResponse = await res.json();
+      const rawItems: BackendSnackItemDto[] = Array.isArray(data.items) ? data.items : [];
+
+      if (rawItems.length > 0) {
+        // Filter item yang aktif dan urutkan berdasarkan sort_order
+        const activeItems = rawItems
+          .filter((item) => Boolean(item.is_active))
+          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+        // Kelompokkan per kategori secara urut
+        const categoryMap = new Map<string, Array<{ nama: string; harga: number }>>();
+
+        activeItems.forEach((item) => {
+          const cat = item.category || 'Lainnya';
+          if (!categoryMap.has(cat)) {
+            categoryMap.set(cat, []);
+          }
+          categoryMap.get(cat)!.push({
+            nama: item.name,
+            harga: Number(item.price || 0),
+          });
+        });
+
+        const result: SnackKategori[] = [];
+        categoryMap.forEach((items, label) => {
+          result.push({ label, items });
+        });
+
+        if (result.length > 0) {
+          return result;
+        }
+      }
+    }
+  } catch (err) {
+    if (import.meta.env?.DEV) {
+      console.warn('[menuService] Backend offline untuk katalog snack items:', (err as Error)?.message || err);
+    }
+  }
+
+  return fallbackSnackKategori;
 }

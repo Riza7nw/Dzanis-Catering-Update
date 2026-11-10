@@ -92,3 +92,20 @@ export interface BackendLeadResponse {
   message: string;
   lead_id?: number;
 }
+
+export interface BackendSnackItemDto {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  is_active: number | boolean;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface BackendSnackResponse {
+  items: BackendSnackItemDto[];
+  categories?: Record<string, BackendSnackItemDto[]>;
+  total?: number;
+}
