@@ -138,7 +138,11 @@ export async function getMenuCatalog(): Promise<Paket[]> {
           return !cat.includes('snack');
         });
 
-        // Kembalikan murni data dari backend (bila kosong, kembalikan array kosong [])
+        // Jika data dari backend kosong, fallback ke DAFTAR_PAKET agar SSG build selalu memiliki konten siap saji
+        if (cateringDtos.length === 0) {
+          return DAFTAR_PAKET;
+        }
+
         return cateringDtos.map((dto) => normalizePackage(dto, DAFTAR_PAKET));
       }
     }

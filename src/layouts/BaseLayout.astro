@@ -74,6 +74,30 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
     <meta name="twitter:image" content={ogImageUrl} />
     {useTransitions && <ClientRouter />}
 
+    <!-- Network Optimization: Preconnect & Preload API Backend -->
+    <link rel="preconnect" href="https://dzaniez-back.ethiodeploy.app" crossorigin />
+    <link rel="dns-prefetch" href="https://dzaniez-back.ethiodeploy.app" />
+    <link rel="preload" href="https://dzaniez-back.ethiodeploy.app/api/menu" as="fetch" crossorigin="anonymous" />
+
+    <!-- Early Eager Prefetch: Jalankan request API katalog di <head> sebelum DOM/gambar selesai -->
+    <script is:inline>
+      (function() {
+        try {
+          var urlParams = new URLSearchParams(window.location.search);
+          var h = window.location.hostname;
+          var isLocal = h === 'localhost' || h === '127.0.0.1' || h.indexOf('192.168.') === 0 || h.indexOf('10.') === 0 || h.slice(-6) === '.local';
+          var defLocal = window.location.protocol + '//' + (h || '127.0.0.1') + ':8000';
+          var api = urlParams.get('apiUrl') || (isLocal ? defLocal : 'https://dzaniez-back.ethiodeploy.app');
+          
+          window.__DZANIS_MENU_PROMISE__ = fetch(api + '/api/menu', {
+            headers: { 'Accept': 'application/json' }
+          }).then(function(r) {
+            return (r && r.ok) ? r.json() : null;
+          }).catch(function() { return null; });
+        } catch(e) {}
+      })();
+    </script>
+
     <!-- Google Site Name Structured Data (Schema.org WebSite) -->
     {shouldRenderWebSiteSchema && (
       <script

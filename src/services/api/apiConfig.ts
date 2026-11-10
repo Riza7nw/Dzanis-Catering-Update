@@ -32,13 +32,7 @@ export function enforceSecureUrl(url: string): string {
  * Mengambil base URL API backend yang aktif (terenkripsi HTTPS pada production).
  */
 export function getApiBaseUrl(): string {
-  // 1. Variabel lingkungan PUBLIC_API_URL (prioritas utama pada mode build/hosting)
-  if (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_API_URL) {
-    const envUrl = String(import.meta.env.PUBLIC_API_URL).trim();
-    if (envUrl) return enforceSecureUrl(envUrl);
-  }
-
-  // 2. Lingkungan Klien Browser: Periksa parameter URL ?apiUrl= atau deteksi localhost
+  // 1. Lingkungan Klien Browser: Periksa parameter URL ?apiUrl= atau deteksi localhost
   if (typeof window !== 'undefined') {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -59,6 +53,12 @@ export function getApiBaseUrl(): string {
     } catch {
       // Fallback diam jika URLSearchParams atau window tidak dapat diakses
     }
+  }
+
+  // 2. Variabel lingkungan PUBLIC_API_URL (prioritas utama pada mode build/hosting)
+  if (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_API_URL) {
+    const envUrl = String(import.meta.env.PUBLIC_API_URL).trim();
+    if (envUrl) return enforceSecureUrl(envUrl);
   }
 
   // 3. Fallback produksi cloud terenkripsi HTTPS

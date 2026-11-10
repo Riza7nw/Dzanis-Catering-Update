@@ -89,12 +89,8 @@ const publicApiUrl = import.meta.env.PUBLIC_API_URL || '';
       const hostname = window.location.hostname;
       const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
       const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-      const rawApiUrl = queryApi || publicApiUrl || (
-        isLocal
-          ? defaultLocalApi
-          : 'https://dzaniez-back.ethiodeploy.app'
-      );
-      const apiUrl = (rawApiUrl && !isLocal && rawApiUrl.startsWith('http://'))
+      const rawApiUrl = queryApi || (isLocal ? defaultLocalApi : (publicApiUrl || 'https://dzaniez-back.ethiodeploy.app'));
+      const apiUrl = (rawApiUrl && rawApiUrl.startsWith('http://') && !rawApiUrl.includes('localhost') && !rawApiUrl.includes('127.0.0.1'))
         ? rawApiUrl.replace(/^http:\/\//i, 'https://')
         : rawApiUrl;
 

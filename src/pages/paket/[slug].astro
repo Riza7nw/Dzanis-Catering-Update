@@ -232,7 +232,7 @@ const defaultSideDishes =
       const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
       const queryApi = (new URLSearchParams(window.location.search)).get('apiUrl');
       const rawApiUrl = queryApi || (isLocal ? defaultLocalApi : 'https://dzaniez-back.ethiodeploy.app');
-      const apiUrl = (rawApiUrl && !isLocal && rawApiUrl.startsWith('http://'))
+      const apiUrl = (rawApiUrl && rawApiUrl.startsWith('http://') && !rawApiUrl.includes('localhost') && !rawApiUrl.includes('127.0.0.1'))
         ? rawApiUrl.replace(/^http:\/\//i, 'https://')
         : rawApiUrl;
       if (!apiUrl) return;

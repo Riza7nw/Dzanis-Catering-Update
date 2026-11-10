@@ -555,8 +555,8 @@ const menuKatalog = await getMenuCatalog();
   // Sinkronisasi katalog paket menu dengan Stale-While-Revalidate (SWR) cache
   (async function() {
     try {
-      const MENU_CACHE_KEY = 'dzanis_menu_cache_v1';
-      const MENU_CACHE_TTL = 5 * 60 * 1000; // 5 menit
+      const MENU_CACHE_KEY = 'dzanis_menu_cache_v2';
+      const MENU_CACHE_TTL = 10 * 60 * 1000; // 10 menit
 
       const grid = document.getElementById('paket-grid');
       const prevBtn = document.getElementById('paket-prev');
@@ -774,15 +774,15 @@ const menuKatalog = await getMenuCatalog();
         });
       };
 
-      // 1. Coba render instan dari sessionStorage (Stale-While-Revalidate: 0ms render)
+      // 1. Coba render instan dari localStorage (persisten lintas-sesi/tab: 0ms render)
       try {
-        const cachedRaw = sessionStorage.getItem(MENU_CACHE_KEY);
+        const cachedRaw = localStorage.getItem(MENU_CACHE_KEY) || sessionStorage.getItem(MENU_CACHE_KEY);
         if (cachedRaw) {
           const cachedObj = JSON.parse(cachedRaw);
           if (Array.isArray(cachedObj?.data) && cachedObj.data.length > 0) {
             const cachedKatering = filterKatering(cachedObj.data);
             if (cachedKatering.length > 0) {
-              renderKateringPackages(cachedKatering);
+              renderKateringPackages(cachedKatering, apiUrl);
             }
           }
         }
@@ -796,49 +796,58 @@ const menuKatalog = await getMenuCatalog();
       const hostname = window.location.hostname;
       const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
       const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-      const rawApiUrl = queryApi || publicApiUrl || (
-        isLocal
-          ? defaultLocalApi
-          : 'https://dzaniez-back.ethiodeploy.app'
-      );
-      const apiUrl = (rawApiUrl && !isLocal && rawApiUrl.startsWith('http://'))
+      const rawApiUrl = queryApi || (isLocal ? defaultLocalApi : (publicApiUrl || 'https://dzaniez-back.ethiodeploy.app'));
+      const apiUrl = (rawApiUrl && rawApiUrl.startsWith('http://') && !rawApiUrl.includes('localhost') && !rawApiUrl.includes('127.0.0.1'))
         ? rawApiUrl.replace(/^http:\/\//i, 'https://')
         : rawApiUrl;
       if (!apiUrl) return;
 
-      // 3. Request background ke API tanpa header non-standar (CORS Simple Request: zero preflight delay)
-      const fetchHeaders = {
-        'Accept': 'application/json'
-      };
-      if (apiUrl.includes('ngrok')) {
-        fetchHeaders['ngrok-skip-browser-warning'] = 'true';
+      // 3. Manfaatkan early prefetch dari <head> jika sudah ada
+      let rawPackages = null;
+      if (window.__DZANIS_MENU_PROMISE__) {
+        try {
+          const preloaded = await window.__DZANIS_MENU_PROMISE__;
+          if (preloaded) {
+            rawPackages = Array.isArray(preloaded)
+              ? preloaded
+              : (Array.isArray(preloaded.packages) ? preloaded.packages : (Array.isArray(preloaded.data) ? preloaded.data : null));
+          }
+        } catch (pe) {}
       }
 
-      const res = await fetch(`${apiUrl}/api/menu`, {
-        headers: fetchHeaders
-      });
-      if (!res.ok) {
-        console.warn('[Dzanis Menu] API menu tidak merespon OK:', res.status);
-        return;
+      // Jika belum selesai / prefetch tidak tersedia, fetch langsung
+      if (!rawPackages) {
+        const fetchHeaders = {
+          'Accept': 'application/json'
+        };
+        if (apiUrl.includes('ngrok')) {
+          fetchHeaders['ngrok-skip-browser-warning'] = 'true';
+        }
+
+        const res = await fetch(`${apiUrl}/api/menu`, {
+          headers: fetchHeaders
+        });
+        if (res.ok) {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const data = await res.json();
+            rawPackages = Array.isArray(data)
+              ? data
+              : (Array.isArray(data.packages) ? data.packages : (Array.isArray(data.data) ? data.data : []));
+          }
+        }
       }
 
-      const contentType = res.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        console.warn('[Dzanis Menu] Respons API bukan JSON:', contentType);
-        return;
-      }
+      if (!rawPackages) return;
 
-      const data = await res.json();
-      const rawPackages = Array.isArray(data)
-        ? data
-        : (Array.isArray(data.packages) ? data.packages : (Array.isArray(data.data) ? data.data : []));
-
-      // Simpan ke cache sessionStorage untuk kunjungan berikutnya
+      // Simpan ke localStorage & sessionStorage untuk kunjungan berikutnya (instan 0ms)
       try {
-        sessionStorage.setItem(MENU_CACHE_KEY, JSON.stringify({
+        const cachePayload = JSON.stringify({
           timestamp: Date.now(),
           data: rawPackages
-        }));
+        });
+        localStorage.setItem(MENU_CACHE_KEY, cachePayload);
+        sessionStorage.setItem(MENU_CACHE_KEY, cachePayload);
       } catch (saveErr) {}
 
       // Filter paket katering & render hasil termutakhir
