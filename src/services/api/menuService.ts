@@ -131,11 +131,16 @@ export async function getMenuCatalog(): Promise<Paket[]> {
           ? data.data
           : [];
 
-        // Filter paket katering (selain Snack Box yang memiliki seksi tersendiri di #snack)
+        // Filter paket resmi Nasi Kotak (Hemat, Favorit, Spesial, Ayam Kampung)
+        const officialSlugs = new Set([
+          'paket-hemat-20k',
+          'paket-favorit-23k',
+          'paket-spesial-25k',
+          'paket-ayam-kampung-28k'
+        ]);
         const cateringDtos = rawPackages.filter((p) => {
-          if (!p.category) return true;
-          const cat = p.category.toLowerCase();
-          return !cat.includes('snack');
+          const s = p.slug || p.id;
+          return officialSlugs.has(s);
         });
 
         // Jika data dari backend kosong, fallback ke DAFTAR_PAKET agar SSG build selalu memiliki konten siap saji

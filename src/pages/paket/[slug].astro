@@ -17,28 +17,24 @@ export async function getStaticPaths() {
   const catalog = await getMenuCatalog();
   const allPackagesMap = new Map<string, Paket>();
 
-  // 1. Base master packages
+  // 1. Base master packages (hanya 4 paket resmi: Hemat, Favorit, Spesial, Ayam Kampung)
   for (const p of DAFTAR_PAKET) {
     allPackagesMap.set(p.slug, p);
   }
 
-  // 2. Overlay & sertakan paket baru dari database backend
+  // 2. Overlay data dari database backend khusus 4 paket resmi
   for (const p of catalog) {
-    if (!p.slug) continue;
-    const existing = allPackagesMap.get(p.slug);
-    if (existing) {
-      allPackagesMap.set(p.slug, {
-        ...existing,
-        nama: p.nama || existing.nama,
-        harga: p.harga || existing.harga,
-        badge: p.badge !== undefined ? p.badge : existing.badge,
-        foto: p.foto || existing.foto,
-        deskripsiSingkat: p.deskripsiSingkat || existing.deskripsiSingkat,
-        minOrder: p.minOrder || existing.minOrder,
-      });
-    } else {
-      allPackagesMap.set(p.slug, p);
-    }
+    if (!p.slug || !allPackagesMap.has(p.slug)) continue;
+    const existing = allPackagesMap.get(p.slug)!;
+    allPackagesMap.set(p.slug, {
+      ...existing,
+      nama: p.nama || existing.nama,
+      harga: p.harga || existing.harga,
+      badge: p.badge !== undefined ? p.badge : existing.badge,
+      foto: p.foto || existing.foto,
+      deskripsiSingkat: p.deskripsiSingkat || existing.deskripsiSingkat,
+      minOrder: p.minOrder || existing.minOrder,
+    });
   }
 
   return Array.from(allPackagesMap.values()).map((paket) => ({

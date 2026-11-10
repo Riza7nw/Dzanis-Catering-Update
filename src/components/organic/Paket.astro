@@ -767,10 +767,15 @@ const menuKatalog = await getMenuCatalog();
       };
 
       const filterKatering = (rawPkgs) => {
+        const officialSlugs = new Set([
+          'paket-hemat-20k',
+          'paket-favorit-23k',
+          'paket-spesial-25k',
+          'paket-ayam-kampung-28k'
+        ]);
         return rawPkgs.filter((p) => {
-          if (!p.category) return true;
-          const cat = String(p.category).toLowerCase();
-          return !cat.includes('snack');
+          const s = p.slug || p.id;
+          return officialSlugs.has(s);
         });
       };
 
