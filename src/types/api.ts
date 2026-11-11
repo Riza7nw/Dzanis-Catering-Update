@@ -47,6 +47,7 @@ export interface BackendMenuCatalogResponse {
   tagline?: string;
   contact?: Record<string, unknown>;
   general_policies?: Record<string, unknown>;
+  homepage_whitelist?: string[];
   packages: BackendPackageDto[];
 }
 

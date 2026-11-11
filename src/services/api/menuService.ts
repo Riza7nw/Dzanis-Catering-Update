@@ -156,16 +156,16 @@ export async function getMenuCatalog(): Promise<Paket[]> {
           ? data.data
           : [];
 
-        // Filter paket resmi Nasi Kotak (Hemat, Favorit, Spesial, Ayam Kampung)
-        const officialSlugs = new Set([
-          'paket-hemat-20k',
-          'paket-favorit-23k',
-          'paket-spesial-25k',
-          'paket-ayam-kampung-28k'
-        ]);
+        // Filter paket beranda dinamis: dikontrol penuh via Admin Panel (whitelist dinamis)
+        const rawWhitelist: string[] = Array.isArray(data?.homepage_whitelist) ? data.homepage_whitelist : [];
+        const whitelistSet = rawWhitelist.length > 0 ? new Set(rawWhitelist) : null;
         const cateringDtos = rawPackages.filter((p) => {
-          const s = p.slug || p.id;
-          return officialSlugs.has(s);
+          const isCatering = !String(p.category || '').toLowerCase().includes('snack');
+          const isActive = p.is_active === undefined || Boolean(p.is_active);
+          const s = p.slug || p.id || '';
+          if (!isCatering || !isActive) return false;
+          if (whitelistSet) return whitelistSet.has(s) || (p.id && whitelistSet.has(p.id));
+          return true;
         });
 
         // Jika data dari backend kosong, fallback ke DAFTAR_PAKET agar SSG build selalu memiliki konten siap saji

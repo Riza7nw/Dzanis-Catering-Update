@@ -766,16 +766,17 @@ const menuKatalog = await getMenuCatalog();
         }
       };
 
-      const filterKatering = (rawPkgs) => {
-        const officialSlugs = new Set([
-          'paket-hemat-20k',
-          'paket-favorit-23k',
-          'paket-spesial-25k',
-          'paket-ayam-kampung-28k'
-        ]);
+      const filterKatering = (rawPkgs, whitelistArr) => {
+        const wlSet = Array.isArray(whitelistArr) && whitelistArr.length > 0
+          ? new Set(whitelistArr)
+          : null;
         return rawPkgs.filter((p) => {
-          const s = p.slug || p.id;
-          return officialSlugs.has(s);
+          const isCatering = !String(p.category || '').toLowerCase().includes('snack');
+          const isActive = p.is_active === undefined || Boolean(p.is_active);
+          const s = p.slug || p.id || '';
+          if (!isCatering || !isActive) return false;
+          if (wlSet) return wlSet.has(s) || (p.id && wlSet.has(p.id));
+          return true;
         });
       };
 
@@ -785,7 +786,8 @@ const menuKatalog = await getMenuCatalog();
         if (cachedRaw) {
           const cachedObj = JSON.parse(cachedRaw);
           if (Array.isArray(cachedObj?.data) && cachedObj.data.length > 0) {
-            const cachedKatering = filterKatering(cachedObj.data);
+            const cachedWhitelist = Array.isArray(cachedObj?.whitelist) ? cachedObj.whitelist : null;
+            const cachedKatering = filterKatering(cachedObj.data, cachedWhitelist);
             if (cachedKatering.length > 0) {
               renderKateringPackages(cachedKatering, apiUrl);
             }
@@ -809,6 +811,7 @@ const menuKatalog = await getMenuCatalog();
 
       // 3. Manfaatkan early prefetch dari <head> jika sudah ada
       let rawPackages = null;
+      let homepageWhitelist = null;
       if (window.__DZANIS_MENU_PROMISE__) {
         try {
           const preloaded = await window.__DZANIS_MENU_PROMISE__;
@@ -816,6 +819,9 @@ const menuKatalog = await getMenuCatalog();
             rawPackages = Array.isArray(preloaded)
               ? preloaded
               : (Array.isArray(preloaded.packages) ? preloaded.packages : (Array.isArray(preloaded.data) ? preloaded.data : null));
+            if (!Array.isArray(preloaded) && Array.isArray(preloaded.homepage_whitelist)) {
+              homepageWhitelist = preloaded.homepage_whitelist;
+            }
           }
         } catch (pe) {}
       }
@@ -839,6 +845,9 @@ const menuKatalog = await getMenuCatalog();
             rawPackages = Array.isArray(data)
               ? data
               : (Array.isArray(data.packages) ? data.packages : (Array.isArray(data.data) ? data.data : []));
+            if (!Array.isArray(data) && Array.isArray(data.homepage_whitelist)) {
+              homepageWhitelist = data.homepage_whitelist;
+            }
           }
         }
       }
@@ -849,14 +858,15 @@ const menuKatalog = await getMenuCatalog();
       try {
         const cachePayload = JSON.stringify({
           timestamp: Date.now(),
-          data: rawPackages
+          data: rawPackages,
+          whitelist: homepageWhitelist
         });
         localStorage.setItem(MENU_CACHE_KEY, cachePayload);
         sessionStorage.setItem(MENU_CACHE_KEY, cachePayload);
       } catch (saveErr) {}
 
       // Filter paket katering & render hasil termutakhir
-      const packages = filterKatering(rawPackages);
+      const packages = filterKatering(rawPackages, homepageWhitelist);
       renderKateringPackages(packages, apiUrl);
     } catch (err) {
       console.warn('[Dzanis Menu] Gagal sinkronisasi menu:', err);
