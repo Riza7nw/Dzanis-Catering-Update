@@ -2,8 +2,7 @@
 import {
   MIN_BOX,
 } from '../../data/snack';
-import { getSnackTemplates, getSnackCatalog } from '../../services/api/menuService';
-import SnackTemplateCarousel from '../snack/SnackTemplateCarousel.astro';
+import { getSnackCatalog } from '../../services/api/menuService';
 import SnackCategoryNav from '../snack/SnackCategoryNav.astro';
 import SnackCatalogGrid from '../snack/SnackCatalogGrid.astro';
 import SnackBuilderBar from '../snack/SnackBuilderBar.astro';
@@ -11,7 +10,6 @@ import LargeOrderNotice from '../interactive/LargeOrderNotice.astro';
 
 const snackKategori = await getSnackCatalog();
 const totalSnackItems = snackKategori.reduce((sum, cat) => sum + cat.items.length, 0);
-const snackTemplates = await getSnackTemplates();
 ---
 
 <section id="rakit" class="px-[var(--space-4)] pt-8 sm:pt-12 pb-12 lg:px-14 lg:py-20 bg-surface/60 w-full max-w-full min-w-0 overflow-x-clip">
@@ -22,25 +20,20 @@ const snackTemplates = await getSnackTemplates();
         Interactive Snack Experience
       </span>
       <h1 class="font-heading text-[32px] leading-tight lg:text-[52px] lg:leading-[1] text-neutral-900 uppercase">
-        Pemesanan Snack Box
+        Rakit Snack Box Custom
       </h1>
       <p class="mt-3 max-w-2xl text-[16px] leading-relaxed text-neutral-800">
-        Pilih paket template favorit dengan kolom isian fleksibel, atau rancang sendiri snack box impian dari {totalSnackItems} pilihan jajanan higienis.
+        Rancang sendiri snack box impian dari <span id="total-snack-counter">{totalSnackItems}</span> pilihan jajanan higienis dengan kalkulasi harga langsung otomatis.
       </p>
     </div>
 
-    <!-- ================= PANEL 1: PAKET TEMPLATE & KUSTOMISASI KOLOM ================= -->
-    <div id="template" class="scroll-mt-20"></div>
-    <SnackTemplateCarousel snackTemplates={snackTemplates} totalSnackItems={totalSnackItems} />
-
-    <!-- ================= PANEL 2: BUILDER CUSTOM DARI NOL ================= -->
-    <div id="custom" class="scroll-mt-20"></div>
-    <div id="panel-custom" class="mt-10 lg:mt-12 space-y-8 w-full max-w-full min-w-0">
+    <!-- ================= BUILDER CUSTOM DARI NOL ================= -->
+    <div id="panel-custom" class="w-full max-w-full min-w-0">
       <div id="snack-builder" class="rounded-[32px] border border-divider bg-bg p-6 lg:p-10 shadow-[var(--shadow-lg)] w-full max-w-full min-w-0">
         <!-- Portion & Box Settings Bar -->
         <div class="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-divider pb-6">
           <div>
-            <h2 class="font-heading text-2xl text-neutral-900">Rakit Custom Sendiri dari Nol</h2>
+            <h2 class="font-heading text-2xl text-neutral-900">Pilih Komposisi Jajanan</h2>
             <p class="text-xs text-neutral-600 mt-1">Centang jajanan yang ingin dimasukkan ke dalam setiap box secara bebas.</p>
           </div>
           <div class="flex items-center gap-3 bg-surface px-4 py-2 rounded-full border border-divider">
