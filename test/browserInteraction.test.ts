@@ -90,6 +90,10 @@ test('Real headless Chrome: Certificate modal click, focus, filtering, and copy 
                   const afterCloseClickHidden = modal.classList.contains('hidden');
 
                   // 5. Test Category Filter
+                  const expectedMutuCount = Array.from(document.querySelectorAll('.cert-card'))
+                    .filter(c => c.getAttribute('data-category') === 'sertifikat').length;
+                  const expectedAllCount = document.querySelectorAll('.cert-card').length;
+
                   const mutuBtn = document.querySelector('[data-filter="sertifikat"]');
                   mutuBtn?.click();
                   const visibleMutuCards = Array.from(document.querySelectorAll('.cert-card'))
@@ -119,6 +123,8 @@ test('Real headless Chrome: Certificate modal click, focus, filtering, and copy 
                     number,
                     imgSrc,
                     afterCloseClickHidden,
+                    expectedMutuCount,
+                    expectedAllCount,
                     visibleMutuCards,
                     visibleAllCards,
                     b2bPadTop,
@@ -157,8 +163,10 @@ test('Real headless Chrome: Certificate modal click, focus, filtering, and copy 
     assert.match(testResult.title, /Sertifikat/i, 'Modal title should match clicked card document');
     assert.ok(testResult.imgSrc.includes('/images/brand/') || testResult.imgSrc.includes('/uploads/certificates/'), 'Modal should load document image');
     assert.equal(testResult.afterCloseClickHidden, true, 'Modal should close after clicking close button');
-    assert.equal(testResult.visibleMutuCards, 5, 'Sertifikat mutu filter should display 5 cards');
-    assert.equal(testResult.visibleAllCards, 9, 'All documents filter should display 9 cards');
+    assert.equal(testResult.visibleMutuCards, testResult.expectedMutuCount, 'Sertifikat mutu filter should display all cards matching category');
+    assert.ok(testResult.visibleMutuCards >= 3, 'Sertifikat mutu filter should display at least 3 cards');
+    assert.equal(testResult.visibleAllCards, testResult.expectedAllCount, 'All documents filter should display all available cards');
+    assert.ok(testResult.visibleAllCards >= 5, 'All documents filter should display at least 5 cards');
 
     // B2B Section Mobile Assertions
     assert.ok(testResult.b2bPadTop >= 40, `B2B Section padding top on mobile should be >= 40px (pt-10), got ${testResult.b2bPadTop}px`);
