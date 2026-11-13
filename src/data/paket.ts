@@ -223,7 +223,7 @@ export const DAFTAR_PAKET: Paket[] = [
       "Sendok, Tusuk Gigi & Tisu Steril",
     ],
     foto: "/images/menu/paket-25k.webp",
-    fotoAlt: "Paket Nasi Ayam Kampung 28k Dzanis Catering",
+    fotoAlt: "Paket katering nasi kotak ayam kampung Dzanis Catering Ciayumajakuning",
     // Menu selection: 1 Main Menu, 2-3 Side Dishes dari POOL_LAUK_25K_28K
     canSelectMainMenu: true,
     selectableMainMenus: [

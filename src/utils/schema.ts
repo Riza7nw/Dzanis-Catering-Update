@@ -20,7 +20,7 @@ export function generateWebSiteSchema(siteUrl: string = DEFAULT_SITE_URL) {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Dzanis Catering",
-    alternateName: ["Dzanis Catering Majalengka", "Dzanis"],
+    alternateName: ["Dzanis Katering", "Dzanis Catering Ciayumajakuning"],
     url: `${site}/`,
   };
 }
@@ -29,7 +29,7 @@ export const webSiteSchema = generateWebSiteSchema();
 
 /**
  * Menghasilkan JSON-LD schema FoodEstablishment dengan nested Menu (hasMenu)
- * untuk halaman utama (index.astro).
+ * dan OfferCatalog lengkap untuk seluruh lini layanan di halaman utama (index.astro).
  */
 export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_URL, menuItems?: Paket[]) {
   const site = siteUrl.replace(/\/$/, '');
@@ -39,11 +39,11 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
 
   return {
     "@context": "https://schema.org",
-    "@type": "FoodEstablishment",
+    "@type": ["FoodEstablishment", "CateringService"],
     "@id": `${site}/#organization`,
     name: company.name,
     legalName: company.name,
-    description: company.description,
+    description: "Dzanis Catering adalah penyedia jasa catering & katering terpercaya di Ciayumajakuning (Kabupaten Majalengka, Cirebon, Indramayu, Kuningan). Melayani prasmanan kantor & acara, paket nasi box (nasi kotak), snack box custom, nasi tumpeng, hingga paket konsumsi syukuran dan harian dengan sajian higienis serta cita rasa khas masakan rumahan.",
     url: site,
     telephone: formattedPhone,
     priceRange: "Rp20.000 - Rp75.000",
@@ -66,6 +66,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
       longitude: 108.2277
     },
     areaServed: [
+      { "@type": "AdministrativeArea", name: "Ciayumajakuning" },
       { "@type": "AdministrativeArea", name: "Majalengka" },
       { "@type": "AdministrativeArea", name: "Cirebon" },
       { "@type": "AdministrativeArea", name: "Indramayu" },
@@ -87,6 +88,88 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
         closes: "21:00"
       }
     ],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Layanan Lengkap Dzanis Catering & Katering Ciayumajakuning",
+      itemListElement: [
+        {
+          "@type": "OfferCatalog",
+          name: "Layanan Prasmanan / Buffet Acara",
+          itemListElement: [
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Paket Prasmanan Kantor, Resepsi & Syukuran",
+                description: "Layanan jamuan prasmanan higienis siap saji lengkap dengan peralatan pemanas (chafing dish), piring keramik, dan waiter untuk rapat kerja, seminar, resepsi pernikahan, dan syukuran di Majalengka & Ciayumajakuning."
+              },
+              price: "45000",
+              priceCurrency: "IDR"
+            }
+          ]
+        },
+        {
+          "@type": "OfferCatalog",
+          name: "Paket Nasi Kotak (Nasi Box)",
+          itemListElement: [
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Paket Nasi Kotak Higienis",
+                description: "Pilihan menu nasi kotak mulai Rp20.000 dengan lauk olahan ayam, olahan daging sapi, lauk pendamping kustom, dan alat makan steril untuk acara kantor dan syukuran."
+              },
+              price: "20000",
+              priceCurrency: "IDR"
+            }
+          ]
+        },
+        {
+          "@type": "OfferCatalog",
+          name: "Paket Snack Box Acara",
+          itemListElement: [
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Snack Box Custom & Coffeebreak",
+                description: "Aneka pilihan kue basah, jajanan pasar, puff & pastry, serta puding higienis mulai Rp2.000/biji untuk kebutuhan coffeebreak rapat dan seminar."
+              },
+              price: "2000",
+              priceCurrency: "IDR"
+            }
+          ]
+        },
+        {
+          "@type": "OfferCatalog",
+          name: "Nasi Tumpeng & Paket Syukuran",
+          itemListElement: [
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Nasi Tumpeng Tradisional & Tumpeng Mini",
+                description: "Sajian nasi tumpeng kuning tampah hias komplit dan tumpeng mini untuk syukuran, selamatan rumah, peresmian kantor, dan ulang tahun di Majalengka & Ciayumajakuning."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OfferCatalog",
+          name: "Paket Acara & Katering Harian",
+          itemListElement: [
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Katering Acara Kantor, Hajatan & Harian",
+                description: "Solusi konsumsi terpadu untuk acara kantor, hajatan keluarga, corporate gathering, dan kebutuhan katering makan harian institusi."
+              }
+            }
+          ]
+        }
+      ]
+    },
     hasMenu: {
       "@type": "Menu",
       name: "Daftar Menu & Layanan Dzanis Catering",

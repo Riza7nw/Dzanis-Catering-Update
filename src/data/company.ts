@@ -61,9 +61,9 @@ export const company: Company = {
   logo: "/images/brand/dzanis-logo.png",
   logoLight: "/images/brand/dzanis-logo-light.png",
   mark: "/images/brand/dzanis-mark.png",
-  tagline: "Katering rumahan Majalengka",
+  tagline: "Jasa Catering & Katering Ciayumajakuning",
   description:
-    "Dzanis Catering melayani jasa katering rumahan, nasi kotak, dan snack box higienis di Majalengka & Ciayumajakuning. Pesan menu lezat dan hemat sekarang!",
+    "Jasa catering & katering Majalengka dan Ciayumajakuning. Sedia prasmanan acara kantor, nasi kotak, snack box, hingga tumpeng. Pesan menu lezat sekarang!",
 
   /**
    * Nomor kontak WhatsApp sekunder khusus untuk konsultasi menu dan porsi custom,
