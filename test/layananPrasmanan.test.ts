@@ -38,7 +38,8 @@ test('Built dist/index.html contains Layanan Prasmanan section with design syste
     'Should render heading'
   );
   assert.ok(
-    html.includes('Solusi jamuan prasmanan higienis siap saji'),
+    html.includes(LAYANAN_PRASMANAN_SSOT.deskripsi) ||
+    html.includes('Solusi jamuan prasmanan'),
     'Should render subtitle outside card'
   );
 

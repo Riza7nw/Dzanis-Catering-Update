@@ -89,7 +89,7 @@ test('SSOT DAFTAR_PAKET: contains exactly 4 packages with correct properties', (
   assert.equal(p28k.sideDishesSelectMax, 3);
   assert.deepEqual(p28k.selectableSideDishes, POOL_LAUK_25K_28K);
   assert.equal(p28k.foto, '/images/menu/paket-25k.webp');
-  assert.equal(p28k.fotoAlt, 'Paket Nasi Ayam Kampung 28k Dzanis Catering');
+  assert.equal(p28k.fotoAlt, 'Paket katering nasi kotak ayam kampung Dzanis Catering Ciayumajakuning');
 });
 
 test('Master Pool Constants: verify item counts and pool content', () => {
