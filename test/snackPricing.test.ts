@@ -485,3 +485,154 @@ test('Interactive Headless Chrome: /rakit-snack-box/ custom builder calculation 
     server.close();
   }
 });
+
+test('Dynamic Backend Reconciliation: Live update of items, status, deletion, category changes, and new categories', async () => {
+  const distDir = path.resolve('dist');
+  assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
+
+  const mockSnackItems = [
+    { name: 'Kue Sus Vanilla', category: 'Puff & Pastry', price: 3000, is_active: 1 },
+    { name: 'Kue Sus Coklat', category: 'Aneka Cake', price: 3200, is_active: 1 }, // Kategori berubah dari Puff & Pastry ke Aneka Cake
+    { name: 'Pie Susu', category: 'Puff & Pastry', price: 3000, is_active: 0 }, // Dinonaktifkan (Habis)
+    // 'Bolen Pisang' dihapus (tidak ada di list)
+    { name: 'Es Teh Manis Segar', category: 'Minuman Segar', price: 2500, is_active: 1 }, // Kategori baru & item baru
+  ];
+
+  const server = http.createServer((req, res) => {
+    // Mock endpoint /api/snack-items
+    if (req.url && req.url.includes('/api/snack-items')) {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.end(
+        JSON.stringify({
+          success: true,
+          total: mockSnackItems.length,
+          items: mockSnackItems,
+        })
+      );
+    }
+
+    let reqPath = (req.url || '/').split('?')[0];
+    if (reqPath.endsWith('/')) reqPath += 'index.html';
+    let filePath = path.join(distDir, reqPath);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(filePath, 'index.html');
+    }
+    if (!fs.existsSync(filePath)) {
+      res.statusCode = 404;
+      return res.end('Not found');
+    }
+    const ext = path.extname(filePath);
+    const mimeMap: Record<string, string> = {
+      '.html': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.png': 'image/png',
+      '.svg': 'image/svg+xml',
+    };
+    res.setHeader('Content-Type', mimeMap[ext] || 'application/octet-stream');
+    fs.createReadStream(filePath).pipe(res);
+  });
+
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const port = (server.address() as AddressInfo).port;
+  const baseUrl = `http://127.0.0.1:${port}/rakit-snack-box/?apiUrl=http://127.0.0.1:${port}`;
+
+  const chromeDebugPort = port + 1000;
+  const chrome = spawn('google-chrome', [
+    '--headless=new',
+    `--remote-debugging-port=${chromeDebugPort}`,
+    `--user-data-dir=/tmp/chrome-test-suite-${port}`,
+    '--window-size=1280,800',
+    baseUrl,
+  ]);
+
+  await new Promise((r) => setTimeout(r, 1500));
+
+  try {
+    const listRes = await fetch(`http://127.0.0.1:${chromeDebugPort}/json`);
+    const tabs = await listRes.json();
+    const targetTab = tabs.find((t: any) => t.url.includes('rakit-snack-box')) || tabs[0];
+    const ws = new WebSocket(targetTab.webSocketDebuggerUrl);
+
+    const result = await new Promise<any>((resolve, reject) => {
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ id: 1, method: 'Page.enable' }));
+      };
+
+      ws.onmessage = (msg: any) => {
+        const data = JSON.parse(msg.data.toString());
+        if (data.id === 1) {
+          setTimeout(() => {
+            ws.send(
+              JSON.stringify({
+                id: 2,
+                method: 'Runtime.evaluate',
+                params: {
+                  expression: `
+                  (() => {
+                    // 1. Cek penghapusan item (Bolen Pisang harus sudah tidak ada di DOM)
+                    const bolenCard = document.querySelector('[data-snack-card="Bolen Pisang"]');
+                    const isBolenRemoved = bolenCard === null;
+
+                    // 2. Cek status nonaktif (Pie Susu harus disabled & teks Habis)
+                    const pieCb = document.querySelector('input[data-nama="Pie Susu"]');
+                    const isPieDisabled = pieCb ? pieCb.disabled : false;
+                    const pieLabel = pieCb?.closest('label')?.querySelector('.snack-item-price')?.textContent?.trim();
+
+                    // 3. Cek perubahan kategori (Kue Sus Coklat harus pindah ke Aneka Cake)
+                    const susCoklatCard = document.querySelector('[data-snack-card="Kue Sus Coklat"]');
+                    const susCoklatGrid = susCoklatCard?.closest('[data-category-grid]');
+                    const susCoklatCategory = susCoklatGrid?.getAttribute('data-category-grid');
+
+                    // 4. Cek penambahan kategori dan item baru (Minuman Segar -> Es Teh Manis Segar)
+                    const newCatBtn = document.querySelector('[data-category-target="Minuman Segar"]');
+                    const newCatGrid = document.querySelector('[data-category-grid="Minuman Segar"]');
+                    const esTehCard = document.querySelector('[data-snack-card="Es Teh Manis Segar"]');
+
+                    // 5. Cek total active counter
+                    const totalCounter = document.getElementById('total-snack-counter')?.textContent?.trim();
+
+                    return JSON.stringify({
+                      isBolenRemoved,
+                      isPieDisabled,
+                      pieLabel,
+                      susCoklatCategory,
+                      hasNewCatBtn: Boolean(newCatBtn),
+                      hasNewCatGrid: Boolean(newCatGrid),
+                      hasEsTehCard: Boolean(esTehCard),
+                      totalCounter,
+                    });
+                  })()
+                  `,
+                },
+              })
+            );
+          }, 800);
+        }
+
+        if (data.id === 2) {
+          if (data.result.exceptionDetails) {
+            reject(new Error(JSON.stringify(data.result.exceptionDetails)));
+          } else {
+            resolve(JSON.parse(data.result.result.value));
+          }
+        }
+      };
+
+      ws.onerror = (err) => reject(err);
+    });
+
+    assert.equal(result.isBolenRemoved, true, 'Item yang dihapus di backend harus otomatis hilang dari DOM');
+    assert.equal(result.isPieDisabled, true, 'Item yang dinonaktifkan di backend harus disabled di DOM');
+    assert.ok(result.pieLabel?.includes('Habis'), 'Label harga item nonaktif harus memuat tanda (Habis)');
+    assert.equal(result.susCoklatCategory, 'Aneka Cake', 'Item yang kategorinya diubah harus berpindah ke grid kategori yang benar');
+    assert.equal(result.hasNewCatBtn, true, 'Kategori baru dari backend harus dibuatkan tombol filter tab');
+    assert.equal(result.hasNewCatGrid, true, 'Kategori baru dari backend harus dibuatkan block dan grid');
+    assert.equal(result.hasEsTehCard, true, 'Item baru dari backend harus dirender di dalam grid kategori baru');
+    assert.equal(result.totalCounter, '3', 'Total counter harus mencerminkan 3 item aktif (Kue Sus Vanilla, Kue Sus Coklat, Es Teh Manis Segar)');
+  } finally {
+    chrome.kill();
+    server.close();
+  }
+});
