@@ -106,6 +106,7 @@ export interface BackendSnackItemDto {
 }
 
 export interface BackendSnackResponse {
+  success?: boolean;
   items: BackendSnackItemDto[];
   categories?: Record<string, BackendSnackItemDto[]>;
   total?: number;

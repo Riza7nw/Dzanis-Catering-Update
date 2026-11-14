@@ -387,7 +387,7 @@ async function syncSnackCatalogFromBackend(
   // 2. Fetch data termutakhir dari backend (Bypass Cache Browser dengan no-cache & timestamp unik)
   try {
     const headers: Record<string, string> = {
-      ...getCommonApiHeaders(),
+      ...(getCommonApiHeaders(apiBase) as Record<string, string>),
       Accept: 'application/json',
     };
     if (apiBase.includes('ngrok')) {
@@ -529,11 +529,10 @@ export function initSnackBoxPage(): (() => void) | null {
         .map((btn) => btn.dataset.categoryTarget || '')
         .filter((t) => t && t !== 'all');
 
-      let activeBtn: HTMLButtonElement | null = null;
+      const activeBtn = Array.from(buttons).find((btn) => btn.dataset.categoryTarget === target);
       buttons.forEach((btn) => {
         const isMatch = btn.dataset.categoryTarget === target;
         btn.setAttribute('aria-pressed', isMatch ? 'true' : 'false');
-        if (isMatch) activeBtn = btn;
       });
 
       activeBtn?.scrollIntoView({ inline: 'center', block: 'nearest', behavior });

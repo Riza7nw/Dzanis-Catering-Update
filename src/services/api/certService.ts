@@ -48,8 +48,8 @@ export const defaultShowcaseCertificates: ShowcaseCertificateItem[] = [
     date: 'Aktif Berlaku',
     badge: 'DINKES SLHS',
     category: 'sertifikat',
-    documentUrl: '/images/brand/halal-cert.png',
-    docUrl: '/images/brand/halal-cert.png',
+    documentUrl: '',
+    docUrl: '',
     fileType: 'image',
     isActive: true,
   },
@@ -63,8 +63,8 @@ export const defaultShowcaseCertificates: ShowcaseCertificateItem[] = [
     date: 'Aktif Berlaku',
     badge: 'K3 PANGAN',
     category: 'sertifikat',
-    documentUrl: '/images/brand/halal-cert.png',
-    docUrl: '/images/brand/halal-cert.png',
+    documentUrl: '',
+    docUrl: '',
     fileType: 'image',
     isActive: true,
   },
@@ -78,8 +78,8 @@ export const defaultShowcaseCertificates: ShowcaseCertificateItem[] = [
     date: 'Aktif Permanen',
     badge: 'NIB RESMI',
     category: 'sertifikat',
-    documentUrl: '/images/brand/halal-cert.png',
-    docUrl: '/images/brand/halal-cert.png',
+    documentUrl: '',
+    docUrl: '',
     fileType: 'image',
     isActive: true,
   },
@@ -93,8 +93,8 @@ export const defaultShowcaseCertificates: ShowcaseCertificateItem[] = [
     date: 'Teruji Lab',
     badge: 'UJI LAB',
     category: 'sertifikat',
-    documentUrl: '/images/brand/halal-cert.png',
-    docUrl: '/images/brand/halal-cert.png',
+    documentUrl: '',
+    docUrl: '',
     fileType: 'image',
     isActive: true,
   },
@@ -112,8 +112,8 @@ export const defaultLegalDocuments: LegalCardItem[] = [
     badge: 'Legal',
     status: 'Legal',
     category: 'legalitas',
-    documentUrl: '/images/brand/halal-cert.png',
-    document_url: '/images/brand/halal-cert.png',
+    documentUrl: '',
+    document_url: '',
     fileType: 'image',
     file_type: 'image',
     isActive: true,
@@ -129,8 +129,8 @@ export const defaultLegalDocuments: LegalCardItem[] = [
     badge: 'Sanitasi',
     status: 'Sanitasi',
     category: 'legalitas',
-    documentUrl: '/images/brand/halal-cert.png',
-    document_url: '/images/brand/halal-cert.png',
+    documentUrl: '',
+    document_url: '',
     fileType: 'image',
     file_type: 'image',
     isActive: true,
@@ -146,8 +146,8 @@ export const defaultLegalDocuments: LegalCardItem[] = [
     badge: 'Uji Lab',
     status: 'Uji Lab',
     category: 'legalitas',
-    documentUrl: '/images/brand/halal-cert.png',
-    document_url: '/images/brand/halal-cert.png',
+    documentUrl: '',
+    document_url: '',
     fileType: 'image',
     file_type: 'image',
     isActive: true,
@@ -163,8 +163,8 @@ export const defaultLegalDocuments: LegalCardItem[] = [
     badge: 'Dokumen',
     status: 'Dokumen',
     category: 'legalitas',
-    documentUrl: '/images/brand/halal-cert.png',
-    document_url: '/images/brand/halal-cert.png',
+    documentUrl: '',
+    document_url: '',
     fileType: 'image',
     file_type: 'image',
     isActive: true,
@@ -178,8 +178,31 @@ function normalizeCertDto(dto: BackendCertDto, index = 0): ShowcaseCertificateIt
   const validUntil = dto.valid_until || dto.date || '-';
   const category = (dto.category || 'sertifikat').toLowerCase() === 'legalitas' ? 'legalitas' : 'sertifikat';
   const badge = dto.badge || (category === 'sertifikat' ? 'RESMI' : 'LEGAL');
-  const docUrl = dto.document_url || '/images/brand/halal-cert.png';
-  const fileType: 'image' | 'pdf' = dto.file_type === 'pdf' || docUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image';
+  const isHalal = badge.toLowerCase().includes('halal') || title.toLowerCase().includes('halal');
+  let docUrl = dto.document_url || '';
+  if (typeof docUrl === 'string' && docUrl.trim().length > 0) {
+    if (docUrl.startsWith('uploads/')) {
+      docUrl = '/' + docUrl;
+    }
+    if (docUrl.startsWith('/uploads/')) {
+      const apiBase = getApiBaseUrl();
+      docUrl = `${apiBase}${docUrl}`;
+    }
+  } else if (isHalal) {
+    docUrl = '/images/brand/halal-cert.png';
+  } else {
+    docUrl = '';
+  }
+  if (typeof docUrl === 'string') {
+    if (docUrl.startsWith('uploads/')) {
+      docUrl = '/' + docUrl;
+    }
+    if (docUrl.startsWith('/uploads/')) {
+      const apiBase = getApiBaseUrl();
+      docUrl = `${apiBase}${docUrl}`;
+    }
+  }
+  const fileType: 'image' | 'pdf' = dto.file_type === 'pdf' || (typeof docUrl === 'string' && docUrl.toLowerCase().endsWith('.pdf')) ? 'pdf' : 'image';
 
   return {
     id: dto.id || index + 1,

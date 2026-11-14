@@ -10,83 +10,188 @@ interface Props {
 
 const { certificates = [], legalDocuments = [], publicApiUrl = '' } = Astro.props;
 
-// Combine into unified list with clear categories
+// Combine into unified list with clear categories and normalized asset URLs
 const allDocuments = [
-  ...certificates.map(item => ({
-    id: String(item.id),
-    title: item.title,
-    issuer: item.issuer,
-    certNumber: item.certNumber || item.no,
-    validUntil: item.validUntil || item.date,
-    badge: item.badge || 'RESMI',
-    category: 'sertifikat',
-    categoryLabel: 'Sertifikasi Mutu & Halal',
-    documentUrl: item.documentUrl || item.docUrl || '/images/brand/halal-cert.png',
-    fileType: item.fileType || 'image',
-    detail: `Dokumen sah diterbitkan oleh ${item.issuer}. Keaslian dapat diverifikasi langsung melalui nomor registrasi resmi.`
-  })),
-  ...legalDocuments.map(item => ({
-    id: String(item.id),
-    title: item.label || item.title,
-    issuer: item.issuer,
-    certNumber: item.certNumber || '-',
-    validUntil: item.validUntil || 'Aktif',
-    badge: item.status || item.badge || 'LEGAL',
-    category: 'legalitas',
-    categoryLabel: 'Legalitas Usaha & Pajak',
-    documentUrl: item.document_url || item.documentUrl || '/images/brand/halal-cert.png',
-    fileType: item.file_type || item.fileType || 'image',
-    detail: item.detail || `Legalitas resmi operasional Dzanis Catering untuk jaminan kepatuhan hukum.`
-  }))
+  ...certificates.map(item => {
+    let docUrl = item.documentUrl || item.docUrl || '';
+    if (typeof docUrl === 'string' && docUrl.trim().length > 0) {
+      if (docUrl.startsWith('uploads/')) docUrl = '/' + docUrl;
+      if (docUrl.startsWith('/uploads/')) {
+        const base = publicApiUrl || 'https://dzaniez-back.ethiodeploy.app';
+        docUrl = `${base}${docUrl}`;
+      }
+    }
+    return {
+      id: String(item.id),
+      title: item.title,
+      issuer: item.issuer,
+      certNumber: item.certNumber || item.no,
+      validUntil: item.validUntil || item.date,
+      badge: item.badge || 'RESMI',
+      category: 'sertifikat',
+      categoryLabel: 'Sertifikasi Mutu & Halal',
+      documentUrl: docUrl,
+      fileType: item.fileType || 'image',
+      detail: `Dokumen sah diterbitkan oleh ${item.issuer}. Keaslian dapat diverifikasi langsung melalui nomor registrasi resmi.`
+    };
+  }),
+  ...legalDocuments.map(item => {
+    let docUrl = item.document_url || item.documentUrl || '';
+    if (typeof docUrl === 'string' && docUrl.trim().length > 0) {
+      if (docUrl.startsWith('uploads/')) docUrl = '/' + docUrl;
+      if (docUrl.startsWith('/uploads/')) {
+        const base = publicApiUrl || 'https://dzaniez-back.ethiodeploy.app';
+        docUrl = `${base}${docUrl}`;
+      }
+    }
+    return {
+      id: String(item.id),
+      title: item.label || item.title,
+      issuer: item.issuer,
+      certNumber: item.certNumber || '-',
+      validUntil: item.validUntil || 'Aktif',
+      badge: item.status || item.badge || 'LEGAL',
+      category: 'legalitas',
+      categoryLabel: 'Legalitas Usaha & Pajak',
+      documentUrl: docUrl,
+      fileType: item.file_type || item.fileType || 'image',
+      detail: item.detail || `Legalitas resmi operasional Dzanis Catering untuk jaminan kepatuhan hukum.`
+    };
+  })
 ];
+
+function getDocVisual(doc: { badge: string; title: string }) {
+  const b = (doc.badge || '').toLowerCase();
+  const t = (doc.title || '').toLowerCase();
+
+  if (b.includes('slhs') || t.includes('slhs') || t.includes('laik') || t.includes('higiene') || t.includes('sanitasi')) {
+    return {
+      type: 'slhs',
+      header: 'PEMKAB MAJALENGKA',
+      subHeader: 'DINAS KESEHATAN KAB. MAJALENGKA',
+      docType: 'SERTIFIKAT LAIK HIGIENE SANITASI',
+      subDocType: 'Jasaboga Golongan A2 / Catering Resmi',
+      accentColor: 'text-emerald-900',
+      tagText: 'KESEHATAN',
+      tagClass: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      stampText: 'LAIK HIGIENE RESMI',
+      stampBorder: 'border-emerald-700 text-emerald-800 bg-emerald-50/90',
+      bgTheme: 'from-emerald-50/70 via-white to-surface/90',
+      iconEmoji: '🛡️'
+    };
+  }
+  if (b.includes('k3') || t.includes('penjamah') || t.includes('k3')) {
+    return {
+      type: 'k3',
+      header: 'STANDAR K3 & MUTU PANGAN',
+      subHeader: 'BALAI PELATIHAN & KOMPETENSI',
+      docType: 'SERTIFIKAT PENJAMAH MAKANAN',
+      subDocType: 'Higiene Sanitasi Pengolahan Dapur',
+      accentColor: 'text-amber-900',
+      tagText: 'K3 PANGAN',
+      tagClass: 'bg-amber-100 text-amber-800 border-amber-300',
+      stampText: 'KOMPETEN & SAH',
+      stampBorder: 'border-amber-700 text-amber-800 bg-amber-50/90',
+      bgTheme: 'from-amber-50/70 via-white to-surface/90',
+      iconEmoji: '⭐'
+    };
+  }
+  if (b.includes('nib') || b.includes('legal') || t.includes('nib') || t.includes('izin')) {
+    return {
+      type: 'nib',
+      header: 'REPUBLIK INDONESIA',
+      subHeader: 'KEMENTERIAN INVESTASI / BKPM',
+      docType: 'NOMOR INDUK BERUSAHA (NIB)',
+      subDocType: 'KBLI 56210 • Jasa Boga Event Tertentu',
+      accentColor: 'text-neutral-900',
+      tagText: 'OSS RBA',
+      tagClass: 'bg-neutral-200/80 text-neutral-800 border-neutral-300',
+      stampText: 'OSS RBA AKTIF',
+      stampBorder: 'border-neutral-700 text-neutral-800 bg-neutral-100/90',
+      bgTheme: 'from-stone-100/70 via-white to-surface/90',
+      iconEmoji: '⚖️'
+    };
+  }
+  if (b.includes('lab') || t.includes('lab') || t.includes('uji') || t.includes('mikro')) {
+    return {
+      type: 'lab',
+      header: 'LABKESDA & KEAMANAN PANGAN',
+      subHeader: 'PENGUJIAN MUTU AIR & MIKROBIOLOGI',
+      docType: 'HASIL UJI LABORATORIUM RESMI',
+      subDocType: 'Bebas Cemaran Kimia & Bakteri Patogen',
+      accentColor: 'text-teal-900',
+      tagText: 'TERUJI LAB',
+      tagClass: 'bg-teal-100 text-teal-800 border-teal-300',
+      stampText: 'MEMENUHI SYARAT',
+      stampBorder: 'border-teal-700 text-teal-800 bg-teal-50/90',
+      bgTheme: 'from-teal-50/70 via-white to-surface/90',
+      iconEmoji: '🔬'
+    };
+  }
+  return {
+    type: 'pangan',
+    header: 'PENGAWASAN KEAMANAN PANGAN',
+    subHeader: 'DINAS KESEHATAN KAB. MAJALENGKA',
+    docType: 'SERTIFIKASI KEAMANAN PANGAN',
+    subDocType: 'Inspeksi Dapur & Sanitasi Berkala',
+    accentColor: 'text-accent-900',
+    tagText: 'TERDAFTAR',
+    tagClass: 'bg-orange-100 text-accent-900 border-accent-300',
+    stampText: 'TERVERIFIKASI RESMI',
+    stampBorder: 'border-accent-900 text-accent-900 bg-orange-50/90',
+    bgTheme: 'from-orange-50/70 via-white to-surface/90',
+    iconEmoji: '📋'
+  };
+}
 ---
 
-<section class="py-5 sm:py-12 bg-bg relative" id="dokumen-resmi">
+<section class="py-5 sm:py-8 bg-bg relative" id="daftar-sertifikat">
+  <!-- Anchor alias for backward compatibility -->
+  <span id="dokumen-resmi" class="sr-only" aria-hidden="true"></span>
+
   <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-14">
-    <!-- Section Header & Filter Tabs -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-6 border-b border-divider pb-2.5 sm:pb-6">
-      <div>
-        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.22em] text-accent-900">
-          DOKUMEN RESMI TERVERIFIKASI
-        </p>
-        <h2 class="mt-1 sm:mt-2 font-heading text-xl sm:text-3xl lg:text-4xl font-bold text-text">
-          Pameran Sertifikat &amp; Kelaikan Hukum
-        </h2>
-        <p class="mt-1 sm:mt-2 text-xs sm:text-sm text-neutral-700 max-w-xl line-clamp-2 sm:line-clamp-none">
-          Seluruh berkas pindaian asli beresolusi tinggi dapat diperiksa langsung untuk memenuhi persyaratan administrasi pengadaan atau keyakinan konsumen.
-        </p>
+    <!-- Clean Category Filter Pills Bar (Directly Above the Cards - Above the Fold) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-5 border-b border-divider">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex h-2 w-2 rounded-full bg-accent-900" aria-hidden="true"></span>
+        <span class="text-xs font-bold uppercase tracking-wider text-text">Daftar Dokumen Resmi</span>
+        <span class="text-xs text-neutral-600">({allDocuments.length} Berkas)</span>
       </div>
 
-      <!-- Category Filter Pills (Rapat dengan grid mt-3 mb-4) -->
-      <div class="mt-2.5 mb-1 sm:mt-0 sm:mb-0 flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 sm:gap-2 pb-1 sm:pb-2 overscroll-x-contain touch-manipulation w-full max-w-full" role="tablist" aria-label="Filter kategori dokumen">
+      <!-- Minimalist Category Filter Pills -->
+      <div 
+        class="flex flex-nowrap overflow-x-auto no-scrollbar gap-1.5 sm:gap-2 pb-1 sm:pb-0 overscroll-x-contain touch-manipulation w-full sm:w-auto" 
+        role="tablist" 
+        aria-label="Filter kategori dokumen"
+      >
         <button
           type="button"
           data-filter="all"
-          class="cert-filter-btn active-filter shrink-0 min-h-[36px] sm:min-h-[44px] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition cursor-pointer border border-accent-900 bg-accent-900 text-bg shadow-sm flex items-center justify-center touch-manipulation"
+          class="cert-filter-btn active-filter shrink-0 min-h-[36px] sm:min-h-[40px] px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer border border-accent-900 bg-accent-900 text-bg shadow-2xs flex items-center justify-center touch-manipulation"
         >
           Semua Dokumen ({allDocuments.length})
         </button>
         <button
           type="button"
           data-filter="sertifikat"
-          class="cert-filter-btn shrink-0 min-h-[36px] sm:min-h-[44px] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition cursor-pointer border border-divider bg-surface text-neutral-800 hover:border-accent-900/40 flex items-center justify-center touch-manipulation"
+          class="cert-filter-btn shrink-0 min-h-[36px] sm:min-h-[40px] px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer border border-divider bg-surface text-neutral-800 hover:border-accent-900/40 flex items-center justify-center touch-manipulation"
         >
           Sertifikasi Mutu ({certificates.length})
         </button>
         <button
           type="button"
           data-filter="legalitas"
-          class="cert-filter-btn shrink-0 min-h-[36px] sm:min-h-[44px] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider transition cursor-pointer border border-divider bg-surface text-neutral-800 hover:border-accent-900/40 flex items-center justify-center touch-manipulation"
+          class="cert-filter-btn shrink-0 min-h-[36px] sm:min-h-[40px] px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer border border-divider bg-surface text-neutral-800 hover:border-accent-900/40 flex items-center justify-center touch-manipulation"
         >
           Izin Usaha &amp; Pajak ({legalDocuments.length})
         </button>
       </div>
     </div>
 
-    <!-- Document Cards Grid (SSR-First: 2 Kolom Ringkas di Mobile) -->
+    <!-- Document Cards Grid (2 Kolom Ringkas di Mobile, 3 di Desktop) -->
     <div 
       id="cert-documents-grid" 
-      class="mt-3 sm:mt-8 grid grid-cols-2 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6"
+      class="mt-4 sm:mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6"
       data-api-url={publicApiUrl}
     >
       {allDocuments.map((doc) => {
@@ -105,6 +210,9 @@ const allDocuments = [
         const badgeColorClass = isHalalOrSanitasi
           ? 'bg-accent-2-200 text-accent-2-900 border-accent-2-300'
           : 'bg-accent-200 text-accent-900 border-accent-300';
+
+        const hasRealScan = Boolean(doc.documentUrl && doc.documentUrl.trim().length > 0);
+        const visual = getDocVisual(doc);
 
         return (
           <article 
@@ -128,20 +236,57 @@ const allDocuments = [
               </div>
 
               <!-- Document Preview Thumbnail Canvas (Proporsional aspect-[4/3] framed) -->
-              <div class="relative mt-2 sm:mt-4 overflow-hidden rounded-lg sm:rounded-xl border border-divider/70 bg-bg p-1.5 sm:p-3 shadow-inner group-hover:border-accent-900/30 transition">
+              <div class="relative mt-2 sm:mt-4 overflow-hidden rounded-lg sm:rounded-xl border border-divider/70 bg-bg p-1.5 sm:p-2.5 shadow-inner group-hover:border-accent-900/30 transition">
                 <div class="relative flex items-center justify-center aspect-[4/3] w-full overflow-hidden rounded-md sm:rounded-lg bg-neutral-100 border border-neutral-200/80 shadow-xs">
-                  <img
-                    src={doc.documentUrl}
-                    alt={`Pindaian Dokumen Resmi: ${doc.title}`}
-                    width="400"
-                    height="300"
-                    loading="lazy"
-                    class="h-full w-full object-contain object-center transition duration-300 group-hover:scale-105"
-                  />
-                  <!-- Stamp / Watermark Overlay -->
-                  <div class="pointer-events-none absolute bottom-1 right-1 sm:bottom-2 sm:right-2 rounded sm:rounded-md bg-accent-900/80 px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-bg backdrop-blur-sm shadow-sm">
-                    Verified
-                  </div>
+                  {hasRealScan ? (
+                    <>
+                      <img
+                        src={doc.documentUrl}
+                        alt={`Pindaian Dokumen Resmi: ${doc.title}`}
+                        width="400"
+                        height="300"
+                        loading="lazy"
+                        decoding="async"
+                        class="h-full w-full object-contain object-center transition duration-300 group-hover:scale-105"
+                        onerror="if(!this.dataset.fallbackApplied){this.dataset.fallbackApplied='true';this.setAttribute('src','/images/brand/halal-cert.png');}"
+                      />
+                      <div class="pointer-events-none absolute bottom-1 right-1 sm:bottom-2 sm:right-2 rounded sm:rounded-md bg-accent-900/80 px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-bg backdrop-blur-sm shadow-sm">
+                        Verified
+                      </div>
+                    </>
+                  ) : (
+                    <div class={`relative flex flex-col justify-between aspect-[4/3] w-full p-2 sm:p-3 bg-gradient-to-b ${visual.bgTheme} text-center select-none`}>
+                      <div class="border-b border-divider/70 pb-1 flex items-center justify-between gap-1 text-left">
+                        <div class="min-w-0">
+                          <p class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider text-neutral-500 truncate">{visual.header}</p>
+                          <p class="text-[7.5px] sm:text-[8.5px] font-bold text-neutral-800 truncate">{visual.subHeader}</p>
+                        </div>
+                        <span class="text-xs sm:text-sm shrink-0" aria-hidden="true">{visual.iconEmoji}</span>
+                      </div>
+
+                      <div class="my-auto py-0.5 flex flex-col items-center justify-center">
+                        <span class={`rounded-full px-1.5 py-0.2 text-[6.5px] sm:text-[7.5px] font-bold uppercase tracking-wider border ${visual.tagClass} mb-0.5 shrink-0`}>
+                          {visual.tagText}
+                        </span>
+                        <p class={`font-heading font-black text-[9px] sm:text-xs tracking-tight ${visual.accentColor} uppercase leading-tight line-clamp-1`}>
+                          {visual.docType}
+                        </p>
+                        <p class="text-[7px] sm:text-[8px] text-neutral-600 mt-0.5 line-clamp-1">
+                          {visual.subDocType}
+                        </p>
+                      </div>
+
+                      <div class="border-t border-divider/70 pt-0.5 flex items-center justify-between gap-1 text-left">
+                        <div class="min-w-0">
+                          <p class="text-[6.5px] sm:text-[7px] uppercase tracking-wider text-neutral-500 font-semibold">No. Registrasi</p>
+                          <p class="font-mono text-[7.5px] sm:text-[9px] font-bold text-accent-900 truncate">{doc.certNumber}</p>
+                        </div>
+                        <div class={`border border-dashed ${visual.stampBorder} rounded px-1 py-0.2 text-[6px] sm:text-[7px] font-black tracking-wider uppercase rotate-[-2deg] shrink-0 shadow-2xs`}>
+                          {visual.stampText}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <!-- Hover/Focus Overlay Trigger (Desktop Only) -->
@@ -282,4 +427,3 @@ const allDocuments = [
   }
   document.addEventListener('astro:page-load', initCertGrid);
 </script>
-
