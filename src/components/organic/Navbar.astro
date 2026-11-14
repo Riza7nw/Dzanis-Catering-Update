@@ -172,8 +172,11 @@ const tautan = [
     const iconClose = document.getElementById('hamburger-icon-close');
 
     if (!toggleBtn || !drawer || !backdrop) return;
+    if (toggleBtn.dataset.navbarInitialized === 'true') return;
+    toggleBtn.dataset.navbarInitialized = 'true';
 
     let isOpen = false;
+    let savedScrollY = 0;
 
     function getFloatingWa() {
       return document.getElementById('floating-whatsapp-btn') || document.querySelector('a[aria-label="Chat WhatsApp Dzanis Catering"]');
@@ -182,6 +185,8 @@ const tautan = [
     function openDrawer() {
       if (isOpen) return;
       isOpen = true;
+      savedScrollY = window.scrollY;
+
       toggleBtn?.setAttribute('aria-expanded', 'true');
       toggleBtn?.setAttribute('aria-label', 'Tutup menu navigasi');
       iconOpen?.classList.add('hidden');
@@ -212,12 +217,12 @@ const tautan = [
       setTimeout(() => {
         const focusable = drawer?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
         if (focusable && focusable.length > 0) {
-          focusable[0].focus();
+          focusable[0].focus({ preventScroll: true });
         }
       }, 50);
     }
 
-    function closeDrawer() {
+    function closeDrawer(options?: { isNavigation?: boolean }) {
       if (!isOpen) return;
       isOpen = false;
       toggleBtn?.setAttribute('aria-expanded', 'false');
@@ -246,26 +251,40 @@ const tautan = [
 
       document.body.style.overflow = '';
 
-      toggleBtn?.focus();
+      // Pastikan posisi scroll tidak ter-reset atau meluncur smooth
+      if (!options?.isNavigation && typeof savedScrollY === 'number') {
+        if (window.scrollY !== savedScrollY) {
+          window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+        }
+      }
+
+      // Kembalikan fokus ke tombol toggle dengan preventScroll agar tidak meloncat ke header
+      toggleBtn?.focus({ preventScroll: true });
     }
 
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
       if (isOpen) closeDrawer();
       else openDrawer();
     });
 
     closeBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
       closeDrawer();
     });
 
-    backdrop.addEventListener('click', closeDrawer);
+    backdrop.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      closeDrawer();
+    });
 
     // Auto-close on any link click (both anchor links and full page navigation)
     drawer.querySelectorAll('a').forEach((link) => {
       link.addEventListener('click', () => {
-        closeDrawer();
+        closeDrawer({ isNavigation: true });
       });
     });
 
