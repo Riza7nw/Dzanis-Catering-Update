@@ -111,7 +111,7 @@ async function syncSnackCatalogFromBackend(
   const apiBase = getApiBaseUrl();
 
   function applyItemsToDOM(rawItems: BackendSnackItemDto[]) {
-    if (!Array.isArray(rawItems) || rawItems.length === 0) return;
+    if (!Array.isArray(rawItems)) return;
 
     // Peta normalisasi item dari backend berdasarkan nama (lowercase)
     const backendItemMap = new Map<string, BackendSnackItemDto>();
@@ -259,6 +259,28 @@ async function syncSnackCatalogFromBackend(
       }
     });
 
+    // 3.5 Tampilkan atau Sembunyikan Empty State jika seluruh jajanan kosong
+    const emptyEl = document.getElementById('snack-catalog-empty');
+    const filterNavWrap =
+      document.getElementById('category-filter-nav-wrap') ||
+      root.querySelector('.category-filter-bar')?.parentElement;
+    const flowNav = document.getElementById('category-flow-nav');
+
+    if (rawItems.length === 0) {
+      if (emptyEl) {
+        emptyEl.classList.remove('hidden');
+        emptyEl.classList.add('flex');
+      }
+      filterNavWrap?.classList.add('hidden');
+      flowNav?.classList.add('hidden');
+    } else {
+      if (emptyEl) {
+        emptyEl.classList.add('hidden');
+        emptyEl.classList.remove('flex');
+      }
+      filterNavWrap?.classList.remove('hidden');
+    }
+
     // 4. Perbarui Total Counter di Header dan Tombol Tab "Semua"
     const activeCheckboxes = root.querySelectorAll<HTMLInputElement>(
       'input[name="snack-choice"]:not(:disabled)'
@@ -287,10 +309,14 @@ async function syncSnackCatalogFromBackend(
       .map((b) => b.dataset.categoryTarget || '')
       .filter((t) => t && t !== 'all');
     let currentActive = getActiveCategory();
-    if (currentActive !== 'all' && !validTargets.includes(currentActive)) {
+    if (validTargets.length === 0) {
+      setActiveCategory('all', false);
+    } else if (currentActive !== 'all' && !validTargets.includes(currentActive)) {
       currentActive = validTargets[0] || 'all';
+      setActiveCategory(currentActive, false);
+    } else {
+      setActiveCategory(currentActive, false);
     }
-    setActiveCategory(currentActive, false);
 
     recalculate();
   }
@@ -300,7 +326,7 @@ async function syncSnackCatalogFromBackend(
     const cached = sessionStorage.getItem(SNACK_CACHE_KEY);
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed?.items) && parsed.items.length > 0) {
+      if (Array.isArray(parsed?.items)) {
         applyItemsToDOM(parsed.items);
       }
     }
@@ -325,13 +351,11 @@ async function syncSnackCatalogFromBackend(
     if (res.ok) {
       const data = await res.json();
       const rawItems: BackendSnackItemDto[] = Array.isArray(data?.items) ? data.items : [];
-      if (rawItems.length > 0) {
-        sessionStorage.setItem(
-          SNACK_CACHE_KEY,
-          JSON.stringify({ timestamp: Date.now(), items: rawItems })
-        );
-        applyItemsToDOM(rawItems);
-      }
+      sessionStorage.setItem(
+        SNACK_CACHE_KEY,
+        JSON.stringify({ timestamp: Date.now(), items: rawItems })
+      );
+      applyItemsToDOM(rawItems);
     }
   } catch (err) {
     // Non-blocking fallback diam bila backend sedang offline / maintenance

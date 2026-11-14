@@ -286,6 +286,26 @@ test('Interactive Headless Chrome: /rakit-snack-box/ custom builder calculation 
   assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
 
   const server = http.createServer((req, res) => {
+    if (req.url && req.url.includes('/api/snack-items')) {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      const flatItems = snackKategori.flatMap((k) =>
+        k.items.map((it) => ({
+          name: it.nama,
+          category: k.label,
+          price: it.harga,
+          is_active: 1,
+        }))
+      );
+      return res.end(
+        JSON.stringify({
+          success: true,
+          total: flatItems.length,
+          items: flatItems,
+        })
+      );
+    }
+
     let reqPath = (req.url || '/').split('?')[0];
     if (reqPath.endsWith('/')) reqPath += 'index.html';
     let filePath = path.join(distDir, reqPath);
@@ -310,7 +330,7 @@ test('Interactive Headless Chrome: /rakit-snack-box/ custom builder calculation 
 
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const port = (server.address() as AddressInfo).port;
-  const baseUrl = `http://127.0.0.1:${port}/rakit-snack-box/`;
+  const baseUrl = `http://127.0.0.1:${port}/rakit-snack-box/?apiUrl=http://127.0.0.1:${port}`;
 
   const chromeDebugPort = port + 1400;
   const chrome = spawn('google-chrome', [
@@ -631,6 +651,136 @@ test('Dynamic Backend Reconciliation: Live update of items, status, deletion, ca
     assert.equal(result.hasNewCatGrid, true, 'Kategori baru dari backend harus dibuatkan block dan grid');
     assert.equal(result.hasEsTehCard, true, 'Item baru dari backend harus dirender di dalam grid kategori baru');
     assert.equal(result.totalCounter, '3', 'Total counter harus mencerminkan 3 item aktif (Kue Sus Vanilla, Kue Sus Coklat, Es Teh Manis Segar)');
+  } finally {
+    chrome.kill();
+    server.close();
+  }
+});
+
+test('Dynamic Backend Reconciliation: When all items deleted in backend, DOM immediately empties, hides categories, and shows empty state', async () => {
+  const distDir = path.resolve('dist');
+  assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
+
+  const server = http.createServer((req, res) => {
+    if (req.url && req.url.includes('/api/snack-items')) {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.end(
+        JSON.stringify({
+          success: true,
+          total: 0,
+          items: [],
+          categories: [],
+        })
+      );
+    }
+
+    let reqPath = (req.url || '/').split('?')[0];
+    if (reqPath.endsWith('/')) reqPath += 'index.html';
+    let filePath = path.join(distDir, reqPath);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(filePath, 'index.html');
+    }
+    if (!fs.existsSync(filePath)) {
+      res.statusCode = 404;
+      return res.end('Not found');
+    }
+    const ext = path.extname(filePath);
+    const mimeMap: Record<string, string> = {
+      '.html': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.png': 'image/png',
+      '.svg': 'image/svg+xml',
+    };
+    res.setHeader('Content-Type', mimeMap[ext] || 'application/octet-stream');
+    fs.createReadStream(filePath).pipe(res);
+  });
+
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const port = (server.address() as AddressInfo).port;
+  const baseUrl = `http://127.0.0.1:${port}/rakit-snack-box/?apiUrl=http://127.0.0.1:${port}`;
+
+  const chromeDebugPort = port + 1000;
+  const chrome = spawn('google-chrome', [
+    '--headless=new',
+    `--remote-debugging-port=${chromeDebugPort}`,
+    `--user-data-dir=/tmp/chrome-empty-snack-${port}`,
+    '--window-size=1280,800',
+    baseUrl,
+  ]);
+
+  await new Promise((r) => setTimeout(r, 1500));
+
+  try {
+    const listRes = await fetch(`http://127.0.0.1:${chromeDebugPort}/json`);
+    const tabs = await listRes.json();
+    const targetTab = tabs.find((t: any) => t.url.includes('rakit-snack-box')) || tabs[0];
+    const ws = new WebSocket(targetTab.webSocketDebuggerUrl);
+
+    const result = await new Promise<any>((resolve, reject) => {
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ id: 1, method: 'Page.enable' }));
+      };
+
+      ws.onmessage = (msg: any) => {
+        const data = JSON.parse(msg.data.toString());
+        if (data.id === 1) {
+          setTimeout(() => {
+            ws.send(
+              JSON.stringify({
+                id: 2,
+                method: 'Runtime.evaluate',
+                params: {
+                  expression: `
+                  (() => {
+                    const remainingCards = document.querySelectorAll('[data-snack-card]');
+                    const totalCounter = document.getElementById('total-snack-counter')?.textContent?.trim();
+                    const emptyState = document.getElementById('snack-catalog-empty');
+                    const isVisibleEmptyState = emptyState ? !emptyState.classList.contains('hidden') : false;
+                    const filterNav = document.getElementById('category-filter-nav-wrap');
+                    const isFilterNavHidden = filterNav ? filterNav.classList.contains('hidden') : false;
+                    const orderBtn = document.getElementById('builder-order-btn');
+                    const isOrderBtnDisabled = orderBtn ? orderBtn.disabled : false;
+                    const subtotal = document.getElementById('summary-subtotal')?.textContent?.trim();
+                    const total = document.getElementById('summary-total')?.textContent?.trim();
+
+                    return JSON.stringify({
+                      cardCount: remainingCards.length,
+                      totalCounter,
+                      isVisibleEmptyState,
+                      isFilterNavHidden,
+                      isOrderBtnDisabled,
+                      subtotal,
+                      total,
+                    });
+                  })()
+                  `,
+                },
+              })
+            );
+          }, 800);
+        }
+
+        if (data.id === 2) {
+          if (data.result.exceptionDetails) {
+            reject(new Error(JSON.stringify(data.result.exceptionDetails)));
+          } else {
+            resolve(JSON.parse(data.result.result.value));
+          }
+        }
+      };
+
+      ws.onerror = (err) => reject(err);
+    });
+
+    assert.equal(result.cardCount, 0, 'Seluruh kartu jajanan di DOM wajib dihapus saat backend mengembalikan 0 item');
+    assert.equal(result.totalCounter, '0', 'Total snack counter wajib menjadi 0');
+    assert.equal(result.isVisibleEmptyState, true, 'Elemen Empty State harus muncul saat katalog kosong');
+    assert.equal(result.isFilterNavHidden, true, 'Navigasi filter kategori harus disembunyikan saat kosong');
+    assert.equal(result.isOrderBtnDisabled, true, 'Tombol pesan harus dinonaktifkan saat tidak ada item');
+    assert.equal(result.subtotal, 'Rp0', 'Subtotal harus Rp0');
+    assert.equal(result.total, 'Rp0', 'Total harus Rp0');
   } finally {
     chrome.kill();
     server.close();

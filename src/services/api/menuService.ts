@@ -280,35 +280,40 @@ export async function getSnackCatalog(): Promise<SnackKategori[]> {
       const data: BackendSnackResponse = await res.json();
       const rawItems: BackendSnackItemDto[] = Array.isArray(data.items) ? data.items : [];
 
-      if (rawItems.length > 0) {
-        // Filter item yang aktif dan urutkan berdasarkan sort_order
-        const activeItems = rawItems
-          .filter((item) => Boolean(item.is_active))
-          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-
-        // Kelompokkan per kategori secara urut
-        const categoryMap = new Map<string, Array<{ nama: string; harga: number }>>();
-
-        activeItems.forEach((item) => {
-          const cat = item.category || 'Lainnya';
-          if (!categoryMap.has(cat)) {
-            categoryMap.set(cat, []);
-          }
-          categoryMap.get(cat)!.push({
-            nama: item.name,
-            harga: Number(item.price || 0),
-          });
-        });
-
-        const result: SnackKategori[] = [];
-        categoryMap.forEach((items, label) => {
-          result.push({ label, items });
-        });
-
-        if (result.length > 0) {
-          return result;
-        }
+      // Jika backend merespons 200 OK dan data kosong, ini adalah Single Source of Truth: kembalikan []
+      if (rawItems.length === 0) {
+        return [];
       }
+
+      // Filter item yang aktif dan urutkan berdasarkan sort_order
+      const activeItems = rawItems
+        .filter((item) => Boolean(item.is_active))
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+      if (activeItems.length === 0) {
+        return [];
+      }
+
+      // Kelompokkan per kategori secara urut
+      const categoryMap = new Map<string, Array<{ nama: string; harga: number }>>();
+
+      activeItems.forEach((item) => {
+        const cat = item.category || 'Lainnya';
+        if (!categoryMap.has(cat)) {
+          categoryMap.set(cat, []);
+        }
+        categoryMap.get(cat)!.push({
+          nama: item.name,
+          harga: Number(item.price || 0),
+        });
+      });
+
+      const result: SnackKategori[] = [];
+      categoryMap.forEach((items, label) => {
+        result.push({ label, items });
+      });
+
+      return result;
     }
   } catch (err) {
     if (import.meta.env?.DEV) {

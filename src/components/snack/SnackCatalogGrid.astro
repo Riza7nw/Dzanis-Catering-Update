@@ -7,6 +7,7 @@ interface Props {
 }
 
 const { snackKategori } = Astro.props;
+const totalCount = snackKategori.reduce((sum, cat) => sum + cat.items.length, 0);
 ---
 
 <!-- Categories & Checkbox Grid -->
@@ -54,10 +55,36 @@ const { snackKategori } = Astro.props;
   })}
 </div>
 
+<!-- Empty State saat Katalog Kosong -->
+<div
+  id="snack-catalog-empty"
+  class={totalCount === 0 ? "flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-2xl border border-divider bg-surface/40 my-4" : "hidden flex-col items-center justify-center p-8 sm:p-12 text-center rounded-2xl border border-divider bg-surface/40 my-4"}
+>
+  <div class="size-12 rounded-full bg-accent/10 text-accent flex items-center justify-center mb-3">
+    <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+    </svg>
+  </div>
+  <h3 class="font-heading text-lg font-semibold text-neutral-900 mb-1">
+    Katalog Jajanan Sedang Diperbarui
+  </h3>
+  <p class="text-sm text-neutral-600 max-w-md mb-5">
+    Saat ini daftar jajanan snack satuan sedang disesuaikan oleh admin. Anda tetap dapat memesan atau berkonsultasi langsung dengan admin via WhatsApp.
+  </p>
+  <a
+    href="https://wa.me/6281324383858?text=Halo%20Dzanis%20Catering,%20saya%20ingin%20konsultasi%20paket%20snack%20box%20kustom"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="btn btn-primary text-xs font-semibold py-2.5 px-5 rounded-full"
+  >
+    Konsultasi Snack Box via WhatsApp &rarr;
+  </a>
+</div>
+
 <!-- Tombol Alur Navigasi Kategori Selanjutnya -->
 <div
   id="category-flow-nav"
-  class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 border-t border-divider/60"
+  class={`mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 border-t border-divider/60 ${totalCount === 0 ? 'hidden' : ''}`}
 >
   <span id="category-flow-hint" class="text-xs text-neutral-500 font-medium">
     Selesai memilih di kategori ini?

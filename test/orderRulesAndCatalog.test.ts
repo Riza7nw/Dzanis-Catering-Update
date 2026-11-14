@@ -613,8 +613,8 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const initialPortion = portionInput?.value;
                   const initialSubtotal = subtotalDisplay?.textContent?.trim();
 
-                  // 2. Change event date to Saturday (Weekend: 2026-11-14)
-                  eventDateInput.value = '2026-11-14';
+                  // 2. Change event date to Saturday (Weekend: 2026-11-21)
+                  eventDateInput.value = '2026-11-21';
                   eventDateInput.dispatchEvent(new Event('input', { bubbles: true }));
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -622,8 +622,8 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const weekendPortion = portionInput?.value;
                   const weekendSubtotal = subtotalDisplay?.textContent?.trim();
 
-                  // 3. Change event date to Monday (Weekday: 2026-11-16)
-                  eventDateInput.value = '2026-11-16';
+                  // 3. Change event date to Monday (Weekday: 2026-11-23)
+                  eventDateInput.value = '2026-11-23';
                   eventDateInput.dispatchEvent(new Event('input', { bubbles: true }));
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -642,8 +642,8 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const pkgPortionClamped500 = portionInput.value;
                   const pkgNoticeVisibleAfterBlur = !document.getElementById('package-large-order-notice')?.classList.contains('hidden');
 
-                  // Change event date to 2026-11-20 -> notice must still stay visible and WA link must update
-                  eventDateInput.value = '2026-11-20';
+                  // Change event date to 2026-11-27 -> notice must still stay visible and WA link must update
+                  eventDateInput.value = '2026-11-27';
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
                   const pkgNoticeVisibleAfterDateChange = !document.getElementById('package-large-order-notice')?.classList.contains('hidden');
                   const pkgWaHrefAfterDateChange = document.getElementById('package-wa-admin-link')?.getAttribute('href') || '';
@@ -658,7 +658,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const pkgNoticeHiddenOn40 = document.getElementById('package-large-order-notice')?.classList.contains('hidden');
 
                   // 4. Change back to Saturday and click waCheckoutBtn to open OrderModal
-                  eventDateInput.value = '2026-11-14';
+                  eventDateInput.value = '2026-11-21';
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
                   waCheckoutBtn.click();
 
@@ -670,7 +670,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   // 5. Inside OrderModal, change date from Saturday to Monday (Weekday)
                   const modalEventDateInput = document.getElementById('event-date');
                   const modalPortionInput = document.getElementById('portion-count');
-                  modalEventDateInput.value = '2026-11-16';
+                  modalEventDateInput.value = '2026-11-23';
                   modalEventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
                   const modalMinHintWeekday = document.getElementById('portion-min-hint')?.textContent?.trim();
@@ -799,13 +799,13 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
     assert.equal(testResult.pkgPortionClamped500, '500', 'Package portion input must clamp to 500 on blur');
     assert.equal(testResult.pkgNoticeVisibleAfterBlur, true, 'Package notice must remain visible after blur');
     assert.equal(testResult.pkgNoticeVisibleAfterDateChange, true, 'Package notice must remain visible after changing event date');
-    assert.ok(testResult.pkgWaHrefAfterDateChange.includes('20%20November%202026'), 'Package WA link must reflect updated event date');
+    assert.ok(testResult.pkgWaHrefAfterDateChange.includes('27%20November%202026'), 'Package WA link must reflect updated event date');
     assert.equal(testResult.modalOpenBlockedOnLarge, false, 'waCheckoutBtn must block opening OrderModal while in large order mode');
     assert.equal(testResult.pkgNoticeHiddenOn40, true, 'Package large order notice must hide when portion returns to 40');
 
     // Modal Prefill & Open
     assert.equal(testResult.modalOpen, true, 'OrderModal must open when clicking waCheckoutBtn');
-    assert.equal(testResult.modalDateVal, '2026-11-14', 'OrderModal date must prefill with selected date');
+    assert.equal(testResult.modalDateVal, '2026-11-21', 'OrderModal date must prefill with selected date');
     assert.equal(testResult.modalPortionVal, '40', 'OrderModal portion must prefill with weekend 40');
     assert.ok(testResult.modalMinHintWeekend.includes('Akhir Pekan'), 'Modal hint must state Akhir Pekan on weekend date');
 

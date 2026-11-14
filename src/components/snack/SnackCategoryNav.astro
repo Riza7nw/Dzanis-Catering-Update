@@ -10,7 +10,7 @@ const { snackKategori, totalSnackItems } = Astro.props;
 ---
 
 <!-- Filter Kategori Pill Buttons -->
-<div class="relative w-full max-w-full min-w-0 overflow-hidden mb-6">
+<div id="category-filter-nav-wrap" class={`relative w-full max-w-full min-w-0 overflow-hidden mb-6 ${totalSnackItems === 0 ? 'hidden' : ''}`}>
   <div
     class="category-filter-bar relative flex items-center gap-2 overflow-x-auto no-scrollbar w-full max-w-full min-w-0 py-2 overscroll-x-contain"
     role="group"
