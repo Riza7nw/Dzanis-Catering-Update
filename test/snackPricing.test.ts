@@ -786,3 +786,164 @@ test('Dynamic Backend Reconciliation: When all items deleted in backend, DOM imm
     server.close();
   }
 });
+
+test('Resilient Cache: When backend sleeps, crashes, or returns 500/gateway error, front-end persistent cache and DOM are NEVER deleted', async () => {
+  const distDir = path.resolve('dist');
+  assert.ok(fs.existsSync(distDir), 'dist must exist, run build first');
+
+  const server = http.createServer((req, res) => {
+    // Simulasi backend error 500 / gateway timeout / server sleeping
+    if (req.url && req.url.includes('/api/snack-items')) {
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.end(
+        JSON.stringify({
+          success: false,
+          error: 'Database locked or server cold-starting',
+        })
+      );
+    }
+
+    let reqPath = (req.url || '/').split('?')[0];
+    if (reqPath.endsWith('/')) reqPath += 'index.html';
+    let filePath = path.join(distDir, reqPath);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(filePath, 'index.html');
+    }
+    if (!fs.existsSync(filePath)) {
+      res.statusCode = 404;
+      return res.end('Not found');
+    }
+    const ext = path.extname(filePath);
+    const mimeMap: Record<string, string> = {
+      '.html': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.png': 'image/png',
+      '.svg': 'image/svg+xml',
+    };
+    res.setHeader('Content-Type', mimeMap[ext] || 'application/octet-stream');
+    fs.createReadStream(filePath).pipe(res);
+  });
+
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const port = (server.address() as AddressInfo).port;
+  const baseUrl = `http://127.0.0.1:${port}/rakit-snack-box/?apiUrl=http://127.0.0.1:${port}`;
+
+  const chromeDebugPort = port + 1000;
+  const chrome = spawn('google-chrome', [
+    '--headless=new',
+    `--remote-debugging-port=${chromeDebugPort}`,
+    `--user-data-dir=/tmp/chrome-resilient-cache-${port}`,
+    '--window-size=1280,800',
+    baseUrl,
+  ]);
+
+  await new Promise((r) => setTimeout(r, 1500));
+
+  try {
+    const listRes = await fetch(`http://127.0.0.1:${chromeDebugPort}/json`);
+    const tabs = await listRes.json();
+    const targetTab = tabs.find((t: any) => t.url.includes('rakit-snack-box')) || tabs[0];
+    const ws = new WebSocket(targetTab.webSocketDebuggerUrl);
+
+    const result = await new Promise<any>((resolve, reject) => {
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ id: 1, method: 'Page.enable' }));
+      };
+
+      ws.onmessage = (msg: any) => {
+        const data = JSON.parse(msg.data.toString());
+        if (data.id === 1) {
+          // Pre-populate localStorage dengan 2 jajanan berharga khusus sebelum simulasi
+          ws.send(
+            JSON.stringify({
+              id: 2,
+              method: 'Runtime.evaluate',
+              params: {
+                expression: `
+                (() => {
+                  const initialCache = {
+                    timestamp: Date.now(),
+                    version: "2.0",
+                    items: [
+                      { id: "snack-1", name: "Kue Sus Vanilla", category: "Puff & Pastry", price: 3500, is_active: 1 },
+                      { id: "snack-2", name: "Kue Sus Coklat", category: "Puff & Pastry", price: 3800, is_active: 1 }
+                    ]
+                  };
+                  localStorage.setItem('dzanis_snack_items_cache', JSON.stringify(initialCache));
+                  sessionStorage.setItem('dzanis_snack_items_cache', JSON.stringify(initialCache));
+                  return true;
+                })()
+                `,
+              },
+            })
+          );
+        }
+
+        if (data.id === 2) {
+          // Reload halaman agar lifecycle inisialisasi membaca cache localStorage dari awal saat backend offline/500
+          ws.send(JSON.stringify({ id: 10, method: 'Page.reload' }));
+        }
+
+        if (data.id === 10) {
+          setTimeout(() => {
+            ws.send(
+              JSON.stringify({
+                id: 3,
+                method: 'Runtime.evaluate',
+                params: {
+                  expression: `
+                  (() => {
+                    // Verifikasi bahwa data di localStorage tidak terhapus
+                    const localRaw = localStorage.getItem('dzanis_snack_items_cache');
+                    const parsed = localRaw ? JSON.parse(localRaw) : null;
+                    const itemsInCache = Array.isArray(parsed?.items) ? parsed.items.length : 0;
+
+                    // Verifikasi elemen kartu di DOM dirender dari cache dan tidak dihapus
+                    const cards = document.querySelectorAll('[data-snack-card]');
+                    const emptyState = document.getElementById('snack-catalog-empty');
+                    const isVisibleEmptyState = emptyState ? !emptyState.classList.contains('hidden') : false;
+                    const totalCounter = document.getElementById('total-snack-counter')?.textContent?.trim();
+
+                    return JSON.stringify({
+                      hasCache: Boolean(localRaw),
+                      itemsInCache,
+                      cardCount: cards.length,
+                      isVisibleEmptyState,
+                      totalCounter
+                    });
+                  })()
+                  `,
+                },
+              })
+            );
+          }, 1000);
+        }
+
+        if (data.id === 3) {
+          if (data.result && data.result.exceptionDetails) {
+            reject(new Error(JSON.stringify(data.result.exceptionDetails)));
+          } else if (data.result && data.result.result) {
+            resolve(JSON.parse(data.result.result.value));
+          } else {
+            reject(new Error('Unexpected CDP data: ' + JSON.stringify(data)));
+          }
+        }
+      };
+
+      ws.onerror = (err) => {
+        reject(err);
+      };
+    });
+
+    assert.equal(result.hasCache, true, 'localStorage wajib mempertahankan cache saat backend merespon error 500');
+    assert.equal(result.itemsInCache, 2, 'Cache wajib tetap memuat 2 item tanpa dihapus atau ditimpa');
+    assert.ok(result.cardCount > 0, 'Kartu jajanan di DOM TIDAK BOLEH dihapus saat backend mengalami kendala');
+    assert.equal(result.isVisibleEmptyState, false, 'Empty state TIDAK BOLEH muncul saat backend sedang error/sleep');
+  } finally {
+    chrome.kill();
+    server.close();
+  }
+});

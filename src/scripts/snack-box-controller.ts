@@ -96,6 +96,61 @@ function getOrCreateCategoryGrid(root: HTMLElement, categoryName: string): HTMLE
   return block.querySelector<HTMLElement>(`[data-category-grid="${categoryName}"]`)!;
 }
 
+interface CachedSnackPayload {
+  timestamp: number;
+  version: string;
+  items: BackendSnackItemDto[];
+}
+
+/**
+ * Membaca cache katalog snack dari persistent storage (localStorage)
+ * dengan fallback ke sessionStorage jika localStorage dibatasi browser.
+ */
+function loadSnackCache(): BackendSnackItemDto[] | null {
+  try {
+    const raw = localStorage.getItem(SNACK_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed?.items)) {
+        return parsed.items;
+      }
+    }
+  } catch {}
+
+  try {
+    const raw = sessionStorage.getItem(SNACK_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed?.items)) {
+        return parsed.items;
+      }
+    }
+  } catch {}
+
+  return null;
+}
+
+/**
+ * Menyimpan data katalog snack ke persistent storage (localStorage & sessionStorage)
+ * agar data tetap bertahan meskipun tab ditutup atau perangkat direstart.
+ */
+function saveSnackCache(items: BackendSnackItemDto[]): void {
+  const payload: CachedSnackPayload = {
+    timestamp: Date.now(),
+    version: '2.0',
+    items,
+  };
+  const str = JSON.stringify(payload);
+
+  try {
+    localStorage.setItem(SNACK_CACHE_KEY, str);
+  } catch {}
+
+  try {
+    sessionStorage.setItem(SNACK_CACHE_KEY, str);
+  } catch {}
+}
+
 /**
  * Sinkronisasi data katalog snack items dari backend API (/api/snack-items).
  * Menyesuaikan harga, status ketersediaan (aktif/habis), penambahan, pemindahan kategori,
@@ -321,14 +376,11 @@ async function syncSnackCatalogFromBackend(
     recalculate();
   }
 
-  // SWR: 1. Baca cache lokal instan (0ms)
+  // SWR: 1. Baca cache persistent lokal instan (0ms)
   try {
-    const cached = sessionStorage.getItem(SNACK_CACHE_KEY);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed?.items)) {
-        applyItemsToDOM(parsed.items);
-      }
+    const cachedItems = loadSnackCache();
+    if (cachedItems) {
+      applyItemsToDOM(cachedItems);
     }
   } catch {}
 
@@ -350,16 +402,23 @@ async function syncSnackCatalogFromBackend(
 
     if (res.ok) {
       const data = await res.json();
-      const rawItems: BackendSnackItemDto[] = Array.isArray(data?.items) ? data.items : [];
-      sessionStorage.setItem(
-        SNACK_CACHE_KEY,
-        JSON.stringify({ timestamp: Date.now(), items: rawItems })
-      );
-      applyItemsToDOM(rawItems);
+      // STRICT SUCCESS & PAYLOAD GUARD:
+      // Cache HANYA boleh dimutasi jika server secara sadar merespons sukses (success === true)
+      // dan properti items valid berupa array. Jika server mengembalikan error payload
+      // atau struktur data tidak sah, pertahankan cache lama utuh 100%!
+      if (data && data.success === true && Array.isArray(data.items)) {
+        saveSnackCache(data.items);
+        applyItemsToDOM(data.items);
+      } else {
+        console.warn('[snackBoxController] Respon backend tidak valid / mode darurat, cache lokal dipertahankan:', data);
+      }
+    } else {
+      console.warn(`[snackBoxController] Backend merespons status HTTP ${res.status}, cache lokal dipertahankan.`);
     }
   } catch (err) {
-    // Non-blocking fallback diam bila backend sedang offline / maintenance
-    console.warn('[snackBoxController] Sync snack items from backend offline:', (err as Error)?.message || err);
+    // Non-blocking graceful fallback saat backend offline, sleep, crash, atau timeout.
+    // Cache lokal & DOM yang sudah tampil tetap dipertahankan utuh 100%.
+    console.warn('[snackBoxController] Backend sedang offline / sleep, mempertahankan cache lokal:', (err as Error)?.message || err);
   }
 }
 

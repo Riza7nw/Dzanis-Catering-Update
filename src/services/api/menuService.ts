@@ -278,7 +278,11 @@ export async function getSnackCatalog(): Promise<SnackKategori[]> {
 
     if (res.ok) {
       const data: BackendSnackResponse = await res.json();
-      const rawItems: BackendSnackItemDto[] = Array.isArray(data.items) ? data.items : [];
+      // STRICT SUCCESS GUARD: Validasi eksplisit bahwa backend menyatakan success: true
+      if (!data || data.success !== true || !Array.isArray(data.items)) {
+        return fallbackSnackKategori;
+      }
+      const rawItems: BackendSnackItemDto[] = data.items;
 
       // Jika backend merespons 200 OK dan data kosong, ini adalah Single Source of Truth: kembalikan []
       if (rawItems.length === 0) {
