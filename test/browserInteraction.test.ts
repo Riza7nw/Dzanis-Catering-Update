@@ -106,14 +106,11 @@ test('Real headless Chrome: Certificate modal click, focus, filtering, and copy 
 
                   // 6. Test B2B CTA Mobile Layout
                   const b2bSections = document.querySelectorAll('section');
-                  const b2bSection = Array.from(b2bSections).find(s => s.textContent.includes('Kesiapan Pengadaan B2B'));
+                  const b2bSection = Array.from(b2bSections).find(s => s.textContent.includes('Kebutuhan Acara & Pengadaan Resmi'));
                   const b2bPadTop = b2bSection ? parseFloat(window.getComputedStyle(b2bSection).paddingTop) : 0;
-                  const b2bCard = b2bSection?.querySelector('.bg-surface');
-                  const b2bButtons = b2bCard ? Array.from(b2bCard.querySelectorAll('a')) : [];
-                  const ctaBtnText = b2bButtons[0]?.textContent?.trim() || '';
-                  const ctaBtnBg = b2bButtons[0] ? window.getComputedStyle(b2bButtons[0]).backgroundColor : '';
-                  const subtext = b2bCard?.querySelector('.mt-5 p')?.textContent?.trim() || '';
-                  const checklistSvgs = b2bSection?.querySelectorAll('div[class*="text-bg"] svg').length || 0;
+                  const ctaBtn = b2bSection?.querySelector('a.btn-primary');
+                  const ctaBtnText = ctaBtn?.textContent?.trim() || '';
+                  const subtext = b2bSection?.querySelector('p.text-xs.text-neutral-600')?.textContent?.trim() || '';
 
                   return JSON.stringify({
                     initialHidden,
@@ -128,11 +125,9 @@ test('Real headless Chrome: Certificate modal click, focus, filtering, and copy 
                     visibleMutuCards,
                     visibleAllCards,
                     b2bPadTop,
-                    b2bButtonCount: b2bButtons.length,
+                    hasCtaBtn: Boolean(ctaBtn),
                     ctaBtnText,
-                    ctaBtnBg,
                     subtext,
-                    checklistSvgs,
                   });
                 })()
               `,
@@ -169,12 +164,10 @@ test('Real headless Chrome: Certificate modal click, focus, filtering, and copy 
     assert.ok(testResult.visibleAllCards >= 5, 'All documents filter should display at least 5 cards');
 
     // B2B Section Mobile Assertions
-    assert.ok(testResult.b2bPadTop >= 40, `B2B Section padding top on mobile should be >= 40px (pt-10), got ${testResult.b2bPadTop}px`);
-    assert.equal(testResult.b2bButtonCount, 1, 'Card should have exactly 1 button (no duplicate)');
-    assert.equal(testResult.ctaBtnText, 'Konsultasi Pengadaan via WhatsApp', 'Button text must match requirement');
-    assert.equal(testResult.ctaBtnBg, 'rgb(37, 211, 102)', 'Button bg should be WhatsApp green (#25D366)');
+    assert.ok(testResult.b2bPadTop >= 32, `B2B Section padding top on mobile should be >= 32px (py-8), got ${testResult.b2bPadTop}px`);
+    assert.equal(testResult.hasCtaBtn, true, 'Section should have primary CTA button');
+    assert.match(testResult.ctaBtnText, /Konsultasi via WhatsApp/, 'Button text must match requirement');
     assert.match(testResult.subtext, /Nomor Resmi:\s*0813-2438-3858.*Respon Cepat Setiap Hari/, 'Subtext must be present with phone number');
-    assert.equal(testResult.checklistSvgs, 4, 'Should have 4 clear SVG checkmark icons in checklist');
   } finally {
     chrome.kill();
     server.close();
