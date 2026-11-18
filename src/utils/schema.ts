@@ -20,7 +20,14 @@ export function generateWebSiteSchema(siteUrl: string = DEFAULT_SITE_URL) {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Dzanis Catering",
-    alternateName: ["Dzanis Katering", "Dzanis Catering Ciayumajakuning"],
+    alternateName: [
+      "Dzanis Katering",
+      "Dzanis Catering Majalengka",
+      "Catering Majalengka",
+      "Katering Majalengka",
+      "Dzanis Catering Ciayumajakuning",
+      "Catering Ciayumajakuning",
+    ],
     url: `${site}/`,
   };
 }
@@ -43,7 +50,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
     "@id": `${site}/#organization`,
     name: company.name,
     legalName: company.name,
-    description: "Dzanis Catering adalah penyedia jasa catering & katering terpercaya di Ciayumajakuning (Kabupaten Majalengka, Cirebon, Indramayu, Kuningan). Melayani prasmanan kantor & acara, paket nasi box (nasi kotak), snack box custom, nasi tumpeng, hingga paket konsumsi syukuran dan harian dengan sajian higienis serta cita rasa khas masakan rumahan.",
+    description: "Dzanis Catering adalah penyedia jasa catering & katering terpercaya di Kabupaten Majalengka dan seluruh Ciayumajakuning (Cirebon, Indramayu, Kuningan). Melayani prasmanan kantor & acara, paket nasi box (nasi kotak), snack box custom, nasi tumpeng, hingga paket konsumsi syukuran dan harian dengan sajian higienis serta cita rasa khas masakan rumahan.",
     url: site,
     telephone: formattedPhone,
     priceRange: "Rp20.000 - Rp75.000",
@@ -66,11 +73,13 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
       longitude: 108.2277
     },
     areaServed: [
-      { "@type": "AdministrativeArea", name: "Ciayumajakuning" },
+      { "@type": "AdministrativeArea", name: "Kabupaten Majalengka" },
       { "@type": "AdministrativeArea", name: "Majalengka" },
-      { "@type": "AdministrativeArea", name: "Cirebon" },
-      { "@type": "AdministrativeArea", name: "Indramayu" },
-      { "@type": "AdministrativeArea", name: "Kuningan" }
+      { "@type": "AdministrativeArea", name: "Kota Cirebon" },
+      { "@type": "AdministrativeArea", name: "Kabupaten Cirebon" },
+      { "@type": "AdministrativeArea", name: "Kabupaten Indramayu" },
+      { "@type": "AdministrativeArea", name: "Kabupaten Kuningan" },
+      { "@type": "AdministrativeArea", name: "Ciayumajakuning" }
     ],
     openingHoursSpecification: [
       {
@@ -90,7 +99,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
     ],
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "Layanan Lengkap Dzanis Catering & Katering Ciayumajakuning",
+      name: "Layanan Lengkap Dzanis Catering Majalengka & Ciayumajakuning",
       itemListElement: [
         {
           "@type": "OfferCatalog",
@@ -178,7 +187,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
         {
           "@type": "MenuSection",
           name: "Paket Nasi Kotak",
-          description: "Pilihan paket nasi kotak higienis lengkap dengan alat makan steril untuk berbagai acara di Ciayumajakuning.",
+          description: "Pilihan paket nasi kotak higienis lengkap dengan alat makan steril untuk berbagai acara di Majalengka & Ciayumajakuning.",
           hasMenuItem: nasiKotakItems.map((item) => ({
             "@type": "MenuItem",
             name: formatNamaPaket(item.nama),
