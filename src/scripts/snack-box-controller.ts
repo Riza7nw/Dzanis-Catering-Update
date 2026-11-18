@@ -24,6 +24,15 @@ function formatRp(num: number): string {
   return 'Rp' + (Number(num) || 0).toLocaleString('id-ID');
 }
 
+function escapeHtml(str: string): string {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 interface BackendSnackItemDto {
   id: string;
   name: string;
@@ -54,11 +63,11 @@ function getOrCreateCategoryGrid(root: HTMLElement, categoryName: string): HTMLE
     <div class="flex items-center gap-2.5 mb-4">
       <span class="size-2 rounded-full bg-accent"></span>
       <h3 class="font-heading text-lg font-semibold text-neutral-900">
-        ${categoryName}
+        ${escapeHtml(categoryName)}
       </h3>
       <span class="text-xs text-neutral-500 font-mono category-header-count">(0 pilihan)</span>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" data-category-grid="${categoryName}"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" data-category-grid="${escapeHtml(categoryName)}"></div>
   `;
 
   if (wrapper) {
@@ -79,10 +88,10 @@ function getOrCreateCategoryGrid(root: HTMLElement, categoryName: string): HTMLE
       'category-filter-btn group/catbtn relative shrink-0 rounded-full px-4 sm:px-5 py-2.5 min-h-[44px] text-xs font-semibold transition-all cursor-pointer border border-divider bg-surface text-neutral-700 hover:bg-neutral-200/70 aria-pressed:bg-accent aria-pressed:text-bg aria-pressed:border-accent shadow-xs flex items-center gap-1.5 touch-manipulation';
     btn.setAttribute('aria-label', `${categoryName} (0 pilihan)`);
     btn.innerHTML = `
-      <span class="category-name">${categoryName}</span>
+      <span class="category-name">${escapeHtml(categoryName)}</span>
       <span class="text-[10px] opacity-70 category-pill-count">(0)</span>
       <span
-        data-selected-count="${categoryName}"
+        data-selected-count="${escapeHtml(categoryName)}"
         data-count="0"
         hidden
         class="ml-0.5 data-[count='0']:hidden inline-flex size-5 rounded-full bg-accent text-bg group-aria-pressed/catbtn:bg-white/25 group-aria-pressed/catbtn:text-white text-[10px] items-center justify-center font-bold"
@@ -257,15 +266,15 @@ async function syncSnackCatalogFromBackend(
           <input
             type="checkbox"
             name="snack-choice"
-            value="${item.name}"
-            data-nama="${item.name}"
+            value="${escapeHtml(item.name)}"
+            data-nama="${escapeHtml(item.name)}"
             data-price="${price}"
-            data-kategori="${item.category || 'Lainnya'}"
+            data-kategori="${escapeHtml(item.category || 'Lainnya')}"
             ${!isActive ? 'disabled' : ''}
             class="size-5 rounded border-neutral-400 text-accent focus:ring-accent accent-accent cursor-pointer touch-manipulation"
           />
           <span class="text-sm font-medium text-neutral-900 truncate">
-            ${item.name}
+            ${escapeHtml(item.name)}
           </span>
         </div>
         <span class="snack-item-price text-xs font-semibold text-accent-700 whitespace-nowrap">
@@ -394,10 +403,14 @@ async function syncSnackCatalogFromBackend(
       headers['ngrok-skip-browser-warning'] = 'true';
     }
 
+    const fetchSignal = typeof AbortSignal.any === 'function'
+      ? AbortSignal.any([signal, AbortSignal.timeout(DEFAULT_TIMEOUT_MS)])
+      : signal;
+
     const res = await fetch(`${apiBase}/api/snack-items?all=true&t=${Date.now()}`, {
       headers,
       cache: 'no-cache',
-      signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
+      signal: fetchSignal,
     });
 
     if (res.ok) {

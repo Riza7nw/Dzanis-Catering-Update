@@ -193,15 +193,6 @@ function normalizeCertDto(dto: BackendCertDto, index = 0): ShowcaseCertificateIt
   } else {
     docUrl = '';
   }
-  if (typeof docUrl === 'string') {
-    if (docUrl.startsWith('uploads/')) {
-      docUrl = '/' + docUrl;
-    }
-    if (docUrl.startsWith('/uploads/')) {
-      const apiBase = getApiBaseUrl();
-      docUrl = `${apiBase}${docUrl}`;
-    }
-  }
   const fileType: 'image' | 'pdf' = dto.file_type === 'pdf' || (typeof docUrl === 'string' && docUrl.toLowerCase().endsWith('.pdf')) ? 'pdf' : 'image';
 
   return {

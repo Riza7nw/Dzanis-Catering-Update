@@ -4,8 +4,11 @@
  * mengikuti sesi aktif WhatsApp di Back-End (Baileys), dengan fallback default ke nomor resmi.
  */
 
-export const DEFAULT_FALLBACK_PHONE = '6281324383858';
-export const DEFAULT_FALLBACK_DISPLAY = '0813-2438-3858';
+import { waPhoneNumber, company } from '../data/company.ts';
+import { getApiBaseUrl } from '../services/api/apiConfig.ts';
+
+export const DEFAULT_FALLBACK_PHONE = waPhoneNumber;
+export const DEFAULT_FALLBACK_DISPLAY = company.contact.whatsappDisplay;
 
 export const CACHE_KEY_PHONE = 'dzanis_active_phone';
 export const CACHE_KEY_DISPLAY = 'dzanis_active_phone_display';
@@ -76,27 +79,10 @@ export function replaceTelLinkPhone(url: string, newPhone: string): string {
 }
 
 /**
- * Mendeteksi base URL backend
+ * Mendeteksi base URL backend aman (mencegah pembajakan via origin tak sah)
  */
 export function resolveApiBase(): string {
-  if (typeof window === 'undefined') return 'https://dzaniez-back.ethiodeploy.app';
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryApi = urlParams.get('apiUrl');
-    if (queryApi) return queryApi.replace(/\/+$/, '');
-
-    const h = window.location.hostname;
-    const isLocal =
-      h === 'localhost' ||
-      h === '127.0.0.1' ||
-      h.startsWith('192.168.') ||
-      h.startsWith('10.') ||
-      h.endsWith('.local');
-    if (isLocal) {
-      return `${window.location.protocol}//${h || '127.0.0.1'}:8000`;
-    }
-  } catch {}
-  return 'https://dzaniez-back.ethiodeploy.app';
+  return getApiBaseUrl();
 }
 
 /**

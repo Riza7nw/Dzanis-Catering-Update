@@ -57,3 +57,14 @@ Consult these guides before working on related tasks:
   - Seluruh pesan commit Git, judul pembaruan, dan catatan rilis harus selalu menggunakan bahasa bisnis aplikasi standar (misal: "integrasi sambungan API", "sinkronisasi layanan pesanan", "pembaruan modul jembatan data").
   - Dilarang keras mempublikasikan istilah teknis tingkat rendah atau penanda pengesahan data pada pesan commit publik.
 
+## Keamanan Endpoint API & Isolasi Parameter Dinamis (?apiUrl=)
+
+- **Batasan Akses Parameter `?apiUrl=` (Anti-Hijacking & Anti-Exfiltration)**:
+  - Parameter URL `?apiUrl=` **hanya boleh aktif pada lingkungan lokal/pengujian** (`localhost`, `127.0.0.1`, IP privat `192.168.x`/`10.x`, domain internal `*.ethiodeploy.app`, atau tunneling `*.ngrok*`).
+  - Pada lingkungan produksi publik (`dzanis-catering-update.vercel.app` atau domain rilis), parameter `?apiUrl=` dari domain asing yang tidak sah **wajib ditolak** oleh helper `isAllowedApiOrigin()` di `src/services/api/apiConfig.ts` dan skrip prefetch `<head>` di `BaseLayout.astro`.
+  - Hal ini melindungi pelanggan dari skenario phishing di mana penyerang menyebarkan tautan berisi `?apiUrl=https://attacker.com` untuk membelokkan nomor kontak WhatsApp atau mencuri mutasi data pesanan (lead exfiltration).
+- **Pertimbangan Trade-off & Alternatif**:
+  - *Trade-off Whitelist*: Jika server backend dipindahkan ke domain baru (misal: `api.dzaniscatering.com` atau domain custom), domain tersebut wajib didaftarkan pada whitelist `isAllowedApiOrigin()` di `src/services/api/apiConfig.ts` dan skrip prefetch `BaseLayout.astro`.
+  - *Alternatif Local-Only*: Alternatif yang lebih ringkas dan bebas perawatan berkala adalah membatasi `?apiUrl=` murni ketika `isLocal === true`. Pada domain produksi luar, web selalu mengunci target ke `DEFAULT_BACKEND_URL` (`https://dzaniez-back.ethiodeploy.app` atau `PUBLIC_API_URL`).
+
+

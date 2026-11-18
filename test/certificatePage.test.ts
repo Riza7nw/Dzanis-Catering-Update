@@ -134,6 +134,6 @@ test('Built HTML contains CertB2BProcurementCta safe padding and single CTA', ()
   assert.match(html, /Konsultasi via WhatsApp/);
 
   // Subtext with phone number
-  assert.match(html, /Nomor Resmi: <strong class="text-text font-semibold">0813-2438-3858<\/strong> &bull; Respon Cepat Setiap Hari/);
+  assert.match(html, /Nomor Resmi: <strong class="text-text font-semibold"( data-contact-phone-display)?>0813-2438-3858<\/strong> &bull; Respon Cepat Setiap Hari/);
 });
 

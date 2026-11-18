@@ -53,28 +53,25 @@ test('📞 contact-sync: replaceTelLinkPhone mengganti nomor pada tautan tel:', 
 });
 
 test('📞 contact-sync: applyPhoneToDom memperbarui link, atribut data, dan teks nomor pada DOM simulasi', () => {
-  // Buat mock elemen DOM sederhana
-  const mockElements: Array<{ href?: string; dataset: Record<string, string>; textContent?: string; attributes: Record<string, string> }> = [];
-
   const linkWa = {
     href: 'https://wa.me/6281324383858?text=Tes',
-    dataset: {},
-    attributes: { href: 'https://wa.me/6281324383858?text=Tes' },
+    dataset: {} as Record<string, string>,
+    attributes: { href: 'https://wa.me/6281324383858?text=Tes' } as Record<string, string>,
     getAttribute(k: string) { return this.attributes[k]; },
     setAttribute(k: string, v: string) { this.attributes[k] = v; this.href = v; }
   };
 
   const modalEl = {
-    dataset: { phone: '6281324383858' },
-    attributes: {},
+    dataset: { phone: '6281324383858' } as Record<string, string>,
+    attributes: {} as Record<string, string>,
     getAttribute(k: string) { return this.attributes[k]; },
     setAttribute(k: string, v: string) { this.attributes[k] = v; }
   };
 
   const displayEl = {
     textContent: '0813-2438-3858',
-    dataset: { contactPhoneDisplay: '' },
-    attributes: {},
+    dataset: { contactPhoneDisplay: '' } as Record<string, string>,
+    attributes: {} as Record<string, string>,
     getAttribute(k: string) { return this.attributes[k]; },
     setAttribute(k: string, v: string) { this.attributes[k] = v; }
   };
@@ -84,31 +81,29 @@ test('📞 contact-sync: applyPhoneToDom memperbarui link, atribut data, dan tek
   const originalWindow = globalThis.window;
 
   let eventDispatched = false;
-  // @ts-expect-error Mocking window
   globalThis.window = {
-    dispatchEvent(evt: CustomEvent) {
-      if (evt.type === 'dzanis:contact-updated') {
+    dispatchEvent(evt: Event) {
+      if ((evt as CustomEvent).type === 'dzanis:contact-updated') {
         eventDispatched = true;
       }
       return true;
     }
-  };
+  } as unknown as Window & typeof globalThis;
 
-  // @ts-expect-error Mocking document
   globalThis.document = {
     querySelectorAll(selector: string) {
       if (selector.includes('wa.me')) {
-        return [linkWa];
+        return [linkWa] as unknown as NodeListOf<HTMLAnchorElement>;
       }
       if (selector.includes('[data-phone]')) {
-        return [modalEl];
+        return [modalEl] as unknown as NodeListOf<HTMLElement>;
       }
       if (selector.includes('[data-contact-phone-display]')) {
-        return [displayEl];
+        return [displayEl] as unknown as NodeListOf<HTMLElement>;
       }
-      return [];
+      return [] as unknown as NodeListOf<HTMLElement>;
     }
-  };
+  } as unknown as Document;
 
   try {
     applyPhoneToDom('089876543210', '0898-7654-3210');

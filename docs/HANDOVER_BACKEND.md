@@ -540,6 +540,13 @@ To ensure defensive operation, the backend must guard against the following clie
 - **Target Coverage**: Majalengka, Cirebon (Kota & Kabupaten), Indramayu, and Kuningan.
 - **Backend Requirement**: For locations explicitly outside these regencies, respond with an advisory flag `out_of_coverage: true`, indicating to the customer that customized long-distance logistics fees apply.
 
+### 5. Client-Side API Base URL Resolution & Whitelist Policy
+To facilitate local integration testing (`test/*.test.ts`) and headless browser CDP tests without hardcoding environment variables into production assets:
+- **Dynamic Routing Overrides**: The frontend allows local parameter overrides via `?apiUrl=` strictly under verified development / internal origins (`localhost`, `127.0.0.1`, `*.ethiodeploy.app`, `*.ngrok*`).
+- **Production Defense**: Arbitrary external domains passed via `?apiUrl=` in public browsers are unconditionally rejected by `isAllowedApiOrigin()` (`src/services/api/apiConfig.ts`) and the prefetch bootstrap in `src/layouts/BaseLayout.astro`. This prevents malicious actors from distributing phishing links that hijack WhatsApp order destinations or exfiltrate lead submissions to unauthorized servers.
+- **Backend Domain Migration Notice**: If the backend REST server moves from `https://dzaniez-back.ethiodeploy.app` to a custom domain (e.g., `https://api.dzaniscatering.com`), add the new domain to `isAllowedApiOrigin()` in `src/services/api/apiConfig.ts` and the `<head>` prefetch script in `src/layouts/BaseLayout.astro`.
+
+
 ---
 
 ## V. Migration Strategy (Phased Rollout)

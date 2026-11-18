@@ -556,13 +556,21 @@ const menuKatalog = await getMenuCatalog();
   (async function() {
     try {
       const MENU_CACHE_KEY = 'dzanis_menu_cache_v2';
-      const MENU_CACHE_TTL = 10 * 60 * 1000; // 10 menit
 
       const grid = document.getElementById('paket-grid');
       const prevBtn = document.getElementById('paket-prev');
       const nextBtn = document.getElementById('paket-next');
       const dotsContainer = document.getElementById('paket-dots');
       if (!grid) return;
+
+      const escapeHtml = (str) => {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      };
 
       const resolvePhotoUrl = (img, apiUrl) => {
         if (!img) return '/images/menu/paket-20k.webp';
@@ -637,14 +645,16 @@ const menuKatalog = await getMenuCatalog();
 
         grid.innerHTML = packages.map((p, idx) => {
           const rawNama = p.name || p.nama || p.title || 'Paket Menu';
-          const nama = rawNama.replace(/\s*\d+K$/i, '').trim();
+          const nama = escapeHtml(rawNama.replace(/\s*\d+K$/i, '').trim());
           const harga = Number(p.price_per_pax || p.harga || p.price || 0);
           const slug = p.slug || (p.id ? String(p.id) : 'paket');
           const rawImg = p.image || p.foto || p.gambar || '';
           const foto = resolvePhotoUrl(rawImg, apiUrl);
-          const deskripsi = p.description || p.deskripsiSingkat || p.deskripsi_singkat || p.deskripsi || 'Pilihan menu lezat higienis Dzanis Catering.';
+          const rawDeskripsi = p.description || p.deskripsiSingkat || p.deskripsi_singkat || p.deskripsi || 'Pilihan menu lezat higienis Dzanis Catering.';
+          const deskripsi = escapeHtml(rawDeskripsi);
           const isPopular = p.isPopular || p.is_popular || p.populer;
-          const badge = p.badge || (isPopular ? 'FAVORIT' : (p.category ? p.category : null));
+          const rawBadge = p.badge || (isPopular ? 'FAVORIT' : (p.category ? p.category : null));
+          const badge = rawBadge ? escapeHtml(rawBadge) : null;
           const items = Array.isArray(p.items) ? p.items : (p.menuUtama || p.menu_utama || []);
           const laukPendamping = Array.isArray(p.laukPendamping) ? p.laukPendamping : (p.lauk_pendamping || []);
           const tags = Array.isArray(p.tags) ? p.tags : (Array.isArray(p.badges) ? p.badges : (Array.isArray(items) ? items.slice(0, 3) : []));
@@ -668,7 +678,7 @@ const menuKatalog = await getMenuCatalog();
                   decoding="async"
                   draggable="false"
                   class="h-full w-full object-cover transition-transform duration-300 hover:scale-105 pointer-events-none select-none"
-                  onerror="if(!this.dataset.retryLocal && this.src.includes('/uploads/')){this.dataset.retryLocal='true';this.src='${rawImg}';}else{this.onerror=null;this.src='/images/menu/paket-20k.webp';}"
+                  onerror="if(!this.dataset.retryLocal && this.src.includes('/uploads/')){this.dataset.retryLocal='true';this.src='${escapeHtml(rawImg)}';}else{this.onerror=null;this.src='/images/menu/paket-20k.webp';}"
                 />
                 ${badge ? `
                   <span class="absolute top-3 left-3 rounded-full bg-[#C04A27] px-2.5 py-1 font-heading text-[10px] tracking-[0.05em] text-white font-bold uppercase shadow-sm">
@@ -705,7 +715,7 @@ const menuKatalog = await getMenuCatalog();
                 <div class="flex flex-wrap gap-1.5 mb-4">
                   ${tags.map(tag => `
                     <span class="inline-flex items-center rounded-full bg-white text-neutral-900 border border-neutral-300 font-medium px-2.5 py-0.5 text-xs">
-                      ✓ ${tag}
+                      ✓ ${escapeHtml(tag)}
                     </span>
                   `).join('')}
                 </div>
@@ -716,7 +726,7 @@ const menuKatalog = await getMenuCatalog();
                   ${items.slice(0, 4).map(item => `
                     <p class="text-xs text-neutral-900 flex items-start gap-1.5 leading-snug">
                       <span class="text-[#C04A27] font-bold flex-none">•</span>
-                      <span>${item}</span>
+                      <span>${escapeHtml(item)}</span>
                     </p>
                   `).join('')}
                   ${items.length > 4 ? `
@@ -732,7 +742,7 @@ const menuKatalog = await getMenuCatalog();
                     <span aria-hidden="true" class="text-sm font-bold group-open:rotate-45 transition-transform duration-200">+</span>
                   </summary>
                   <ul class="mt-2 space-y-1 text-xs text-neutral-900 pl-2">
-                    ${laukPendamping.map(lauk => `<li>• ${lauk}</li>`).join('')}
+                    ${laukPendamping.map(lauk => `<li>• ${escapeHtml(lauk)}</li>`).join('')}
                   </ul>
                 </details>
                 ` : ''}
@@ -780,7 +790,26 @@ const menuKatalog = await getMenuCatalog();
         });
       };
 
-      // 1. Coba render instan dari localStorage (persisten lintas-sesi/tab: 0ms render)
+      // 1. Resolve target API URL terlebih dahulu agar tersedia untuk cache dan fetch
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryApi = urlParams.get('apiUrl');
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
+      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
+      let isAllowedQueryApi = false;
+      if (queryApi) {
+        try {
+          const qHost = new URL(queryApi.startsWith('http') ? queryApi : `http://${queryApi}`).hostname;
+          isAllowedQueryApi = qHost === 'localhost' || qHost === '127.0.0.1' || qHost.startsWith('192.168.') || qHost.endsWith('.ethiodeploy.app') || qHost.includes('ngrok');
+        } catch {}
+      }
+      const rawApiUrl = (queryApi && isAllowedQueryApi) ? queryApi : (isLocal ? defaultLocalApi : (publicApiUrl || 'https://dzaniez-back.ethiodeploy.app'));
+      const apiUrl = (rawApiUrl && rawApiUrl.startsWith('http://') && !rawApiUrl.includes('localhost') && !rawApiUrl.includes('127.0.0.1'))
+        ? rawApiUrl.replace(/^http:\/\//i, 'https://')
+        : rawApiUrl;
+      if (!apiUrl) return;
+
+      // 2. Render instan dari localStorage (persisten lintas-sesi/tab: 0ms render)
       try {
         const cachedRaw = localStorage.getItem(MENU_CACHE_KEY) || sessionStorage.getItem(MENU_CACHE_KEY);
         if (cachedRaw) {
@@ -796,18 +825,6 @@ const menuKatalog = await getMenuCatalog();
       } catch (cacheErr) {
         // Abaikan jika storage disabled/quota
       }
-
-      // 2. Resolve target API URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const queryApi = urlParams.get('apiUrl');
-      const hostname = window.location.hostname;
-      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
-      const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
-      const rawApiUrl = queryApi || (isLocal ? defaultLocalApi : (publicApiUrl || 'https://dzaniez-back.ethiodeploy.app'));
-      const apiUrl = (rawApiUrl && rawApiUrl.startsWith('http://') && !rawApiUrl.includes('localhost') && !rawApiUrl.includes('127.0.0.1'))
-        ? rawApiUrl.replace(/^http:\/\//i, 'https://')
-        : rawApiUrl;
-      if (!apiUrl) return;
 
       // 3. Manfaatkan early prefetch dari <head> jika sudah ada
       let rawPackages = null;

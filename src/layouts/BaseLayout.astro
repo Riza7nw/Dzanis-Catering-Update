@@ -1,10 +1,10 @@
 ---
-import '@fontsource-variable/plus-jakarta-sans';
-import '../styles/global.css';
-import OrderModal from '../components/interactive/OrderModal.astro';
-import { ClientRouter } from 'astro:transitions';
-import { company } from '../data/company';
-import { generateWebSiteSchema } from '../data/schema';
+import "@fontsource-variable/plus-jakarta-sans";
+import "../styles/global.css";
+import OrderModal from "../components/interactive/OrderModal.astro";
+import { ClientRouter } from "astro:transitions";
+import { company } from "../data/company";
+import { generateWebSiteSchema } from "../data/schema";
 
 interface Props {
   title: string;
@@ -20,23 +20,33 @@ const {
   description = company.description,
   schema,
   useTransitions = true,
-  image = '/images/menu/hero-nasi-kotak.jpg',
+  image = "/images/menu/hero-nasi-kotak.jpg",
   canonicalUrl,
 } = Astro.props;
 
-const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://dzanis-catering-update.vercel.app';
-const currentUrl = canonicalUrl || new URL(Astro.url.pathname, siteUrl).toString();
-const ogImageUrl = image.startsWith('http') ? image : `${siteUrl}${image.startsWith('/') ? '' : '/'}${image}`;
+const siteUrl = Astro.site
+  ? Astro.site.toString().replace(/\/$/, "")
+  : "https://dzanis-catering-update.vercel.app";
+const currentUrl =
+  canonicalUrl || new URL(Astro.url.pathname, siteUrl).toString();
+const ogImageUrl = image.startsWith("http")
+  ? image
+  : `${siteUrl}${image.startsWith("/") ? "" : "/"}${image}`;
 
-const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
+const isHomePage = Astro.url.pathname === "/" || Astro.url.pathname === "";
 const hasWebSiteSchema = Array.isArray(schema)
-  ? schema.some((item) => (item as Record<string, unknown>)?.['@type'] === 'WebSite')
-  : (schema as Record<string, unknown> | undefined)?.['@type'] === 'WebSite';
+  ? schema.some(
+      (item) => (item as Record<string, unknown>)?.["@type"] === "WebSite",
+    )
+  : (schema as Record<string, unknown> | undefined)?.["@type"] === "WebSite";
 const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
 ---
 
 <!doctype html>
-<html lang="id" class="scroll-smooth w-full max-w-full overflow-x-clip relative m-0 p-0">
+<html
+  lang="id"
+  class="scroll-smooth w-full max-w-full overflow-x-clip relative m-0 p-0"
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,7 +54,12 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
     <!-- Google Favicon & Touch Icons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/favicon-192x192.png"
+    />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -75,26 +90,65 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
     {useTransitions && <ClientRouter />}
 
     <!-- Network Optimization: Preconnect & Preload API Backend -->
-    <link rel="preconnect" href="https://dzaniez-back.ethiodeploy.app" crossorigin />
+    <link
+      rel="preconnect"
+      href="https://dzaniez-back.ethiodeploy.app"
+      crossorigin
+    />
     <link rel="dns-prefetch" href="https://dzaniez-back.ethiodeploy.app" />
-    <link rel="preload" href="https://dzaniez-back.ethiodeploy.app/api/menu" as="fetch" crossorigin="anonymous" />
+    <link
+      rel="preload"
+      href="https://dzaniez-back.ethiodeploy.app/api/menu"
+      as="fetch"
+      crossorigin="anonymous"
+    />
 
     <!-- Early Eager Prefetch: Jalankan request API katalog di <head> sebelum DOM/gambar selesai -->
     <script is:inline>
-      (function() {
+      (function () {
         try {
           var urlParams = new URLSearchParams(window.location.search);
           var h = window.location.hostname;
-          var isLocal = h === 'localhost' || h === '127.0.0.1' || h.indexOf('192.168.') === 0 || h.indexOf('10.') === 0 || h.slice(-6) === '.local';
-          var defLocal = window.location.protocol + '//' + (h || '127.0.0.1') + ':8000';
-          var api = urlParams.get('apiUrl') || (isLocal ? defLocal : 'https://dzaniez-back.ethiodeploy.app');
-          
-          window.__DZANIS_MENU_PROMISE__ = fetch(api + '/api/menu', {
-            headers: { 'Accept': 'application/json' }
-          }).then(function(r) {
-            return (r && r.ok) ? r.json() : null;
-          }).catch(function() { return null; });
-        } catch(e) {}
+          var isLocal =
+            h === "localhost" ||
+            h === "127.0.0.1" ||
+            h.indexOf("192.168.") === 0 ||
+            h.indexOf("10.") === 0 ||
+            h.slice(-6) === ".local";
+          var defLocal =
+            window.location.protocol + "//" + (h || "127.0.0.1") + ":8000";
+          var qApi = urlParams.get("apiUrl");
+          var isAllowed = false;
+          if (qApi) {
+            try {
+              var qHost = new URL(
+                qApi.indexOf("http") === 0 ? qApi : "http://" + qApi,
+              ).hostname;
+              isAllowed =
+                qHost === "localhost" ||
+                qHost === "127.0.0.1" ||
+                qHost.indexOf("192.168.") === 0 ||
+                qHost.slice(-16) === ".ethiodeploy.app" ||
+                qHost.indexOf("ngrok") !== -1;
+            } catch (e) {}
+          }
+          var api =
+            qApi && isAllowed
+              ? qApi
+              : isLocal
+                ? defLocal
+                : "https://dzaniez-back.ethiodeploy.app";
+
+          window.__DZANIS_MENU_PROMISE__ = fetch(api + "/api/menu", {
+            headers: { Accept: "application/json" },
+          })
+            .then(function (r) {
+              return r && r.ok ? r.json() : null;
+            })
+            .catch(function () {
+              return null;
+            });
+        } catch (e) {}
       })();
     </script>
 
@@ -115,7 +169,6 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
         set:html={JSON.stringify(schema, null, 2)}
       />
     )}
-
   </head>
   <body class="w-full max-w-full overflow-x-clip relative m-0 p-0 min-h-screen bg-bg text-text antialiased">
     <a
@@ -129,7 +182,7 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
     </div>
     <OrderModal />
     <script>
-      import '../scripts/contact-sync';
+      import "../scripts/contact-sync";
     </script>
   </body>
 </html>

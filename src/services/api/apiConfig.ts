@@ -29,6 +29,31 @@ export function enforceSecureUrl(url: string): string {
 }
 
 /**
+ * Memvalidasi apakah URL origin aman dan diizinkan sebagai target API backend.
+ * Mencegah eksfiltrasi data pesanan dan pembajakan nomor kontak via parameter ?apiUrl=.
+ */
+export function isAllowedApiOrigin(url: string): boolean {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url.startsWith('http') ? url : `http://${url}`);
+    const host = parsed.hostname;
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host.startsWith('192.168.') ||
+      host.startsWith('10.') ||
+      host.endsWith('.local') ||
+      host.endsWith('.ethiodeploy.app') ||
+      host.endsWith('.ngrok-free.app') ||
+      host.endsWith('.ngrok.io') ||
+      host.endsWith('.ngrok.app')
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Mengambil base URL API backend yang aktif (terenkripsi HTTPS pada production).
  */
 export function getApiBaseUrl(): string {
@@ -37,7 +62,7 @@ export function getApiBaseUrl(): string {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const queryApi = urlParams.get('apiUrl');
-      if (queryApi) return enforceSecureUrl(queryApi);
+      if (queryApi && isAllowedApiOrigin(queryApi)) return enforceSecureUrl(queryApi);
 
       const hostname = window.location.hostname;
       const isLocal =
