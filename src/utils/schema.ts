@@ -8,7 +8,7 @@ import { DAFTAR_PAKET, type Paket, formatNamaPaket } from '../data/paket.ts';
 import { DAFTAR_LAYANAN_LAIN } from '../data/layananLain.ts';
 import { snackRingkasan } from '../data/snack.ts';
 
-export const DEFAULT_SITE_URL = "https://dzanis-catering-update.vercel.app";
+export const DEFAULT_SITE_URL = "https://dzaniscatering.web.id";
 
 /**
  * Menghasilkan JSON-LD schema WebSite sesuai standar Google Search Site Name.

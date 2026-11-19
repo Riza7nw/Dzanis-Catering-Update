@@ -61,10 +61,36 @@ Consult these guides before working on related tasks:
 
 - **Batasan Akses Parameter `?apiUrl=` (Anti-Hijacking & Anti-Exfiltration)**:
   - Parameter URL `?apiUrl=` **hanya boleh aktif pada lingkungan lokal/pengujian** (`localhost`, `127.0.0.1`, IP privat `192.168.x`/`10.x`, domain internal `*.ethiodeploy.app`, atau tunneling `*.ngrok*`).
-  - Pada lingkungan produksi publik (`dzanis-catering-update.vercel.app` atau domain rilis), parameter `?apiUrl=` dari domain asing yang tidak sah **wajib ditolak** oleh helper `isAllowedApiOrigin()` di `src/services/api/apiConfig.ts` dan skrip prefetch `<head>` di `BaseLayout.astro`.
+  - Pada lingkungan produksi publik (`dzaniscatering.web.id`, `dzanis-catering-update.vercel.app` atau domain rilis), parameter `?apiUrl=` dari domain asing yang tidak sah **wajib ditolak** oleh helper `isAllowedApiOrigin()` di `src/services/api/apiConfig.ts` dan skrip prefetch `<head>` di `BaseLayout.astro`.
   - Hal ini melindungi pelanggan dari skenario phishing di mana penyerang menyebarkan tautan berisi `?apiUrl=https://attacker.com` untuk membelokkan nomor kontak WhatsApp atau mencuri mutasi data pesanan (lead exfiltration).
 - **Pertimbangan Trade-off & Alternatif**:
   - *Trade-off Whitelist*: Jika server backend dipindahkan ke domain baru (misal: `api.dzaniscatering.com` atau domain custom), domain tersebut wajib didaftarkan pada whitelist `isAllowedApiOrigin()` di `src/services/api/apiConfig.ts` dan skrip prefetch `BaseLayout.astro`.
   - *Alternatif Local-Only*: Alternatif yang lebih ringkas dan bebas perawatan berkala adalah membatasi `?apiUrl=` murni ketika `isLocal === true`. Pada domain produksi luar, web selalu mengunci target ke `DEFAULT_BACKEND_URL` (`https://dzaniez-back.ethiodeploy.app` atau `PUBLIC_API_URL`).
+
+## Review-First & Strict Commit Invariant
+
+- **Perintah Ubah Kode Bukan Izin Komit**: Ketika pengguna meminta modifikasi kode (misal: "iya lakukan", "terapkan", "ubah kalimat ini"), agen **HANYA** boleh memodifikasi berkas di direktori kerja (*working tree*) agar pengguna tetap dapat meninjau perbandingan *diff Before/After* di tab Source Control editor.
+- **Larangan Komit Tanpa Instruksi Eksplisit**: Dilarang keras menjalankan `git commit` atau `git push` sebelum pengguna secara gamblang memerintahkan untuk komit/push (misal: "push", "commit", "oke mantap push").
+
+## Standar CI/CD & Deploy Cloudflare Pages (pnpm v11+)
+
+- **Otorisasi Skrip Build Cloudflare (`allowBuilds`)**:
+  - Jika proyek terhubung ke Cloudflare Pages dengan runner `pnpm`, berkas `pnpm-workspace.yaml` wajib menyertakan otorisasi modul kompilasi deploy:
+    ```yaml
+    allowBuilds:
+      esbuild: true
+      workerd: true
+    ```
+  - Hal ini mencegah kegagalan deploy `[ERR_PNPM_IGNORED_BUILDS]` akibat kebijakan keamanan skrip bawaan pnpm versi 11/12.
+- **Integritas Berkas Kunci (Lockfile Integrity)**:
+  - Setiap penambahan atau penghapusan paket dependensi wajib menyinkronkan kedua berkas `package-lock.json` dan `pnpm-lock.yaml` guna memenuhi syarat validasi `--frozen-lockfile` di lingkungan build serverless.
+
+## Local-First SEO & Geotargeting Standards
+
+- **Prinsip Local-First (Majalengka Primer, Ciayumajakuning Sekunder)**:
+  - Dzanis Catering beroperasi secara fisik di Kabupaten Majalengka dengan jangkauan pengantaran se-Ciayumajakuning.
+  - Tag `<title>`, heading `<h1>`, deskripsi meta, dan structured data Schema.org (`areaServed`, `alternateName`) **wajib selalu mencantumkan "Majalengka" / "Catering Majalengka" di posisi terdepan (bobot tertinggi)** sebelum mencantumkan wilayah regional "Ciayumajakuning".
+  - Jangan pernah menghapus atau menggeser kata kunci lokal kota spesifik demi kata kunci regional, karena 90%+ niat pencarian (*search intent*) pelanggan lokal menggunakan nama kota/kabupaten.
+
 
 

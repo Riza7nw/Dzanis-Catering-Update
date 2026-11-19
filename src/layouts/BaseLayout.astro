@@ -26,7 +26,7 @@ const {
 
 const siteUrl = Astro.site
   ? Astro.site.toString().replace(/\/$/, "")
-  : "https://dzanis-catering-update.vercel.app";
+  : "https://dzaniscatering.web.id";
 const currentUrl =
   canonicalUrl || new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = image.startsWith("http")

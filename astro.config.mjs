@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://dzanis-catering-update.vercel.app",
+  site: "https://dzaniscatering.web.id",
   integrations: [sitemap()],
   server: {
     host: '0.0.0.0',
