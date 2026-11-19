@@ -24,6 +24,13 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/leaflet": "^1.9.22",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.164.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
   }
 }
