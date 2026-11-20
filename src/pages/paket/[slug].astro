@@ -22,19 +22,24 @@ export async function getStaticPaths() {
     allPackagesMap.set(p.slug, p);
   }
 
-  // 2. Overlay data dari database backend khusus 4 paket resmi
+  // 2. Overlay dan sertakan paket baru dari database SSOT
   for (const p of catalog) {
-    if (!p.slug || !allPackagesMap.has(p.slug)) continue;
-    const existing = allPackagesMap.get(p.slug)!;
-    allPackagesMap.set(p.slug, {
-      ...existing,
-      nama: p.nama || existing.nama,
-      harga: p.harga || existing.harga,
-      badge: p.badge !== undefined ? p.badge : existing.badge,
-      foto: p.foto || existing.foto,
-      deskripsiSingkat: p.deskripsiSingkat || existing.deskripsiSingkat,
-      minOrder: p.minOrder || existing.minOrder,
-    });
+    if (!p.slug) continue;
+    if (allPackagesMap.has(p.slug)) {
+      const existing = allPackagesMap.get(p.slug)!;
+      allPackagesMap.set(p.slug, {
+        ...existing,
+        ...p,
+        nama: p.nama || existing.nama,
+        harga: p.harga || existing.harga,
+        badge: p.badge !== undefined ? p.badge : existing.badge,
+        foto: p.foto || existing.foto,
+        deskripsiSingkat: p.deskripsiSingkat || existing.deskripsiSingkat,
+        minOrder: p.minOrder || existing.minOrder,
+      });
+    } else {
+      allPackagesMap.set(p.slug, p);
+    }
   }
 
   return Array.from(allPackagesMap.values()).map((paket) => ({
@@ -186,6 +191,12 @@ const defaultSideDishes =
   // Dynamic Real-time Client Sync dengan Database Backend (/api/menu) & SWR Cache
   (async function syncPackageDetailWithApi() {
     try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && ((window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
+      if (!isLiveSyncEnabled) {
+        return; // Zero-Wake Default: 0 fetch runtime ke backend!
+      }
+
       const MENU_CACHE_KEY = 'dzanis_menu_cache_v1';
       const root = document.getElementById('package-detail-root');
       if (!root) return;
@@ -215,7 +226,7 @@ const defaultSideDishes =
 
       // 1. Instant Cache Price Sync (0ms)
       try {
-        const cachedRaw = sessionStorage.getItem(MENU_CACHE_KEY);
+        const cachedRaw = localStorage.getItem(MENU_CACHE_KEY) || sessionStorage.getItem(MENU_CACHE_KEY);
         if (cachedRaw) {
           const cachedObj = JSON.parse(cachedRaw);
           if (Array.isArray(cachedObj?.data) && cachedObj.data.length > 0) {
@@ -253,17 +264,18 @@ const defaultSideDishes =
         ? data
         : (Array.isArray(data?.packages) ? data.packages : (Array.isArray(data?.data) ? data.data : []));
 
-      // Update cache
-      try {
-        sessionStorage.setItem(MENU_CACHE_KEY, JSON.stringify({
-          timestamp: Date.now(),
-          data: packages
-        }));
-      } catch (saveErr) {}
-
-      applyPackagePrice(packages);
+      if (packages.length > 0) {
+        // Simpan ke localStorage dengan Strict Success Guard
+        try {
+          localStorage.setItem(MENU_CACHE_KEY, JSON.stringify({
+            timestamp: Date.now(),
+            data: packages
+          }));
+        } catch (saveErr) {}
+        applyPackagePrice(packages);
+      }
     } catch (err) {
-      console.warn('[Dzanis Detail] Sinkronisasi harga runtime terlewat:', err);
+      console.warn('[Dzanis Package Detail] Gagal sinkronisasi harga paket:', err);
     }
   })();
 </script>

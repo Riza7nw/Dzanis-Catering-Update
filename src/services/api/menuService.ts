@@ -9,6 +9,7 @@ import type { BackendPackageDto, BackendSnackItemDto, BackendSnackResponse } fro
 import { DAFTAR_PAKET } from '../../data/paket.ts';
 import { defaultSnackTemplates, snackKategori as fallbackSnackKategori } from '../../data/snack.ts';
 import { getApiBaseUrl, getCommonApiHeaders, DEFAULT_TIMEOUT_MS } from './apiConfig.ts';
+import { getBuildMenuCatalog, getBuildSnackItems } from '../db/tursoBuildClient.ts';
 
 /**
  * Normalizer Adapter (Anti-Corruption Layer):
@@ -137,6 +138,31 @@ export function normalizePackage(dto: BackendPackageDto, fallbackList: Paket[] =
  * Mencoba memanggil backend API, jika offline/gagal akan otomatis fallback ke DAFTAR_PAKET.
  */
 export async function getMenuCatalog(): Promise<Paket[]> {
+  // Prioritas 1: Ambil langsung dari Turso Cloud (0 wake request ke EthioDeploy saat build time)
+  try {
+    const tursoData = await getBuildMenuCatalog();
+    if (tursoData && Array.isArray(tursoData.packages)) {
+      const whitelistSet = tursoData.whitelist.length > 0 ? new Set(tursoData.whitelist) : null;
+      const cateringDtos = tursoData.packages.filter((p) => {
+        const isCatering = !String(p.category || '').toLowerCase().includes('snack');
+        const isActive = p.is_active === undefined || Boolean(p.is_active);
+        const s = p.slug || p.id || '';
+        if (!isCatering || !isActive) return false;
+        if (whitelistSet) return whitelistSet.has(s) || (p.id && whitelistSet.has(p.id));
+        return true;
+      });
+
+      if (cateringDtos.length > 0) {
+        return cateringDtos.map((dto) => normalizePackage(dto, DAFTAR_PAKET));
+      }
+    }
+  } catch (err) {
+    if (import.meta.env?.DEV) {
+      console.warn('[menuService] Fallback dari Turso ke REST API untuk menu catalog:', (err as Error)?.message || err);
+    }
+  }
+
+  // Prioritas 2: Fallback ke REST API backend
   try {
     const apiBase = getApiBaseUrl();
     const res = await fetch(`${apiBase}/api/menu`, {
@@ -203,6 +229,50 @@ export async function getPackageBySlug(slug: string): Promise<Paket | undefined>
  * Mengambil template paket Snack Box dari API backend atau fallback lokal.
  */
 export async function getSnackTemplates(): Promise<SnackTemplatePackage[]> {
+  // Prioritas 1: Ambil langsung dari Turso Cloud (0 request ke EthioDeploy saat build time)
+  try {
+    const tursoData = await getBuildMenuCatalog();
+    if (tursoData && Array.isArray(tursoData.packages)) {
+      const snackDtos = tursoData.packages.filter((p) =>
+        String(p.category || '').toLowerCase().includes('snack')
+      );
+      if (snackDtos.length > 0) {
+        return snackDtos.map((p) => {
+          let slots: SnackSlot[] = [];
+          if (p.custom_slots) {
+            slots = typeof p.custom_slots === 'string' ? JSON.parse(p.custom_slots) : p.custom_slots;
+          } else if (Array.isArray(p.items)) {
+            slots = p.items.map((it: string, idx: number) => ({
+              name: `Slot ${idx + 1}`,
+              default_item: it,
+              options: it,
+            }));
+          }
+
+          return {
+            id: p.id || p.slug || 'snack-pkg',
+            slug: p.slug || p.id || 'snack-pkg',
+            name: p.name || 'Paket Snack Box',
+            category: p.category || 'Snack Box',
+            price_per_pax: Number(p.price_per_pax || p.harga || 15000),
+            min_pax: Number(p.min_pax || p.minOrder || 20),
+            badge: p.badge || 'Snack',
+            description: p.description || p.deskripsi || '',
+            image: p.image || p.foto || '/images/menu/snack-puding.webp',
+            foto: p.foto || p.image || '/images/menu/snack-puding.webp',
+            items: Array.isArray(p.items) ? p.items : [],
+            custom_slots: slots,
+          };
+        });
+      }
+    }
+  } catch (err) {
+    if (import.meta.env?.DEV) {
+      console.warn('[menuService] Fallback dari Turso ke REST API untuk snack templates:', (err as Error)?.message || err);
+    }
+  }
+
+  // Prioritas 2: Fallback ke REST API backend
   try {
     const apiBase = getApiBaseUrl();
     const res = await fetch(`${apiBase}/api/menu`, {
@@ -269,6 +339,49 @@ export async function getSnackTemplates(): Promise<SnackTemplatePackage[]> {
  * dengan pengelompokan per kategori dan fallback offline ke snackKategori lokal.
  */
 export async function getSnackCatalog(): Promise<SnackKategori[]> {
+  // Prioritas 1: Ambil langsung dari Turso Cloud (0 request ke EthioDeploy saat build time)
+  try {
+    const tursoSnacks = await getBuildSnackItems();
+    if (tursoSnacks !== null && Array.isArray(tursoSnacks)) {
+      // Jika di database tidak ada item sama sekali (Empty State SSOT)
+      if (tursoSnacks.length === 0) {
+        return [];
+      }
+
+      const activeItems = tursoSnacks
+        .filter((item) => Boolean(item.is_active))
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+      if (activeItems.length === 0) {
+        return [];
+      }
+
+      const categoryMap = new Map<string, Array<{ nama: string; harga: number }>>();
+      activeItems.forEach((item) => {
+        const cat = item.category || 'Lainnya';
+        if (!categoryMap.has(cat)) {
+          categoryMap.set(cat, []);
+        }
+        categoryMap.get(cat)!.push({
+          nama: item.name,
+          harga: Number(item.price || 0),
+        });
+      });
+
+      const result: SnackKategori[] = [];
+      categoryMap.forEach((items, label) => {
+        result.push({ label, items });
+      });
+
+      return result;
+    }
+  } catch (err) {
+    if (import.meta.env?.DEV) {
+      console.warn('[menuService] Fallback dari Turso ke REST API untuk snack catalog:', (err as Error)?.message || err);
+    }
+  }
+
+  // Prioritas 2: Fallback ke REST API backend
   try {
     const apiBase = getApiBaseUrl();
     const res = await fetch(`${apiBase}/api/snack-items`, {

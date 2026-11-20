@@ -279,9 +279,9 @@ const { snackTemplates, totalSnackItems } = Astro.props;
         }
       };
 
-      // 1. Coba baca dari sessionStorage (Instant Cache Render)
+      // 1. Coba baca dari localStorage / sessionStorage (Instant Cache Render)
       try {
-        const cachedRaw = sessionStorage.getItem(MENU_CACHE_KEY);
+        const cachedRaw = localStorage.getItem(MENU_CACHE_KEY) || sessionStorage.getItem(MENU_CACHE_KEY);
         if (cachedRaw) {
           const cachedObj = JSON.parse(cachedRaw);
           if (Array.isArray(cachedObj?.data) && cachedObj.data.length > 0) {
@@ -290,8 +290,14 @@ const { snackTemplates, totalSnackItems } = Astro.props;
         }
       } catch (cacheErr) {}
 
-      // 2. Fetch API background tanpa header non-standar (zero preflight lag)
+      // Fitur flag: Live sync hanya berjalan jika PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' atau ada query apiUrl / liveSync
       const urlParams = new URLSearchParams(window.location.search);
+      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && ((window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
+      if (!isLiveSyncEnabled) {
+        return; // Zero-Wake Default
+      }
+
+      // 2. Fetch API background tanpa header non-standar (zero preflight lag)
       const queryApi = urlParams.get('apiUrl');
       const hostname = window.location.hostname;
       const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
@@ -322,9 +328,9 @@ const { snackTemplates, totalSnackItems } = Astro.props;
         ? data
         : (Array.isArray(data.packages) ? data.packages : (Array.isArray(data.data) ? data.data : []));
 
-      // Simpan ke cache sessionStorage
+      // Simpan ke cache localStorage dengan Strict Success Guard
       try {
-        sessionStorage.setItem(MENU_CACHE_KEY, JSON.stringify({
+        localStorage.setItem(MENU_CACHE_KEY, JSON.stringify({
           timestamp: Date.now(),
           data: rawPackages
         }));

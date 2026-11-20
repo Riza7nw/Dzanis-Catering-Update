@@ -7,6 +7,7 @@
 import type { CertificationItem } from '../../types/cert';
 import type { BackendCertDto, BackendCertResponse } from '../../types/api';
 import { getApiBaseUrl, getCommonApiHeaders, DEFAULT_TIMEOUT_MS } from './apiConfig';
+import { getBuildCertifications } from '../db/tursoBuildClient';
 
 export interface ShowcaseCertificateItem extends CertificationItem {
   no: string;
@@ -221,6 +222,19 @@ function normalizeCertDto(dto: BackendCertDto, index = 0): ShowcaseCertificateIt
  * Mengambil seluruh data sertifikat dan dokumen legalitas aktif dari backend.
  */
 export async function getCertifications(): Promise<(ShowcaseCertificateItem & LegalCardItem)[]> {
+  // Prioritas 1: Langsung dari Turso Cloud (0 request ke EthioDeploy saat build time)
+  try {
+    const tursoCerts = await getBuildCertifications();
+    if (tursoCerts && Array.isArray(tursoCerts) && tursoCerts.length > 0) {
+      return tursoCerts.map((c, i) => normalizeCertDto(c as any, i)).filter((c) => c.isActive);
+    }
+  } catch (err) {
+    if (import.meta.env?.DEV) {
+      console.warn('[certService] Fallback dari Turso ke REST API:', (err as Error)?.message || err);
+    }
+  }
+
+  // Prioritas 2: Fallback ke REST API backend
   try {
     const apiBase = getApiBaseUrl();
     const res = await fetch(`${apiBase}/api/certifications?active=true`, {

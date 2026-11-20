@@ -5,6 +5,7 @@ import OrderModal from "../components/interactive/OrderModal.astro";
 import { ClientRouter } from "astro:transitions";
 import { company } from "../data/company";
 import { generateWebSiteSchema } from "../data/schema";
+import { getBuildActiveContact } from "../services/db/tursoBuildClient";
 
 interface Props {
   title: string;
@@ -23,6 +24,9 @@ const {
   image = "/images/menu/hero-nasi-kotak.jpg",
   canonicalUrl,
 } = Astro.props;
+
+const activeContact = await getBuildActiveContact();
+const enableLiveSync = import.meta.env.PUBLIC_ENABLE_LIVE_BACKEND_SYNC === "true";
 
 const siteUrl = Astro.site
   ? Astro.site.toString().replace(/\/$/, "")
@@ -89,68 +93,77 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
     <meta name="twitter:image" content={ogImageUrl} />
     {useTransitions && <ClientRouter />}
 
-    <!-- Network Optimization: Preconnect & Preload API Backend -->
-    <link
-      rel="preconnect"
-      href="https://dzaniez-back.ethiodeploy.app"
-      crossorigin
-    />
-    <link rel="dns-prefetch" href="https://dzaniez-back.ethiodeploy.app" />
-    <link
-      rel="preload"
-      href="https://dzaniez-back.ethiodeploy.app/api/menu"
-      as="fetch"
-      crossorigin="anonymous"
-    />
-
-    <!-- Early Eager Prefetch: Jalankan request API katalog di <head> sebelum DOM/gambar selesai -->
-    <script is:inline>
-      (function () {
-        try {
-          var urlParams = new URLSearchParams(window.location.search);
-          var h = window.location.hostname;
-          var isLocal =
-            h === "localhost" ||
-            h === "127.0.0.1" ||
-            h.indexOf("192.168.") === 0 ||
-            h.indexOf("10.") === 0 ||
-            h.slice(-6) === ".local";
-          var defLocal =
-            window.location.protocol + "//" + (h || "127.0.0.1") + ":8000";
-          var qApi = urlParams.get("apiUrl");
-          var isAllowed = false;
-          if (qApi) {
-            try {
-              var qHost = new URL(
-                qApi.indexOf("http") === 0 ? qApi : "http://" + qApi,
-              ).hostname;
-              isAllowed =
-                qHost === "localhost" ||
-                qHost === "127.0.0.1" ||
-                qHost.indexOf("192.168.") === 0 ||
-                qHost.slice(-16) === ".ethiodeploy.app" ||
-                qHost.indexOf("ngrok") !== -1;
-            } catch (e) {}
-          }
-          var api =
-            qApi && isAllowed
-              ? qApi
-              : isLocal
-                ? defLocal
-                : "https://dzaniez-back.ethiodeploy.app";
-
-          window.__DZANIS_MENU_PROMISE__ = fetch(api + "/api/menu", {
-            headers: { Accept: "application/json" },
-          })
-            .then(function (r) {
-              return r && r.ok ? r.json() : null;
-            })
-            .catch(function () {
-              return null;
-            });
-        } catch (e) {}
-      })();
+    <!-- Feature Flag: Client-Side Backend Live Sync (Default: false / Zero-Wake) -->
+    <script is:inline define:vars={{ enableLiveSync }}>
+      window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC = enableLiveSync ? "true" : "false";
     </script>
+
+    <!-- Network Optimization: Preconnect & Preload API Backend (Hanya saat Live Sync Aktif) -->
+    {enableLiveSync && (
+      <>
+        <link
+          rel="preconnect"
+          href="https://dzaniez-back.ethiodeploy.app"
+          crossorigin
+        />
+        <link rel="dns-prefetch" href="https://dzaniez-back.ethiodeploy.app" />
+        <link
+          rel="preload"
+          href="https://dzaniez-back.ethiodeploy.app/api/menu"
+          as="fetch"
+          crossorigin="anonymous"
+        />
+
+        <!-- Early Eager Prefetch: Jalankan request API katalog di <head> sebelum DOM/gambar selesai -->
+        <script is:inline>
+          (function () {
+            try {
+              var urlParams = new URLSearchParams(window.location.search);
+              var h = window.location.hostname;
+              var isLocal =
+                h === "localhost" ||
+                h === "127.0.0.1" ||
+                h.indexOf("192.168.") === 0 ||
+                h.indexOf("10.") === 0 ||
+                h.slice(-6) === ".local";
+              var defLocal =
+                window.location.protocol + "//" + (h || "127.0.0.1") + ":8000";
+              var qApi = urlParams.get("apiUrl");
+              var isAllowed = false;
+              if (qApi) {
+                try {
+                  var qHost = new URL(
+                    qApi.indexOf("http") === 0 ? qApi : "http://" + qApi,
+                  ).hostname;
+                  isAllowed =
+                    qHost === "localhost" ||
+                    qHost === "127.0.0.1" ||
+                    qHost.indexOf("192.168.") === 0 ||
+                    qHost.slice(-16) === ".ethiodeploy.app" ||
+                    qHost.indexOf("ngrok") !== -1;
+                } catch (e) {}
+              }
+              var api =
+                qApi && isAllowed
+                  ? qApi
+                  : isLocal
+                    ? defLocal
+                    : "https://dzaniez-back.ethiodeploy.app";
+
+              window.__DZANIS_MENU_PROMISE__ = fetch(api + "/api/menu", {
+                headers: { Accept: "application/json" },
+              })
+                .then(function (r) {
+                  return r && r.ok ? r.json() : null;
+                })
+                .catch(function () {
+                  return null;
+                });
+            } catch (e) {}
+          })();
+        </script>
+      </>
+    )}
 
     <!-- Google Site Name Structured Data (Schema.org WebSite) -->
     {shouldRenderWebSiteSchema && (
@@ -180,7 +193,7 @@ const shouldRenderWebSiteSchema = isHomePage && !hasWebSiteSchema;
     <div class="w-full max-w-full min-w-0 overflow-x-clip flex flex-col min-h-screen">
       <slot />
     </div>
-    <OrderModal />
+    <OrderModal phoneNumber={activeContact.phone} />
     <script>
       import "../scripts/contact-sync";
     </script>

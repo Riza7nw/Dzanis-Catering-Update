@@ -146,9 +146,25 @@ export function applyPhoneToDom(phone: string, display?: string): void {
 let isSyncing = false;
 
 /**
+ * Memeriksa apakah fitur live backend sync diizinkan (default: false / Zero-Wake)
+ */
+export function isContactLiveSyncEnabled(): boolean {
+  if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1') {
+      return true;
+    }
+    if ((window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC !== undefined) {
+      return (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true;
+    }
+  }
+  return typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true';
+}
+
+/**
  * Melakukan sinkronisasi nomor kontak dari cache & API backend
  */
-export async function syncContact(): Promise<void> {
+export async function syncContact(forceNetwork = false): Promise<void> {
   if (typeof window === 'undefined') return;
 
   // Lapis 1: Muat dari localStorage (0ms load instant)
@@ -159,6 +175,11 @@ export async function syncContact(): Promise<void> {
       applyPhoneToDom(cachedPhone, cachedDisplay || undefined);
     }
   } catch {}
+
+  // Zero-Wake Default: Jangan pernah memanggil backend via fetch jika live sync tidak aktif
+  if (!forceNetwork && !isContactLiveSyncEnabled()) {
+    return;
+  }
 
   if (isSyncing) return;
   isSyncing = true;
@@ -203,7 +224,7 @@ export async function syncContact(): Promise<void> {
 export function initContactSync(): void {
   if (typeof window === 'undefined') return;
 
-  // Sinkronisasi awal
+  // Sinkronisasi awal (hanya dari cache lokal saat Zero-Wake mode)
   syncContact();
 
   // Sinkronisasi saat halaman selesai dimuat atau saat navigasi Astro View Transitions
@@ -218,18 +239,22 @@ export function initContactSync(): void {
       const cachedDisplay = localStorage.getItem(CACHE_KEY_DISPLAY) || DEFAULT_FALLBACK_DISPLAY;
       applyPhoneToDom(cachedPhone, cachedDisplay);
     } catch {}
-    syncContact();
+    if (isContactLiveSyncEnabled()) {
+      syncContact();
+    }
   });
 
-  // Re-validasi saat tab kembali aktif
+  // Re-validasi saat tab kembali aktif (hanya saat live sync aktif)
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
+    if (document.visibilityState === 'visible' && isContactLiveSyncEnabled()) {
       syncContact();
     }
   });
 
   window.addEventListener('focus', () => {
-    syncContact();
+    if (isContactLiveSyncEnabled()) {
+      syncContact();
+    }
   });
 
   // Pengamat DOM untuk menangkap elemen/modal yang baru dirender secara dinamis

@@ -555,6 +555,12 @@ const menuKatalog = await getMenuCatalog();
   // Sinkronisasi katalog paket menu dengan Stale-While-Revalidate (SWR) cache
   (async function() {
     try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && ((window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
+      if (!isLiveSyncEnabled) {
+        return; // Zero-Wake Default: 0 fetch runtime ke backend!
+      }
+
       const MENU_CACHE_KEY = 'dzanis_menu_cache_v2';
 
       const grid = document.getElementById('paket-grid');

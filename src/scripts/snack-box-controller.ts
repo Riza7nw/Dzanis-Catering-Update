@@ -172,6 +172,24 @@ async function syncSnackCatalogFromBackend(
   getActiveCategory: () => string,
   signal: AbortSignal
 ): Promise<void> {
+  // Fitur flag: Live sync hanya berjalan jika PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' atau ada query apiUrl / liveSync
+  const isLiveSyncEnabled = (() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl')) {
+        return true;
+      }
+      if ((window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC !== undefined) {
+        return (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true;
+      }
+    }
+    return typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true';
+  })();
+
+  if (!isLiveSyncEnabled) {
+    return;
+  }
+
   const apiBase = getApiBaseUrl();
 
   function applyItemsToDOM(rawItems: BackendSnackItemDto[]) {
