@@ -92,5 +92,32 @@ Consult these guides before working on related tasks:
   - Tag `<title>`, heading `<h1>`, deskripsi meta, dan structured data Schema.org (`areaServed`, `alternateName`) **wajib selalu mencantumkan "Majalengka" / "Catering Majalengka" di posisi terdepan (bobot tertinggi)** sebelum mencantumkan wilayah regional "Ciayumajakuning".
   - Jangan pernah menghapus atau menggeser kata kunci lokal kota spesifik demi kata kunci regional, karena 90%+ niat pencarian (*search intent*) pelanggan lokal menggunakan nama kota/kabupaten.
 
+## Standar Deployment Cloudflare Workers & Pipeline Fork (Dzanis Catering)
+
+- **Alur Distribusi Kode & Multi-Repo / Fork**:
+  - Alur git: Pengguna melakukan `push` ke repositori upstream/utama, lalu melakukan **sinkronisasi (sync fork)** ke repositori fork pribadi yang terhubung ke pipeline deploy.
+  - Cloudflare Workers Builds membaca sumber kode langsung dari repositori fork pribadi (Worker `"dzanis-catering-new"`).
+  - Jika fork belum di-sync, build Cloudflare **tidak akan pernah** melihat commit terbaru. Selalu pastikan fork telah disinkronkan setelah melakukan push ke upstream.
+
+- **Konfigurasi Single-Source-of-Truth Deployment**:
+  - Konfigurasi resmi berada di `wrangler.jsonc` pada root proyek (`name: "dzanis-catering-new"`, `compatibility_date: "2026-11-01"`, `assets: { directory: "./dist", not_found_handling: "404-page" }`).
+  - Direktori cache lokal `.wrangler/` wajib selalu diabaikan di `.gitignore`.
+  - **Dilarang keras** memasang adapter `@astrojs/cloudflare` atau menambahkan opsi `redirects: { ... }` pada `astro.config.mjs` tanpa izin eksplisit pengguna. Web ini adalah web statis murni yang dilayani via Cloudflare Workers Static Assets.
+  - Perintah deploy resmi di Cloudflare Dashboard:
+    ```bash
+    npx wrangler deploy --config wrangler.jsonc --no-autoconfig
+    ```
+
+- **Aturan Redirect & Penanganan Path (Anti-Duplikasi Code 100324)**:
+  - **Satu Rule per Path**: Jika memerlukan redirect via file konfigurasi, hanya boleh ada **satu aturan per path** (dilarang mendefinisikan `/x` dan `/x/` secara bersamaan karena Cloudflare menormalisasi trailing slash dan akan menolak build dengan error code `100324`).
+  - Halaman pengalihan katalog paket `/paket` ditangani langsung oleh file fisik `src/pages/paket/index.astro` (dengan `<meta http-equiv="refresh">` dan JavaScript fallback), **bukan** melalui `_redirects` atau adapter.
+  - File `public/_redirects` tidak boleh dibuat kembali.
+
+- **Prosedur Diagnostik & Verifikasi Build Cloudflare**:
+  - **Keterbatasan `--dry-run`**: Perintah `wrangler deploy --dry-run` **tidak memvalidasi aturan `_redirects` ke API Cloudflare**. Status sukses pada dry-run lokal BUKAN jaminan deploy CI sukses. Bukti valid hanya deploy lokal sungguhan atau status hijau pada Cloudflare Dashboard.
+  - **Larangan "Retry Build" pada Commit Lama**: Jangan pernah menyarankan pengguna mengeklik "Retry" pada deployment Cloudflare yang gagal setelah ada perbaikan kode. "Retry" hanya menjalankan ulang commit lama (sehingga memicu error seperti `ENOENT: wrangler.jsonc`). Solusi yang benar: lakukan push commit baru, lalu sync fork pengguna agar build baru terpicu otomatis.
+  - **Deteksi Kegagalan Baca Konfigurasi**: Jika deploy gagal lagi, selalu periksa hash commit pada halaman build Cloudflare dan cocokkan dengan commit terbaru di fork. Jika log CI menampilkan teks `"Detected Project Settings"` atau `"astro add cloudflare"`, itu adalah bukti bahwa `wrangler.jsonc` tidak terbaca di runner CI.
+
+
 
 
