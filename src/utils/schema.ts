@@ -294,3 +294,34 @@ export function generateProductSchema(paket: Paket, siteUrl: string = DEFAULT_SI
     }
   };
 }
+
+export interface BreadcrumbItem {
+  name: string;
+  item: string;
+}
+
+/**
+ * Menghasilkan JSON-LD schema BreadcrumbList resmi Google Search.
+ * Membantu mesin pencari memahami hierarki navigasi dan menampilkan breadcrumbs yang rapi di SERP.
+ */
+export function generateBreadcrumbSchema(items: BreadcrumbItem[], siteUrl: string = DEFAULT_SITE_URL) {
+  const site = siteUrl.replace(/\/$/, '');
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((crumb, index) => {
+      const fullUrl = crumb.item.startsWith('http')
+        ? crumb.item
+        : `${site}${crumb.item.startsWith('/') ? '' : '/'}${crumb.item}`;
+
+      return {
+        "@type": "ListItem",
+        position: index + 1,
+        name: crumb.name,
+        item: fullUrl,
+      };
+    }),
+  };
+}
+

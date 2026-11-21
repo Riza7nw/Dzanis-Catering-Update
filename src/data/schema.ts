@@ -9,4 +9,7 @@ export {
   webSiteSchema,
   generateFoodEstablishmentSchema,
   generateProductSchema,
+  generateBreadcrumbSchema,
+  type BreadcrumbItem,
 } from '../utils/schema';
+

@@ -10,7 +10,7 @@ import PackageMenuCustomizer from '../../components/paket/PackageMenuCustomizer.
 import PackageOrderBar from '../../components/paket/PackageOrderBar.astro';
 import { DAFTAR_PAKET, type Paket, formatNamaPaket } from '../../data/paket';
 import { waPhoneNumber } from '../../data/company';
-import { generateProductSchema } from '../../utils/schema';
+import { generateProductSchema, generateBreadcrumbSchema } from '../../utils/schema';
 import { getMenuCatalog } from '../../services/api/menuService';
 
 export async function getStaticPaths() {
@@ -102,6 +102,11 @@ const activePaket: Paket = {
 const pageTitle = `${formatNamaPaket(activePaket.nama)} | Dzanis Catering Majalengka`;
 const pageDescription = activePaket.deskripsiSingkat;
 const productSchema = generateProductSchema(activePaket);
+const breadcrumbSchema = generateBreadcrumbSchema([
+  { name: "Beranda", item: "/" },
+  { name: "Paket Nasi Kotak", item: "/#paket" },
+  { name: formatNamaPaket(activePaket.nama), item: `/paket/${activePaket.slug}` },
+]);
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -121,7 +126,7 @@ const defaultSideDishes =
 <BaseLayout
   title={pageTitle}
   description={pageDescription}
-  schema={productSchema}
+  schema={[productSchema, breadcrumbSchema]}
   useTransitions={true}
 >
   <Navbar />
@@ -144,15 +149,41 @@ const defaultSideDishes =
       data-min-event-date={minEventDateString}
       class="mx-auto max-w-[1280px] px-4 pt-6 sm:pt-8 lg:pt-10 pb-12 sm:pb-16 lg:pb-20 sm:px-6 lg:px-14"
     >
-      <div class="mb-6">
-        <a
-          href="/#paket"
-          class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-900 transition-colors"
-        >
-          <span aria-hidden="true">&larr;</span>
-          <span>Kembali ke Daftar Paket</span>
-        </a>
-      </div>
+      <!-- Breadcrumb Navigation -->
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-neutral-600">
+          <li class="inline-flex items-center">
+            <a
+              href="/"
+              class="font-medium text-neutral-600 transition-colors hover:text-accent-700"
+            >
+              Beranda
+            </a>
+          </li>
+          <li class="inline-flex items-center text-neutral-400" aria-hidden="true">
+            /
+          </li>
+          <li class="inline-flex items-center">
+            <a
+              href="/#paket"
+              class="font-medium text-neutral-600 transition-colors hover:text-accent-700"
+            >
+              Paket Nasi Kotak
+            </a>
+          </li>
+          <li class="inline-flex items-center text-neutral-400" aria-hidden="true">
+            /
+          </li>
+          <li class="inline-flex items-center">
+            <span
+              class="font-semibold text-neutral-900 truncate max-w-[220px] sm:max-w-none"
+              aria-current="page"
+            >
+              {formatNamaPaket(activePaket.nama)}
+            </span>
+          </li>
+        </ol>
+      </nav>
 
       <!-- Scalable Package Selector (Trigger Button with Bottom Sheet / Dropdown) -->
       <PackageSelector currentPaket={activePaket} packages={catalog.length > 0 ? catalog : DAFTAR_PAKET} />
