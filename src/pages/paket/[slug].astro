@@ -223,7 +223,14 @@ const defaultSideDishes =
   (async function syncPackageDetailWithApi() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && (window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
+      const isLocal = typeof window !== 'undefined' && (
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.startsWith('192.168.') ||
+        window.location.hostname.startsWith('10.') ||
+        window.location.hostname.endsWith('.local')
+      );
+      const isLiveSyncEnabled = isLocal || urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && (window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
       if (!isLiveSyncEnabled) {
         return; // Zero-Wake Default: 0 fetch runtime ke backend!
       }

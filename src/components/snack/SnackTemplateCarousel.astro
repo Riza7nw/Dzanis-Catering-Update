@@ -290,9 +290,16 @@ const { snackTemplates, totalSnackItems } = Astro.props;
         }
       } catch (cacheErr) {}
 
-      // Fitur flag: Live sync hanya berjalan jika PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' atau ada query apiUrl / liveSync
+      // Fitur flag: Live sync hanya berjalan jika PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' atau ada query apiUrl / liveSync / localhost
       const urlParams = new URLSearchParams(window.location.search);
-      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && (window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
+      const isLocalHost = typeof window !== 'undefined' && (
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.startsWith('192.168.') ||
+        window.location.hostname.startsWith('10.') ||
+        window.location.hostname.endsWith('.local')
+      );
+      const isLiveSyncEnabled = isLocalHost || urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && (window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
       if (!isLiveSyncEnabled) {
         return; // Zero-Wake Default
       }
