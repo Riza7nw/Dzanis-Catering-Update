@@ -274,8 +274,7 @@ const defaultSideDishes =
       } catch (cacheErr) {}
 
       // 2. Fetch fresh data in background (zero CORS preflight lag)
-      const hostname = window.location.hostname;
-      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');
+      const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
       const defaultLocalApi = `${window.location.protocol}//${hostname || '127.0.0.1'}:8000`;
       const queryApi = (new URLSearchParams(window.location.search)).get('apiUrl');
       const rawApiUrl = queryApi || (isLocal ? defaultLocalApi : 'https://dzaniez-back.ethiodeploy.app');
