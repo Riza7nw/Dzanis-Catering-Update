@@ -30,7 +30,7 @@ export interface BackendPackageDto {
   foto?: string;
   gambar?: string;
   can_customize?: boolean | number;
-  main_dish?: string | string[];
+  main_dish?: string | string[] | null;
   items?: string[] | string;
   menuUtama?: string[];
   laukPendamping?: string[];

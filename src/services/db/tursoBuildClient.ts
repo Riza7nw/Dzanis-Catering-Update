@@ -133,7 +133,7 @@ export async function getBuildMenuCatalog(): Promise<{
         items: parsedItems,
         custom_slots: parsedCustomSlots,
         can_customize: row.can_customize !== undefined ? Boolean(row.can_customize) : false,
-        main_dish: row.main_dish ? String(row.main_dish) : null,
+        main_dish: row.main_dish ? String(row.main_dish) : undefined,
         is_active: row.is_active !== undefined ? Boolean(row.is_active) : true,
       };
     });

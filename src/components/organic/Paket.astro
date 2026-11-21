@@ -556,7 +556,7 @@ const menuKatalog = await getMenuCatalog();
   (async function() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && ((window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
+      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && (window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
       if (!isLiveSyncEnabled) {
         return; // Zero-Wake Default: 0 fetch runtime ke backend!
       }
@@ -797,7 +797,6 @@ const menuKatalog = await getMenuCatalog();
       };
 
       // 1. Resolve target API URL terlebih dahulu agar tersedia untuk cache dan fetch
-      const urlParams = new URLSearchParams(window.location.search);
       const queryApi = urlParams.get('apiUrl');
       const hostname = window.location.hostname;
       const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.endsWith('.local');

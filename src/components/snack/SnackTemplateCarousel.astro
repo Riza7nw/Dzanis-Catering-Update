@@ -292,7 +292,7 @@ const { snackTemplates, totalSnackItems } = Astro.props;
 
       // Fitur flag: Live sync hanya berjalan jika PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' atau ada query apiUrl / liveSync
       const urlParams = new URLSearchParams(window.location.search);
-      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && ((window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || (window as any).__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
+      const isLiveSyncEnabled = urlParams.get('liveSync') === 'true' || urlParams.get('liveSync') === '1' || urlParams.has('apiUrl') || (typeof window !== 'undefined' && (window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === 'true' || window.__PUBLIC_ENABLE_LIVE_BACKEND_SYNC === true));
       if (!isLiveSyncEnabled) {
         return; // Zero-Wake Default
       }
@@ -339,9 +339,6 @@ const { snackTemplates, totalSnackItems } = Astro.props;
       applySnackData(rawPackages);
     } catch (err) {
       console.warn('[Dzanis Snack] Gagal sinkronisasi template snack:', err);
-    }
-  })();
-</script>
     }
   })();
 </script>
