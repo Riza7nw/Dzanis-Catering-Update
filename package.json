@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
     "build": "astro build",
+    "deploy": "wrangler deploy --config wrangler.jsonc --no-autoconfig",
     "test": "node --test --test-concurrency=1 test/*.test.ts",
     "preview": "astro preview --host 0.0.0.0",
     "start": "astro preview --host 0.0.0.0",
