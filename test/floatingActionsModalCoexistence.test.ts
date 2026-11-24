@@ -307,10 +307,11 @@ test('Floating WA Suppression in Real Headless Chrome (Mobile Viewport 375x812 -
                 awaitPromise: true,
                 expression: `
                 (async () => {
-                  for (let i = 0; i < 30; i++) {
-                    if (document.getElementById('floating-whatsapp-btn')) break;
+                  for (let i = 0; i < 50; i++) {
+                    if (document.readyState === 'complete' && document.getElementById('floating-whatsapp-btn')) break;
                     await new Promise((r) => setTimeout(r, 100));
                   }
+                  await new Promise((r) => setTimeout(r, 400));
                   const floatingWa = document.getElementById('floating-whatsapp-btn');
                   if (!floatingWa) throw new Error('floating-whatsapp-btn not found in DOM');
                   const orderDialog = document.getElementById('order-modal');

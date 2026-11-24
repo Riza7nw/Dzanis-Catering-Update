@@ -10,7 +10,7 @@ import {
   POOL_LAUK_23K,
   POOL_LAUK_25K_28K,
 } from '../src/data/paket.ts';
-import { isWeekend, getMinOrderByDate } from '../src/utils/date.ts';
+import { isWeekend, getMinOrderByDate, formatIndonesianDate } from '../src/utils/date.ts';
 import { clampQuantity } from '../src/utils/pricing.ts';
 import { company } from '../src/data/company.ts';
 import { faqs } from '../src/data/faq.ts';
@@ -407,8 +407,16 @@ test('Real headless Chrome: /paket/paket-spesial-25k default selection, dynamic 
               id: 2,
               method: 'Runtime.evaluate',
               params: {
+                awaitPromise: true,
                 expression: `
-                (() => {
+                (async () => {
+                  for (let i = 0; i < 50; i++) {
+                    const btn = document.getElementById('wa-checkout-btn');
+                    if (document.readyState === 'complete' && btn && btn.dataset && btn.dataset.waMessage) break;
+                    await new Promise((r) => setTimeout(r, 100));
+                  }
+                  await new Promise((r) => setTimeout(r, 300));
+
                   // 1. Initial State: default preset and radio
                   const defaultPresetBox = document.getElementById('default-preset-box');
                   const defaultPresetText = defaultPresetBox ? defaultPresetBox.textContent.trim() : '';
@@ -585,6 +593,20 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
     const targetTab = pageTabs.find((t: any) => t.url.includes('paket-ayam-kampung-28k')) || pageTabs[0] || tabs[0];
     const ws = new WebSocket(targetTab.webSocketDebuggerUrl);
 
+    // Calculate dynamic future weekend (Saturday), weekday (Monday), and Friday
+    const now = new Date();
+    const targetSat = new Date();
+    targetSat.setDate(now.getDate() + ((6 - now.getDay() + 7) % 7 || 7));
+    const saturdayStr = targetSat.toISOString().split('T')[0];
+
+    const targetMon = new Date(targetSat);
+    targetMon.setDate(targetSat.getDate() + 2);
+    const mondayStr = targetMon.toISOString().split('T')[0];
+
+    const targetFri = new Date(targetSat);
+    targetFri.setDate(targetSat.getDate() + 6);
+    const fridayStr = targetFri.toISOString().split('T')[0];
+
     const testResult = await new Promise<any>((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error('Headless Chrome test for paket-ayam-kampung-28k timed out after 8s'));
@@ -608,13 +630,17 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const waCheckoutBtn = document.getElementById('wa-checkout-btn');
                   const modal = document.getElementById('order-modal');
 
+                  const saturdayStr = '${saturdayStr}';
+                  const mondayStr = '${mondayStr}';
+                  const fridayStr = '${fridayStr}';
+
                   // 1. Initial State (No date selected yet)
                   const initialMinOrderLabel = labelMin?.textContent?.trim();
                   const initialPortion = portionInput?.value;
                   const initialSubtotal = subtotalDisplay?.textContent?.trim();
 
-                  // 2. Change event date to Saturday (Weekend: 2026-11-21)
-                  eventDateInput.value = '2026-11-21';
+                  // 2. Change event date to Saturday (Weekend)
+                  eventDateInput.value = saturdayStr;
                   eventDateInput.dispatchEvent(new Event('input', { bubbles: true }));
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -622,8 +648,8 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const weekendPortion = portionInput?.value;
                   const weekendSubtotal = subtotalDisplay?.textContent?.trim();
 
-                  // 3. Change event date to Monday (Weekday: 2026-11-23)
-                  eventDateInput.value = '2026-11-23';
+                  // 3. Change event date to Monday (Weekday)
+                  eventDateInput.value = mondayStr;
                   eventDateInput.dispatchEvent(new Event('input', { bubbles: true }));
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -642,8 +668,8 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const pkgPortionClamped500 = portionInput.value;
                   const pkgNoticeVisibleAfterBlur = !document.getElementById('package-large-order-notice')?.classList.contains('hidden');
 
-                  // Change event date to 2026-11-27 -> notice must still stay visible and WA link must update
-                  eventDateInput.value = '2026-11-27';
+                  // Change event date to Friday -> notice must still stay visible and WA link must update
+                  eventDateInput.value = fridayStr;
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
                   const pkgNoticeVisibleAfterDateChange = !document.getElementById('package-large-order-notice')?.classList.contains('hidden');
                   const pkgWaHrefAfterDateChange = document.getElementById('package-wa-admin-link')?.getAttribute('href') || '';
@@ -658,7 +684,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   const pkgNoticeHiddenOn40 = document.getElementById('package-large-order-notice')?.classList.contains('hidden');
 
                   // 4. Change back to Saturday and click waCheckoutBtn to open OrderModal
-                  eventDateInput.value = '2026-11-21';
+                  eventDateInput.value = saturdayStr;
                   eventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
                   waCheckoutBtn.click();
 
@@ -670,7 +696,7 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
                   // 5. Inside OrderModal, change date from Saturday to Monday (Weekday)
                   const modalEventDateInput = document.getElementById('event-date');
                   const modalPortionInput = document.getElementById('portion-count');
-                  modalEventDateInput.value = '2026-11-23';
+                  modalEventDateInput.value = mondayStr;
                   modalEventDateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
                   const modalMinHintWeekday = document.getElementById('portion-min-hint')?.textContent?.trim();
@@ -799,13 +825,16 @@ test('Real headless Chrome: Package detail dynamic MoQ reactivity (20 vs 40), ma
     assert.equal(testResult.pkgPortionClamped500, '500', 'Package portion input must clamp to 500 on blur');
     assert.equal(testResult.pkgNoticeVisibleAfterBlur, true, 'Package notice must remain visible after blur');
     assert.equal(testResult.pkgNoticeVisibleAfterDateChange, true, 'Package notice must remain visible after changing event date');
-    assert.ok(testResult.pkgWaHrefAfterDateChange.includes('27%20November%202026'), 'Package WA link must reflect updated event date');
+    assert.ok(
+      testResult.pkgWaHrefAfterDateChange.includes(encodeURIComponent(formatIndonesianDate(fridayStr))),
+      'Package WA link must reflect updated event date'
+    );
     assert.equal(testResult.modalOpenBlockedOnLarge, false, 'waCheckoutBtn must block opening OrderModal while in large order mode');
     assert.equal(testResult.pkgNoticeHiddenOn40, true, 'Package large order notice must hide when portion returns to 40');
 
     // Modal Prefill & Open
     assert.equal(testResult.modalOpen, true, 'OrderModal must open when clicking waCheckoutBtn');
-    assert.equal(testResult.modalDateVal, '2026-11-21', 'OrderModal date must prefill with selected date');
+    assert.equal(testResult.modalDateVal, saturdayStr, 'OrderModal date must prefill with selected date');
     assert.equal(testResult.modalPortionVal, '40', 'OrderModal portion must prefill with weekend 40');
     assert.ok(testResult.modalMinHintWeekend.includes('Akhir Pekan'), 'Modal hint must state Akhir Pekan on weekend date');
 
