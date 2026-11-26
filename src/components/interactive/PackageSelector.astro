@@ -150,7 +150,7 @@ const { currentPaket, packages = DAFTAR_PAKET } = Astro.props;
         const isCurrent = item.slug === currentPaket.slug;
         return (
           <a
-            href={`/paket/${item.slug}`}
+            href={`/paket/${item.slug}/`}
             aria-current={isCurrent ? "page" : undefined}
             tabindex={isCurrent ? -1 : 0}
             data-pkg-item

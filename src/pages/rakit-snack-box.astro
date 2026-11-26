@@ -4,12 +4,19 @@ import Navbar from '../components/organic/Navbar.astro';
 import RakitSnackBox from '../components/organic/RakitSnackBox.astro';
 import Footer from '../components/organic/Footer.astro';
 import { snackRingkasan, formatRupiah } from '../data/snack';
+import { generateBreadcrumbSchema } from '../utils/schema';
 
 const title = "Rakit Snack Box Sendiri — Dzanis Catering Majalengka";
 const description = `Susun sendiri isi snack box dari ${snackRingkasan.totalPilihan} pilihan jajanan mulai ${formatRupiah(snackRingkasan.hargaTermurah)}. Harga box langsung terhitung transparan, pesanan dikirim lewat WhatsApp.`;
+
+const breadcrumbSchema = generateBreadcrumbSchema([
+  { name: "Beranda", item: "/" },
+  { name: "Snack Box", item: "/#snack" },
+  { name: "Rakit Snack Box", item: "/rakit-snack-box/" },
+]);
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schema={breadcrumbSchema}>
   <Navbar />
   <main id="konten" class="w-full max-w-full min-w-0 flex-1 overflow-x-clip pb-36 sm:pb-28 lg:pb-16">
     <!-- Breadcrumb Navigation -->
@@ -28,6 +35,30 @@ const description = `Susun sendiri isi snack box dari ${snackRingkasan.totalPili
     </div>
 
     <RakitSnackBox />
+
+    <!-- Rekomendasi Kontekstual: Menu Nasi Kotak / Makan Utama -->
+    <div class="mx-auto max-w-[1280px] px-[var(--space-4)] lg:px-14 mt-8 sm:mt-12">
+      <aside aria-label="Rekomendasi Menu Utama" class="rounded-2xl border border-neutral-200/90 bg-surface/50 p-6 sm:p-8 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 shadow-2xs">
+        <div>
+          <span class="inline-block px-2.5 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-wider mb-1.5">
+            Menu Utama Acara
+          </span>
+          <h2 class="font-heading text-lg sm:text-xl font-bold text-neutral-900">
+            Mencari Paket Nasi Kotak atau Prasmanan Lengkap?
+          </h2>
+          <p class="text-sm text-neutral-600 mt-1 max-w-xl">
+            Sedia aneka paket nasi kotak higienis mulai Rp20.000 dengan menu ayam serundeng, rolade daging, dan lauk tradisional khas Majalengka.
+          </p>
+        </div>
+        <a
+          href="/#paket"
+          class="btn btn-secondary min-h-[44px] text-xs font-semibold px-5 shrink-0 whitespace-nowrap inline-flex items-center gap-1.5"
+        >
+          <span>Lihat Paket Nasi Kotak</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+      </aside>
+    </div>
   </main>
   <Footer />
 </BaseLayout>

@@ -8,7 +8,7 @@ export default defineConfig({
   site: "https://dzaniscatering.web.id",
   integrations: [
     sitemap({
-      filter: (page) => !page.endsWith('/paket/'),
+      filter: (page) => !page.endsWith('/paket/') && !page.includes('/testing-menu'),
     }),
   ],
   server: {

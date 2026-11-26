@@ -25,6 +25,8 @@ export async function getStaticPaths() {
   // 2. Overlay dan sertakan paket baru dari database SSOT
   for (const p of catalog) {
     if (!p.slug) continue;
+    const isTest = p.slug.toLowerCase().includes('test') || String(p.nama || '').toLowerCase().includes('test');
+    if (isTest) continue;
     if (allPackagesMap.has(p.slug)) {
       const existing = allPackagesMap.get(p.slug)!;
       allPackagesMap.set(p.slug, {
@@ -105,7 +107,7 @@ const productSchema = generateProductSchema(activePaket);
 const breadcrumbSchema = generateBreadcrumbSchema([
   { name: "Beranda", item: "/" },
   { name: "Paket Nasi Kotak", item: "/#paket" },
-  { name: formatNamaPaket(activePaket.nama), item: `/paket/${activePaket.slug}` },
+  { name: formatNamaPaket(activePaket.nama), item: `/paket/${activePaket.slug}/` },
 ]);
 
 const tomorrow = new Date();
@@ -207,6 +209,28 @@ const defaultSideDishes =
           />
         </div>
       </div>
+
+      <!-- Rekomendasi Kontekstual: Pelengkap Snack Box Acara -->
+      <aside aria-label="Rekomendasi Menu Pelengkap" class="mt-12 sm:mt-16 rounded-2xl border border-neutral-200/90 bg-surface/50 p-6 sm:p-8 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 shadow-2xs">
+        <div>
+          <span class="inline-block px-2.5 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-wider mb-1.5">
+            Pelengkap Acara
+          </span>
+          <h2 class="font-heading text-lg sm:text-xl font-bold text-neutral-900">
+            Butuh Snack Box untuk Pembuka atau Coffee Break?
+          </h2>
+          <p class="text-sm text-neutral-600 mt-1 max-w-xl">
+            Lengkapi jamuan nasi kotak Anda dengan aneka jajanan pasar, puff pastry, dan puding segar yang bisa diracik bebas sesuai anggaran.
+          </p>
+        </div>
+        <a
+          href="/rakit-snack-box/"
+          class="btn btn-secondary min-h-[44px] text-xs font-semibold px-5 shrink-0 whitespace-nowrap inline-flex items-center gap-1.5"
+        >
+          <span>Rakit Snack Box</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+      </aside>
     </div>
   </main>
 

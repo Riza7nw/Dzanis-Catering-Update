@@ -193,7 +193,7 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
             name: formatNamaPaket(item.nama),
             description: item.deskripsiSingkat,
             image: `${site}${item.foto}`,
-            url: `${site}/paket/${item.slug}`,
+            url: `${site}/paket/${item.slug}/`,
             offers: {
               "@type": "Offer",
               price: item.harga,
@@ -213,13 +213,13 @@ export function generateFoodEstablishmentSchema(siteUrl: string = DEFAULT_SITE_U
           "@type": "MenuSection",
           name: "Snack Box Custom",
           description: `Pilihan ${snackRingkasan.totalPilihan} aneka kue basah, jajanan pasar, puff & pastry, puding, dan menu asin. Harga mulai Rp${snackRingkasan.hargaTermurah.toLocaleString('id-ID')}/biji.`,
-          url: `${site}/rakit-snack-box`,
+          url: `${site}/rakit-snack-box/`,
           hasMenuItem: [
             {
               "@type": "MenuItem",
               name: "Snack Box Rakit Sendiri",
               description: `Susun sendiri snack box dari ${snackRingkasan.totalPilihan} pilihan jajanan dengan minimal ${snackRingkasan.totalPilihan > 0 ? 20 : 20} box.`,
-              url: `${site}/rakit-snack-box`,
+              url: `${site}/rakit-snack-box/`,
               offers: {
                 "@type": "Offer",
                 price: snackRingkasan.hargaTermurah,
@@ -262,7 +262,7 @@ export function generateProductSchema(paket: Paket, siteUrl: string = DEFAULT_SI
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    "@id": `${site}/paket/${paket.slug}#product`,
+    "@id": `${site}/paket/${paket.slug}/#product`,
     name: `${formatNamaPaket(paket.nama)} — Dzanis Catering`,
     image: [`${site}${paket.foto}`],
     description: paket.deskripsiLengkap || paket.deskripsiSingkat,
@@ -274,7 +274,7 @@ export function generateProductSchema(paket: Paket, siteUrl: string = DEFAULT_SI
     category: "Food & Catering",
     offers: {
       "@type": "Offer",
-      url: `${site}/paket/${paket.slug}`,
+      url: `${site}/paket/${paket.slug}/`,
       price: paket.harga,
       priceCurrency: "IDR",
       priceValidUntil: "2026-12-31",

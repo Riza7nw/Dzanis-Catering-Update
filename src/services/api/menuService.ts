@@ -147,7 +147,8 @@ export async function getMenuCatalog(): Promise<Paket[]> {
         const isCatering = !String(p.category || '').toLowerCase().includes('snack');
         const isActive = p.is_active === undefined || Boolean(p.is_active);
         const s = p.slug || p.id || '';
-        if (!isCatering || !isActive) return false;
+        const isTest = s.toLowerCase().includes('test') || String(p.name || '').toLowerCase().includes('test');
+        if (!isCatering || !isActive || isTest) return false;
         if (whitelistSet) return whitelistSet.has(s) || (p.id && whitelistSet.has(p.id));
         return true;
       });
@@ -189,7 +190,8 @@ export async function getMenuCatalog(): Promise<Paket[]> {
           const isCatering = !String(p.category || '').toLowerCase().includes('snack');
           const isActive = p.is_active === undefined || Boolean(p.is_active);
           const s = p.slug || p.id || '';
-          if (!isCatering || !isActive) return false;
+          const isTest = s.toLowerCase().includes('test') || String(p.name || '').toLowerCase().includes('test');
+          if (!isCatering || !isActive || isTest) return false;
           if (whitelistSet) return whitelistSet.has(s) || (p.id && whitelistSet.has(p.id));
           return true;
         });
